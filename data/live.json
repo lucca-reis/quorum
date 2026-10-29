@@ -1,5 +1,5 @@
 {
- "atualizado": "2026-10-29T16:51-03:00",
+ "atualizado": "2026-10-29T17:44-03:00",
  "camara": [
   {
    "id": 83076,
@@ -73,6 +73,26 @@
   }
  ],
  "senado": [
+  {
+   "id": "594169",
+   "inicio": "2026-11-03T14:00-03:00",
+   "fim": null,
+   "situacao": "Agendada",
+   "tipo": "SESSÃO DELIBERATIVA ORDINÁRIA ",
+   "descricao": "",
+   "video": null,
+   "aoVivo": false
+  },
+  {
+   "id": "594170",
+   "inicio": "2026-11-04T14:00-03:00",
+   "fim": null,
+   "situacao": "Agendada",
+   "tipo": "SESSÃO DELIBERATIVA ORDINÁRIA ",
+   "descricao": "",
+   "video": null,
+   "aoVivo": false
+  },
   {
    "id": "586337",
    "inicio": "2026-11-05T15:00-03:00",
