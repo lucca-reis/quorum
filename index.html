@@ -355,7 +355,8 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   padding:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 8px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 24px) max(16px, env(safe-area-inset-left, 0px));
   transition:background-color .45s}
 .landing[hidden]{display:none!important}
-.landing{grid-template-columns:auto minmax(0,440px);justify-content:center;column-gap:clamp(48px,9vw,140px)}
+.landing{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:stretch;column-gap:clamp(24px,4vw,64px)}
+.landing > svg{place-self:center}
 .landing svg{display:block;height:min(600px, calc(100vh - var(--menu-h) - 72px));width:auto;aspect-ratio:336/482;overflow:visible}
 .lg{cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center;transition:transform .35s cubic-bezier(.3,.7,.3,1), opacity .4s}
 .lg rect,.lg circle{fill:transparent;stroke:var(--ink);stroke-width:1.8}
@@ -412,25 +413,47 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .pres-legend b{color:var(--ink);font-weight:600}
 @media (max-width:900px){ .stf-grid{grid-template-columns:minmax(0,1fr)} .stf-panel .tl{max-height:none;overflow:visible} #stf-svg{max-height:none} }
 
-/* "today" block in the middle of the opening view */
-.today{position:static;width:100%;display:flex;flex-direction:column;gap:14px;font-family:var(--display);color:var(--ink);transition:opacity .35s}
+/* feed of cards on the opening view (right half) */
+.today{position:relative;width:100%;height:100%;min-height:0;display:flex;flex-direction:column;gap:12px;font-family:var(--display);color:var(--ink);transition:opacity .35s}
 .landing.leaving .today{opacity:0}
+.feed-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-right:10px}
 .today-h{margin:0;font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.today ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
-.tday{all:unset;box-sizing:border-box;display:grid;grid-template-columns:22px minmax(0,1fr);column-gap:12px;row-gap:2px;width:100%;cursor:pointer;border-radius:6px;padding:6px 8px;margin:-6px -8px}
-.tday:hover{background:var(--soft)}
-.tday:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.tday .ic{grid-row:1 / span 2;align-self:start;justify-self:center;margin-top:2px;display:block;border:1.5px solid var(--ink)}
-.tday .ic.c{width:22px;height:10px;background:radial-gradient(circle at 30% 50%, var(--ink) 1.6px, transparent 2.1px),radial-gradient(circle at 70% 50%, var(--ink) 2px, transparent 2.5px)}
-.tday .ic.j{width:15px;height:11px}
-.tday .ic.x{width:17px;height:8px}
-.tday .lb{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
-.tday .tx{font-size:14px;line-height:1.4;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.tday .tx em{font-style:normal;color:var(--muted)}
+.feed-live{display:flex;gap:8px;flex-wrap:wrap}
+.feed-live .lv-tag{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin:0;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#E0242B;padding:3px 9px;border-radius:999px;box-shadow:inset 0 0 0 1.5px #E0242B}
+.feed-live .lv-tag:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.today > .feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 10px 32px 0;scrollbar-width:thin}
+
+/* cards: the same piece on the opening view and in every section */
+.feed{list-style:none;margin:0;display:flex;flex-direction:column;gap:12px}
+.card{display:flex;flex-direction:column;gap:8px;padding:16px 18px 18px;border:1.5px solid var(--ink);border-radius:12px;background:var(--bg);color:var(--ink);text-decoration:none;font-family:var(--display);transition:background-color .2s, transform .2s}
+.card:hover{background:var(--soft)}
+.card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.c-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.c-when{color:var(--muted);font-weight:500}
+.c-when::before{content:"· ";}
+.c-live{display:inline-flex;align-items:center;gap:5px;color:#E0242B}
+.c-id{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.c-code{color:var(--ink);font-weight:600}
+.c-title{margin:0;font-size:clamp(19px,1.7vw,23px);line-height:1.15;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+.c-what{margin:0;font-size:14.5px;line-height:1.4}
+.c-what::before{content:"→ ";color:var(--muted)}
+.c-path{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px}
+.c-path li{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--rule);color:var(--muted)}
+.c-path li + li::before{content:"→";margin:0 4px 0 -2px;color:var(--muted)}
+.c-path li.now{background:var(--ink);color:var(--bg);box-shadow:none}
+.c-path li .pw{transform:scale(.85)}
+.c-meta{margin:4px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 16px;font-size:13px;line-height:1.35;border-top:1px solid var(--rule);padding-top:12px}
+.c-meta div{min-width:0}
+.c-meta .wide{grid-column:1 / -1}
+.c-meta dt{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.c-meta dd{margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tl.feed{padding-right:8px}
+@media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 14px 16px} }
 @media (max-width:700px){
   .landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;align-content:start;justify-items:center;gap:32px;overflow:auto;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 24px)}
-  .landing svg{height:min(440px, 58vh)}
-  .today{max-width:420px;padding-bottom:56px}
+  .landing svg{height:min(380px, 48vh)}
+  .today{max-width:640px;height:auto;padding-bottom:56px}
+  .today > .feed{overflow:visible;padding-right:0}
 }
 
 /* calendar v2 */
@@ -1269,14 +1292,11 @@ function liveBox(key){
 }
 function refreshLive(){
   document.querySelectorAll('.live-slot').forEach(el=>{ const n = document.createElement('div'); n.innerHTML = liveBox(el.dataset.k); el.replaceWith(n.firstChild); });
-  document.querySelectorAll('.tday').forEach(b=>{
-    const keys = b.dataset.go==='congresso' ? ['camara','senado'] : [b.dataset.go==='pres'?'exec':b.dataset.go];
-    const on = keys.some(k=> liveState(k)?.s==='live');
-    b.querySelector('.lv-tag')?.remove();
-    if (on) b.querySelector('.lb').insertAdjacentHTML('beforeend',' <span class="lv-tag"><span class="lv-dot" aria-hidden="true"></span>ao vivo</span>');
-    const tx = b.querySelector('.tx');
-    if (on && /^Sem /.test(tx.textContent)){ const st = keys.map(k=>liveState(k)).find(x=>x?.s==='live'); tx.textContent = `${st.day.kind} em andamento agora.`; }
-  });
+  const fl = document.getElementById('feed-live');
+  if (fl){
+    const on = [['stf','STF'],['exec','Presidência'],['camara','Câmara'],['senado','Senado']].filter(([k])=> liveState(k)?.s==='live');
+    fl.innerHTML = on.map(([k,n])=>`<button class="lv-tag" type="button" data-go="${k}"><span class="lv-dot" aria-hidden="true"></span>${n} ao vivo</button>`).join('');
+  }
 }
 setInterval(refreshLive, 60000);
 loadLive(); setInterval(loadLive, 5*60000);
@@ -1305,8 +1325,8 @@ function timelineHTML(key){
   }).join('');
 }
 function renderPanel(key){
-  const A = AGENDA[key], days = timelineHTML(key);
-  panel.innerHTML = `<div class="panel-head"><h2>${A.title}</h2>${infoBox(PANEL_SOURCES[key],'Fontes','Pautas e composição atualizadas em 28 out 2026.')}</div>${liveBox(key)}<ol class="tl" aria-label="Pautas do plenário">${days}</ol>`;
+  const A = AGENDA[key];
+  panel.innerHTML = `<div class="panel-head"><h2>${A.title}</h2>${infoBox(PANEL_SOURCES[key],'Fontes','Pautas e composição atualizadas em 28 out 2026.')}</div>${liveBox(key)}<ol class="tl feed" aria-label="Propostas que passaram por aqui, da mais recente à mais antiga">${feedHTML(key)}</ol>`;
 }
 
 /* ---------- geometry (units of the circle radius, u points away from the president) ---------- */
@@ -1638,43 +1658,107 @@ function resetLayers(){
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
   if (typeof showRoute === 'function') showRoute();
 }
-/* ---------- today in each power (centre of the opening view) ---------- */
-const todayEl = document.getElementById('today');
-function agendaDays(keys){ return keys.flatMap(k=>AGENDA[k].days.map(d=>({...d, key:k}))); }
-function itemTitle(it){ const P = it.ref && PROJECTS[it.ref]; return P ? P.title : (it.id || it.t || ''); }
-function powerToday(keys, none){
-  const t = todayISO(), days = agendaDays(keys);
-  const items = days.filter(d=>d.date===t).flatMap(d=>d.items);
-  if (items.length){
-    const first = items[0], label = first.short || itemTitle(first);
-    return esc(label) + (items.length>1 ? ` <em>e mais ${items.length-1}</em>` : '');
-  }
-  const next = days.filter(d=>d.date>t).sort((a,b)=>a.date.localeCompare(b.date))[0];
-  if (!next) return none;
-  const [y,m,dd] = next.date.split('-').map(Number);
-  const when = next.label ? `semana de ${dd} ${MO[m-1]}` : `${dd} ${MO[m-1]}`;
-  const pool = days.filter(d=>d.date===next.date).flatMap(d=>d.items);
-  const it = pool.find(i=>i.ref) || pool[0];
-  return `${none} <em>Próxima: ${when}, ${esc(it.short || itemTitle(it))}.</em>`;
+/* ---------- cards: every proposal or case is one card that travels between the powers ----------
+   A card's history comes from the agendas (AGENDA, where it was on the floor) and from its own steps
+   (PROJECTS[x].steps). The feed shows the cards that were dealt with most recently first. */
+const POWER_NAME = {camara:'Câmara', senado:'Senado', exec:'Presidência', stf:'STF'};
+const POWER_GLYPH = {camara:'cong', senado:'cong', exec:'exec', stf:'stf'};
+function stepPower(text, P){
+  if (P.house==='stf') return 'stf';
+  // the power named first in the step is where it happened ("Câmara aprova; segue ao Senado" is the Câmara)
+  const at = [['stf',/\bSTF\b|Supremo/i],['exec',/sanç|sancion|vet(o|ad)|Presid[eê]n(te|cia) da Rep|\bLula\b|Planalto|Governo|Diário Oficial|publicad|edita|nomead/i],['senado',/Senado|senador/i],['camara',/Câmara|Deputad/i]]
+    .map(([k,re])=>{ const m = re.exec(text); return m ? [k, m.index] : null; }).filter(Boolean).sort((x,y)=> x[1]-y[1]);
+  return at.length ? at[0][0] : P.house;
 }
+const evMin = e => hm(e.time) ?? -1;
+const byWhen = (a,b) => a.date.localeCompare(b.date) || evMin(a) - evMin(b);
+const CARDS = (()=>{
+  const m = {};
+  for (const slug in PROJECTS) m[slug] = {slug, P:PROJECTS[slug], ev:[]};
+  for (const key in AGENDA) AGENDA[key].days.forEach(d=> d.items.forEach(it=>{
+    if (it.ref && m[it.ref] && !/não realizad|cancelad/i.test(it.r||'')) m[it.ref].ev.push({date:d.date, time:d.time||'', key, kind:d.kind||'', r:it.r||'', week:!!d.label});
+  }));
+  Object.values(m).forEach(c=>{
+    (c.P.steps||[]).forEach(([date,t])=>{
+      const k = stepPower(t, c.P);
+      if (!c.ev.some(e=> e.date===date && e.key===k)) c.ev.push({date, time:'', key:k, kind:'', r:t});
+    });
+    c.ev.sort(byWhen);
+  });
+  return Object.values(m);
+})();
+function cardState(c, key){
+  const t = todayISO(), now = nowBR();
+  const done = e => !e.week && (e.date < t || (e.date===t && (hm(e.time)==null || hm(e.time) <= now)));
+  const past = c.ev.filter(done), next = c.ev.find(e=> !done(e));
+  const lastAll = past[past.length-1] || null;
+  const scope = key ? past.filter(e=> e.key===key) : past;
+  const last = scope[scope.length-1] || null;
+  let here = lastAll ? lastAll.key : c.P.house;
+  const r = lastAll ? lastAll.r : '';
+  if (/sanç/i.test(r) && c.P.house!=='stf') here = 'exec';
+  else if (/(vai|segue|enviad[oa]) (ao|para o) Senado/i.test(r)) here = 'senado';
+  else if (/(volta|segue|vai) (à|para a) Câmara/i.test(r)) here = 'camara';
+  // powers in the order the card first reached them, ending where it is now
+  const path = [];
+  past.forEach(e=>{ if (!path.includes(e.key)) path.push(e.key); });
+  if (!path.length) path.push(c.P.house);
+  if (path[path.length-1]!==here) path.push(here);
+  return {last, next, here, path, created: (c.P.steps && c.P.steps[0] && /apresent|protocol|edita|publicad|ajuizad|proposta|enviad|criad|assinad/i.test(c.P.steps[0][1])) ? c.P.steps[0][0] : null};
+}
+function cardDate(iso, time){
+  if (!iso) return 'não informado';
+  const t = todayISO(), [y,m,d] = iso.split('-').map(Number);
+  const yest = new Date(Date.parse(t+'T12:00:00Z') - 864e5).toISOString().slice(0,10);
+  const day = iso===t ? 'hoje' : iso===yest ? 'ontem' : `${d} ${MO[m-1]}${y!==+t.slice(0,4) ? ' '+y : ''}`;
+  return time ? `${day}, ${time}` : day;
+}
+const NI = /^n[ãa]o informad/i;
+function cardHTML(c, key){
+  const P = c.P, S = cardState(c, key), L = S.last;
+  const where = L ? `${POWER_NAME[L.key]}${L.kind ? ' · '+esc(L.kind.toLowerCase()) : ''}` : 'Ainda não foi a plenário';
+  const when = L ? cardDate(L.date, L.time) : '';
+  const what = L && L.r ? L.r : P.status;
+  const path = S.path.map((k,i)=>`<li class="${i===S.path.length-1?'now':''}"><span class="pw ${POWER_GLYPH[k]}" aria-hidden="true"></span>${POWER_NAME[k]}</li>`).join('');
+  const nextTx = S.next ? `${S.next.week ? 'semana de '+cardDate(S.next.date) : cardDate(S.next.date, S.next.time)} · ${POWER_NAME[S.next.key]}${S.next.kind ? ', '+esc(S.next.kind.toLowerCase()) : ''}` : 'sem data marcada';
+  const vote = P.votes ? `${esc(P.votes.result)}${P.votes.label ? ' · '+esc(P.votes.label) : ''}` : 'sem votação até agora';
+  const row = (k,v,cls='') => v && !NI.test(v) ? `<div class="${cls}"><dt>${k}</dt><dd>${v}</dd></div>` : '';
+  const live = L && L.date===todayISO() && liveState(L.key)?.s==='live' ? '<span class="c-live"><span class="lv-dot" aria-hidden="true"></span>ao vivo</span>' : '';
+  return `<li><a class="card" href="#p-${c.slug}" data-ref="${c.slug}">
+    <div class="c-top"><span class="pw ${POWER_GLYPH[L ? L.key : P.house]}" aria-hidden="true"></span><span class="c-where">${where}</span>${when?`<span class="c-when">${when}</span>`:''}${live}</div>
+    <div class="c-id"><span class="c-type">${esc(P.type)}</span><span class="c-code">${esc(P.code)}</span></div>
+    <h3 class="c-title">${esc(P.title)}</h3>
+    <p class="c-what">${esc(what)}</p>
+    ${S.path.length>1 ? `<ol class="c-path" aria-label="Por onde passou">${path}</ol>` : ''}
+    <dl class="c-meta">
+      ${row(P.house==='stf' ? 'Autor da ação' : 'Autoria', esc(P.author||''))}
+      ${row(P.house==='stf' ? 'Relator(a)' : 'Relatoria', esc(P.rapporteur||''))}
+      ${row('Criado em', cardDate(S.created))}
+      ${row('Agora', `${POWER_NAME[S.here]} · ${esc(P.status)}`)}
+      ${row('Próximo passo', nextTx)}
+      ${row('Votação', vote)}
+    </dl></a></li>`;
+}
+function feedHTML(key){
+  const list = CARDS.filter(c=> !key || c.P.house===key || c.ev.some(e=> e.key===key))
+    .map(c=> ({c, L: cardState(c, key).last}))
+    .sort((a,b)=> (b.L ? b.L.date+String(evMin(b.L)+10).padStart(5,'0') : '0') .localeCompare(a.L ? a.L.date+String(evMin(a.L)+10).padStart(5,'0') : '0'));
+  return list.map(x=> cardHTML(x.c, key)).join('');
+}
+
+/* the feed on the opening view */
+const todayEl = document.getElementById('today');
 function renderToday(){
   const t = todayISO(), [y,m,d] = t.split('-').map(Number), wd = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'][new Date(y,m-1,d).getDay()];
-  const rows = [
-    {go:'stf', ic:'j', lb:'Supremo', tx: powerToday(['stf'], 'Sem sessão plenária hoje.')},
-    {go:'pres', ic:'x', lb:'Presidência', tx: powerToday(['exec'], 'Sem agenda pública registrada para hoje.')},
-    {go:'congresso', ic:'c', lb:'Congresso', tx: powerToday(['camara','senado'], 'Sem sessão no plenário.')}
-  ];
-  todayEl.innerHTML = `<p class="today-h">Hoje · ${wd}, ${d} ${MO[m-1]}</p><ul>${rows.map(r=>`<li><button class="tday" type="button" data-go="${r.go}"><span class="ic ${r.ic}" aria-hidden="true"></span><span class="lb">${r.lb}</span><span class="tx">${r.tx}</span></button></li>`).join('')}</ul>`;
+  todayEl.innerHTML = `<div class="feed-h"><p class="today-h">Atividade recente · ${wd}, ${d} ${MO[m-1]}</p><div class="feed-live" id="feed-live"></div></div>
+    <ol class="feed" aria-label="Propostas e julgamentos, do mais recente ao mais antigo">${feedHTML(null)}</ol>`;
 }
-// keep the block in the empty middle of the drawing (viewBox 520 210 960 860)
-function placeToday(){ /* the block now sits in the landing grid, beside the drawing */ }
+function placeToday(){ /* the feed sits in the landing grid, beside the drawing */ }
 renderToday(); refreshLive();
-requestAnimationFrame(placeToday);
-addEventListener('resize', placeToday);
 todayEl.addEventListener('click', e=>{
-  const b = e.target.closest('.tday'); if (!b) return;
-  e.stopPropagation();
-  if (b.dataset.go==='congresso') enterPlan(); else enterView(VIEWS[b.dataset.go]);
+  const b = e.target.closest('.lv-tag[data-go]');
+  if (b){ e.stopPropagation(); const k = b.dataset.go; if (k==='camara'||k==='senado') enterPlan(()=>open(k)); else enterView(VIEWS[k==='exec'?'pres':'stf']); return; }
+  if (e.target.closest('.card')){ e.stopPropagation(); projFrom = true; }
 });
 
 /* ---------- opening view ---------- */
@@ -1746,7 +1830,7 @@ function renderStfPanel(){
   stfPanel.innerHTML = `<div class="panel-head"><div><h2>Supremo Tribunal Federal</h2></div>${infoBox(STF_SOURCES,'Fontes','Composição e julgamentos atualizados em 29 out 2026.')}</div>
     <p class="stf-sub">10 ministros e 1 cadeira vaga · presidente: Edson Fachin</p>
     ${liveBox('stf')}
-    <ol class="tl" aria-label="Julgamentos do Plenário">${timelineHTML('stf')}</ol>`;
+    <ol class="tl feed" aria-label="Julgamentos, do mais recente ao mais antigo">${feedHTML('stf')}</ol>`;
 }
 // px per viewBox unit of an svg drawn with preserveAspectRatio "meet"
 function svgUnit(svg, vw, vh){ const r = svg.getBoundingClientRect(); return Math.min(r.width/vw, r.height/vh); }
@@ -1794,7 +1878,7 @@ function renderPresPanel(){
     <p class="stf-sub">Lula (PT), reeleito em 25/10 com 51,7% dos votos válidos · posse em 5 jan 2027 · ${EXEC_MIN.length} ministérios</p>
     ${liveBox('exec')}
     <ul class="pres-legend" aria-label="Ministérios por partido">${legend}</ul>
-    <ol class="tl" aria-label="Atos da Presidência">${timelineHTML('exec')}</ol>`;
+    <ol class="tl feed" aria-label="Propostas que passaram pela Presidência, da mais recente à mais antiga">${feedHTML('exec')}</ol>`;
 }
 
 /* ---------- zoom views: a shape on the opening view grows into its section ---------- */
