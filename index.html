@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="quorum: pautas, votações e composição do Congresso, do Supremo e da Presidência.">
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>quorum</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -227,6 +228,8 @@ body{box-sizing:border-box;display:grid;place-items:center;
 .live p{margin:0}
 .lv-h{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
 .lv-t{font-size:14px;line-height:1.4;color:var(--muted)}
+.lv-video{position:relative;width:100%;aspect-ratio:16/9;max-width:100%;margin:6px 0 2px;border-radius:6px;overflow:hidden;background:var(--soft)}
+.lv-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .lv-links{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:4px}
 .lv-go{display:inline-block;background:var(--ink);color:var(--bg);text-decoration:none;font-size:14px;padding:8px 14px;border-radius:999px}
 .live:not(.on) .lv-go{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
@@ -1204,7 +1207,7 @@ function todayISO(){ try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'Amer
 function esc(t){ return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 /* ---------- live: a box in each section while a plenary session is on ---------- */
 const LIVE = {
-  camara:{name:'TV Câmara', start:'14h', hours:7, links:[{l:'Assistir no YouTube da Câmara', u:'https://www.youtube.com/channel/UC-ZkSRh-7UEuwXJQ9UMCFJA/live'}]},
+  camara:{name:'TV Câmara', channel:'UC-ZkSRh-7UEuwXJQ9UMCFJA', start:'14h', hours:7, links:[{l:'Assistir no YouTube da Câmara', u:'https://www.youtube.com/channel/UC-ZkSRh-7UEuwXJQ9UMCFJA/live'}]},
   senado:{name:'TV Senado', start:'14h', hours:7, links:[{l:'Assistir na TV Senado', u:'https://www12.senado.leg.br/tv'},{l:'YouTube', u:'https://www.youtube.com/TVSenadoOficial/live'}]},
   stf:{name:'TV Justiça', start:'14h', hours:5, links:[{l:'Assistir no YouTube do STF', u:'https://www.youtube.com/c/STF_oficial/live'}]},
   exec:{name:'Canal Gov', start:'', hours:3, links:[{l:'Assistir no Canal Gov', u:'https://canalgov.ebc.com.br/'}]}
@@ -1213,7 +1216,34 @@ const LIVE_RE = /sess|live/i;
 function nowBR(){ try{ const f = new Intl.DateTimeFormat('en-GB',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':'); return (+f[0])*60 + (+f[1]); }catch(e){ const d=new Date(); return d.getHours()*60+d.getMinutes(); } }
 function hm(t){ const m = /(\d{1,2})h(\d{2})?/.exec(t||''); return m ? (+m[1])*60 + (+(m[2]||0)) : null; }
 // state of today's session: 'live', 'soon' (later today) or null
+// data/live.json is written every hour by the robot in the GitHub repository (scripts/atualizar.py)
+let LIVE_DATA = null;
+function loadLive(){
+  if (!/^https?:$/.test(location.protocol)) return;
+  fetch('data/live.json', {cache:'no-store'}).then(r=> r.ok ? r.json() : null).then(js=>{ if (js){ LIVE_DATA = js; refreshLive(); } }).catch(()=>{});
+}
+const FRAMED = (()=>{ try{ return window.self !== window.top; }catch(e){ return true; } })();
+function minutesOf(isoStr){ const m = /T(\d{2}):(\d{2})/.exec(isoStr||''); return m ? (+m[1])*60 + (+m[2]) : null; }
+// sessions reported by the official APIs; null when there is no fresh data for this house
+function apiState(key){
+  const list = LIVE_DATA && LIVE_DATA[key];
+  if (!Array.isArray(list) || !LIVE_DATA.atualizado) return null;
+  if (Date.now() - new Date(LIVE_DATA.atualizado).getTime() > 3*3600e3) return null;
+  const t = todayISO(), now = nowBR();
+  const today = list.filter(x=> (x.inicio||'').slice(0,10)===t && !/cancel|adiad|não realizada/i.test(x.situacao||''));
+  const on = today.find(x=> x.aoVivo || (!/encerr/i.test(x.situacao||'') && minutesOf(x.inicio)!=null && minutesOf(x.inicio) <= now && (minutesOf(x.fim)==null || minutesOf(x.fim) > now)));
+  if (on) return {s:'live', day:{kind: on.tipo || 'Sessão'}, st: minutesOf(on.inicio) ?? now, video: on.video};
+  const next = today.filter(x=> minutesOf(x.inicio) > now).sort((a,b)=> a.inicio.localeCompare(b.inicio))[0];
+  if (next) return {s:'soon', day:{kind: next.tipo || 'Sessão'}, st: minutesOf(next.inicio)};
+  return {s:null};
+}
+function ytEmbed(u){
+  const m = /(?:v=|youtu\.be\/|\/live\/|\/embed\/)([\w-]{11})/.exec(u||'');
+  return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1&mute=1` : null;
+}
 function liveState(key){
+  const api = apiState(key);
+  if (api) return api.s ? api : null;
   const L = LIVE[key], t = todayISO();
   const day = (AGENDA[key]?.days||[]).find(d=> d.date===t && !d.label && (d.live || (key!=='exec' && LIVE_RE.test(d.kind||''))));
   if (!day) return null;
@@ -1226,10 +1256,13 @@ function liveState(key){
 function liveBox(key){
   const st = liveState(key), L = LIVE[key];
   if (!st) return `<div class="live-slot" data-k="${key}" hidden></div>`;
+  // on the published site (not inside another page) the session plays right here
+  const src = st.s==='live' && !FRAMED ? (ytEmbed(st.video) || (L.channel ? `https://www.youtube.com/embed/live_stream?channel=${L.channel}&autoplay=1&mute=1` : null)) : null;
+  const player = src ? `<div class="lv-video"><iframe src="${src}" title="Transmissão ao vivo: ${esc(L.name)}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>` : '';
   const h = `${Math.floor(st.st/60)}h${st.st%60 ? String(st.st%60).padStart(2,'0') : ''}`;
   const links = L.links.map((x,i)=>`<a class="${i?'lv-alt':'lv-go'}" href="${x.u}" target="_blank" rel="noopener">${esc(x.l)}${i?'':' ↗'}</a>`).join('');
   return st.s==='live'
-    ? `<div class="live-slot" data-k="${key}"><div class="live on" role="status"><p class="lv-h"><span class="lv-dot" aria-hidden="true"></span>Ao vivo · ${esc(st.day.kind)} em curso</p><p class="lv-t">Transmissão pela ${L.name}, desde as ${h}.</p><div class="lv-links">${links}</div></div></div>`
+    ? `<div class="live-slot" data-k="${key}"><div class="live on" role="status"><p class="lv-h"><span class="lv-dot" aria-hidden="true"></span>Ao vivo · ${esc(st.day.kind)} em curso</p><p class="lv-t">Transmissão pela ${L.name}, desde as ${h}.</p>${player}<div class="lv-links">${links}</div></div></div>`
     : `<div class="live-slot" data-k="${key}"><div class="live"><p class="lv-h"><span class="lv-dot off" aria-hidden="true"></span>Hoje às ${h} · ${esc(st.day.kind)}</p><p class="lv-t">A transmissão pela ${L.name} aparece aqui quando a sessão começar.</p><div class="lv-links">${links}</div></div></div>`;
 }
 function refreshLive(){
@@ -1239,9 +1272,12 @@ function refreshLive(){
     const on = keys.some(k=> liveState(k)?.s==='live');
     b.querySelector('.lv-tag')?.remove();
     if (on) b.querySelector('.lb').insertAdjacentHTML('beforeend',' <span class="lv-tag"><span class="lv-dot" aria-hidden="true"></span>ao vivo</span>');
+    const tx = b.querySelector('.tx');
+    if (on && /^Sem /.test(tx.textContent)){ const st = keys.map(k=>liveState(k)).find(x=>x?.s==='live'); tx.textContent = `${st.day.kind} em andamento agora.`; }
   });
 }
 setInterval(refreshLive, 60000);
+loadLive(); setInterval(loadLive, 5*60000);
 
 function infoBox(items, label, note){
   return `<details class="info"><summary aria-label="${esc(label)}" title="${esc(label)}">i</summary><div class="info-pop" role="note"><p class="info-h">${esc(label)}</p>${note?`<p class="info-note">${esc(note)}</p>`:''}<ol>${items.map(l=>`<li><a href="${l.u}" target="_blank" rel="noopener">${esc(l.l)}</a></li>`).join('')}</ol></div></details>`;

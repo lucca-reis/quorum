@@ -1,0 +1,16 @@
+{
+ "atualizado": "2026-10-29T13:30-03:00",
+ "camara": null,
+ "senado": [],
+ "erros": [
+  "camara: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "senado 2026-10-29: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "senado 2026-10-30: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "senado 2026-10-31: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "senado 2026-11-01: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "senado 2026-11-02: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "senado 2026-11-03: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "senado 2026-11-04: <urlopen error Tunnel connection failed: 403 Forbidden>",
+  "senado 2026-11-05: <urlopen error Tunnel connection failed: 403 Forbidden>"
+ ]
+}
