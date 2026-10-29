@@ -37,7 +37,7 @@ body{box-sizing:border-box;display:grid;place-items:center;
   padding-right:max(16px, env(safe-area-inset-right, 0px));
   padding-block:calc(var(--menu-h) + 8px) 16px}
 .stage{width:100%;max-width:1400px;position:relative;font-family:var(--display)}
-#plan{display:block;width:100%;height:auto;max-height:calc(100vh - var(--menu-h) - 40px);overflow:visible}
+#plan{display:block;backface-visibility:hidden;width:100%;height:auto;max-height:calc(100vh - var(--menu-h) - 40px);overflow:visible}
 #frame{fill:none;stroke:var(--ink);transition:opacity .45s}
 
 .house{cursor:pointer;outline:none;transition:opacity .45s}
@@ -46,7 +46,7 @@ body{box-sizing:border-box;display:grid;place-items:center;
 .house:focus-visible .shell{transform:scale(1.03)}
 .arc{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round}
 .pres{fill:var(--ink)}
-.seat{fill:var(--ink);transition:fill .5s ease, transform .18s ease, opacity .45s ease;transform-box:fill-box;transform-origin:center}
+.seat{fill:var(--ink);transition:fill .35s ease, transform .18s ease, opacity .45s ease;transform-box:fill-box;transform-origin:center}
 
 .stage.is-open #frame,.stage.is-open .house:not(.is-active){opacity:0;pointer-events:none}
 .stage.is-open .house.is-active{cursor:default}
@@ -364,14 +364,16 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .lg.soon{cursor:default}
 /* faint preview of each section inside its shape on the opening view */
 .lg .pv{pointer-events:none}
-.lg .pv circle{fill:var(--muted);stroke:none;opacity:.6;transition:fill .35s, opacity .35s}
-.lg .pv circle.vacant{fill:transparent;stroke:var(--muted);stroke-width:1}
-.lg .pv path{fill:none;stroke:var(--muted);stroke-width:1}
-.lg:hover .pv circle:not(.vacant),.lg:focus-visible .pv circle:not(.vacant){fill:var(--c,var(--ink));opacity:1}
+.lg .pv .dots{fill:var(--muted);stroke:none;opacity:.6;transition:fill .3s, opacity .3s}
+.lg .pv .dots.vacant{fill:transparent;stroke:var(--muted);stroke-width:1.2}
+.lg .pv .u{fill:none;stroke:var(--muted);stroke-width:1.2}
+.lg:hover .pv .dots:not(.vacant),.lg:focus-visible .pv .dots:not(.vacant){fill:var(--c,var(--ink));opacity:1}
 .landing.leaving{background:transparent;pointer-events:none}
 .landing.leaving .lg{opacity:0}
 .landing.leaving .lg.mini,.landing.instant,.landing.instant .lg{transition:none}
-.stage.zooming .seat,.stage.zooming .pres,.stage.zooming .arc{opacity:0}
+.seats{transition:opacity .45s}
+.stage.zooming #plan,.stfv.zooming svg{will-change:transform}
+.stage.zooming .seats{opacity:0}
 .arc,.pres{transition:opacity .45s ease}
 
 /* Supremo view */
@@ -1399,14 +1401,15 @@ for (const key of ['camara','senado']){
   const inner = el('g',{class:'inner'}, g);
   el('circle',{class:'shell', r:1, 'vector-effect':'non-scaling-stroke'}, inner);
   const a=H.arcA*Math.PI/180, sd=H.side, x1=sd*-H.arcR*Math.cos(a), y1=-H.arcR*Math.sin(a), y2=-y1;
-  el('path',{class:'arc', d:`M${x1} ${y1} A${H.arcR} ${H.arcR} 0 0 ${sd>0?0:1} ${x1} ${y2}`, 'vector-effect':'non-scaling-stroke'}, inner);
+  const seatsG = el('g',{class:'seats'}, inner);
+  el('path',{class:'arc', d:`M${x1} ${y1} A${H.arcR} ${H.arcR} 0 0 ${sd>0?0:1} ${x1} ${y2}`, 'vector-effect':'non-scaling-stroke'}, seatsG);
   const k = HOUSES.camara.home.s/H.home.s;
   const L = key==='senado' ? layoutSenado(total, HOUSES.camara.r*k, HOUSES.camara.sp*k, H.T) : layoutCamara(total, H.T);
   H.r = L.r; H.sp = L.sp;
-  el('circle',{class:'pres', cx:sd*H.presU, cy:0, r:L.r.toFixed(4)}, inner);
+  el('circle',{class:'pres', cx:sd*H.presU, cy:0, r:L.r.toFixed(4)}, seatsG);
   const list = H.people.map(x=>x.p);
   H.seats = L.seats.map((s,i)=>{
-    const c = el('circle',{class:'seat', cx:(sd*s.u).toFixed(4), cy:s.v.toFixed(4), r:L.r.toFixed(4)}, inner);
+    const c = el('circle',{class:'seat', cx:(sd*s.u).toFixed(4), cy:s.v.toFixed(4), r:L.r.toFixed(4)}, seatsG);
     c.dataset.p = list[i]; c.style.setProperty('--c', PARTY[list[i]]);
     return c;
   });
@@ -1451,13 +1454,13 @@ function open(key){
   Object.values(HOUSES).forEach(o=>o.g.setAttribute('tabindex','-1'));
   tween(H, H.open, 750);
   const n = H.seats.length;
-  H.seats.forEach((s,i)=> s.style.transitionDelay = reduce ? '0ms' : (i/n*650).toFixed(0)+'ms, 0ms');
+  H.seats.forEach((s,i)=> s.style.transitionDelay = reduce ? '0ms' : (i/n*520).toFixed(0)+'ms, 0ms');
   clearTimeout(colorTimer);
   colorTimer = setTimeout(()=>{
     H.g.classList.add('colored');
     // drop the stagger once the colors land so hover stays instant
     setTimeout(()=>H.seats.forEach(s=>s.style.transitionDelay=''), reduce?0:1200);
-  }, reduce?0:380);
+  }, reduce?0:720);   // after the zoom settles, so the two animations don't compete
 }
 
 function close(){
@@ -1852,11 +1855,27 @@ Object.values(VIEWS).forEach(V=>{
   V.el.addEventListener('click', e=>{ if (e.target.closest('.item-link')) projFrom = true; });
 });
 
-/* previews: the real seats of each section, drawn small and grey inside its shape */
+/* previews: the real seats of each section, drawn small and grey inside its shape.
+   All seats of one colour become a single path, so the opening view stays light. */
 (function(){
   const NS2 = 'http://www.w3.org/2000/svg';
   const pv = (parent, t) => { const g = document.createElementNS(NS2,'g'); g.setAttribute('class','pv'); g.setAttribute('aria-hidden','true'); g.setAttribute('transform', t); parent.appendChild(g); return g; };
-  const dot = (g, src) => { const c = src.cloneNode(false); ['tabindex','role','aria-label','id','data-i','data-e','data-m','data-p'].forEach(a=>c.removeAttribute(a)); c.setAttribute('class', src.classList.contains('vacant') ? 'vacant' : ''); g.appendChild(c); return c; };
+  const ring = (x,y,r) => `M${(x-r).toFixed(3)} ${y.toFixed(3)}a${r} ${r} 0 1 0 ${(2*r).toFixed(3)} 0a${r} ${r} 0 1 0 ${(-2*r).toFixed(3)} 0`;
+  function dots(g, sources){
+    const by = new Map();
+    sources.forEach(src=>{
+      const vac = src.classList.contains('vacant'), c = vac ? 'vacant' : (src.style.getPropertyValue('--c') || '');
+      if (!by.has(c)) by.set(c, []);
+      by.get(c).push(ring(+src.getAttribute('cx'), +src.getAttribute('cy'), +src.getAttribute('r')));
+    });
+    by.forEach((d,c)=>{
+      const p = document.createElementNS(NS2,'path');
+      p.setAttribute('d', d.join(''));
+      p.setAttribute('class', c==='vacant' ? 'dots vacant' : 'dots');
+      if (c && c!=='vacant') p.style.setProperty('--c', c);
+      g.appendChild(p);
+    });
+  }
   // frame of a section mapped onto its shape (same mapping the zoom uses)
   const fit = (fr, mini) => { const k = +mini.getAttribute('width') / +fr.getAttribute('width');
     return `translate(${+mini.getAttribute('x')} ${+mini.getAttribute('y')}) scale(${k.toFixed(5)}) translate(${-fr.getAttribute('x')} ${-fr.getAttribute('y')})`; };
@@ -1864,16 +1883,16 @@ Object.values(VIEWS).forEach(V=>{
   const circ = document.querySelectorAll('#mini > circle');
   [['senado',circ[0]],['camara',circ[1]]].forEach(([key,c])=>{
     const g = pv(document.getElementById('mini'), `translate(${c.getAttribute('cx')} ${c.getAttribute('cy')}) scale(${c.getAttribute('r')})`);
-    HOUSES[key].g.querySelectorAll('.pres, .seat').forEach(src=> dot(g, src));
+    dots(g, HOUSES[key].g.querySelectorAll('.pres, .seat'));
   });
   // STF: the U table and the eleven seats
   const gs = pv(lgStf, fit(stfFrame, document.getElementById('stf-mini')) + ' translate(345 252.5) scale(.95) translate(-345 -273)');
-  const u = document.querySelector('#stf-bench .u-table').cloneNode(false); u.removeAttribute('class'); gs.appendChild(u);
-  document.querySelectorAll('#stf-bench .jz').forEach(src=> dot(gs, src));
+  const u = document.querySelector('#stf-bench .u-table').cloneNode(false); u.setAttribute('class','u'); u.removeAttribute('vector-effect'); gs.appendChild(u);
+  dots(gs, document.querySelectorAll('#stf-bench .jz'));
   // Presidência: president, vice and ministries
   const fx = +presFrame.getAttribute('x') + +presFrame.getAttribute('width')/2, fy = +presFrame.getAttribute('y') + +presFrame.getAttribute('height')/2;
   const gp = pv(lgPres, fit(presFrame, document.getElementById('pres-mini')) + ` translate(${fx} ${fy}) scale(1.1) translate(${-PRES_BENCH.cx} ${-PRES_BENCH.cy})`);
-  document.querySelectorAll('#pres-bench .jz').forEach(src=> dot(gp, src));
+  dots(gp, document.querySelectorAll('#pres-bench .jz'));
 })();
 
 function openMinister(el){
