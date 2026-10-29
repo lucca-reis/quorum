@@ -423,28 +423,37 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .feed-live .lv-tag:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .today > .feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 10px 32px 0;scrollbar-width:thin}
 
-/* cards: the same piece on the opening view and in every section, styled as posts in a list */
-.feed{list-style:none;margin:0;display:flex;flex-direction:column}
-.feed > li{border-bottom:1px solid var(--rule)}
-.feed > li:first-child{border-top:1px solid var(--rule)}
-.card{display:grid;grid-template-columns:14px minmax(0,1fr);column-gap:12px;padding:14px 8px 15px 4px;color:var(--ink);text-decoration:none;font-family:var(--display);border-radius:6px;transition:background-color .15s}
+/* cards: the same piece on the opening view and in every section; the path between the powers is a line with four stations */
+.feed{list-style:none;margin:0;display:flex;flex-direction:column;gap:12px}
+.card{display:flex;flex-direction:column;gap:6px;padding:14px 18px 16px;border:1.5px solid var(--ink);border-radius:12px;background:var(--bg);color:var(--ink);text-decoration:none;font-family:var(--display);transition:background-color .15s}
 .card:hover{background:var(--soft)}
-.card:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
-.c-dot{width:9px;height:9px;margin-top:4px;border-radius:50%;background:var(--ink);justify-self:center}
-.card.is-next .c-dot{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink)}
-.card.is-live .c-dot{background:#E0242B;animation:lvp 1.6s ease-in-out infinite}
-.c-body{min-width:0;display:flex;flex-direction:column;gap:4px}
-.c-body p,.c-body h3{margin:0}
-.c-top{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.c-top .pw{color:var(--ink);transform:scale(.85)}
-.c-live{color:#E0242B}
-.c-title{font-size:16.5px;line-height:1.25;font-weight:700;letter-spacing:-.01em;text-wrap:pretty}
-.c-code{font-variant-numeric:tabular-nums}
+.card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.card p,.card h3{margin:0}
+.c-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+.c-code{font-weight:700;font-variant-numeric:tabular-nums}
+.c-when{color:var(--muted)}
+.c-live{display:inline-flex;align-items:center;gap:5px;color:#E0242B;font-weight:600}
+.c-title{font-size:18px;line-height:1.2;font-weight:700;letter-spacing:-.01em;text-wrap:pretty}
 .c-what{font-size:14px;line-height:1.4}
-.c-path{color:var(--muted)}
-.c-path b{color:var(--ink);font-weight:600}
-.c-meta{font-size:12.5px;line-height:1.4;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.c-what::before{content:"→ ";color:var(--muted)}
+.c-track{list-style:none;margin:10px 0 2px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));position:relative;font-size:11.5px;text-align:center}
+.c-track::before{content:"";position:absolute;left:12.5%;right:12.5%;top:6px;height:1.5px;background:var(--rule)}
+.c-track::after{content:"";position:absolute;top:6px;height:1.5px;background:var(--ink);left:calc(12.5% + var(--lo) * 25%);width:calc((var(--hi) - var(--lo)) * 25%)}
+.c-track .st{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted)}
+.c-track .st::before{content:"";width:13px;height:13px;border-radius:50%;box-sizing:border-box;background:var(--bg);border:1.5px solid var(--rule)}
+.card:hover .c-track .st::before{background:var(--soft)}
+.c-track .st.v{color:var(--ink)}
+.c-track .st.v::before{background:var(--ink);border-color:var(--ink)}
+.c-track .st.now{font-weight:700;color:var(--ink)}
+.c-track .st.now::before{background:var(--ink);border-color:var(--ink);box-shadow:0 0 0 3px var(--bg),0 0 0 4.5px var(--ink)}
+.card:hover .c-track .st.now::before{box-shadow:0 0 0 3px var(--soft),0 0 0 4.5px var(--ink)}
+.card.is-live .c-track .st.now::before{background:#E0242B;border-color:#E0242B}
+.c-meta{margin:8px 0 0;padding-top:10px;border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px;font-size:12.5px;line-height:1.35}
+.c-meta div{min-width:0}
+.c-meta dt{font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:1px}
+.c-meta dd{margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tl.feed{padding-right:8px}
+@media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 14px 16px} .c-track{font-size:10.5px} }
 @media (max-width:700px){
   .landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;align-content:start;justify-items:center;gap:32px;overflow:auto;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 24px)}
   .landing svg{height:min(380px, 48vh)}
@@ -1710,31 +1719,32 @@ function cardDate(iso, time){
   return time ? `${day}, ${time}` : day;
 }
 const NI = /^n[ãa]o informad/i;
+const TRACK = ['camara','senado','exec','stf'];
 function cardHTML(c, key){
   const P = c.P, S = cardState(c, key), L = S.last;
   const where = L ? POWER_NAME[L.key] : POWER_NAME[P.house];
   const when = L ? cardDate(L.date, L.time) : (S.next ? 'a seguir' : '');
   const what = L && L.r ? L.r : P.status;
   const live = L && L.date===todayISO() && liveState(L.key)?.s==='live';
-  const path = S.path.length>1 ? ` <span class="c-path">· ${S.path.map((k,i)=> i===S.path.length-1 ? `<b>${POWER_NAME[k]}</b>` : POWER_NAME[k]).join(' → ')}</span>` : '';
   const ok = v => v && !NI.test(v);
-  const nextTx = S.next ? `${S.next.week ? 'semana de '+cardDate(S.next.date) : cardDate(S.next.date, S.next.time)}, ${POWER_NAME[S.next.key]}` : '';
-  const meta = [
-    ok(P.author) && `${P.house==='stf' ? 'Autor' : 'Autoria'}: ${esc(P.author)}`,
-    ok(P.rapporteur) && `${P.house==='stf' ? 'Relator(a)' : 'Relatoria'}: ${esc(P.rapporteur)}`,
-    S.created && `Criado em ${cardDate(S.created)}`,
-    P.votes ? `Votação: ${esc(P.votes.result)}` : 'Sem votação até agora',
-    nextTx && `Próximo: ${nextTx}`
-  ].filter(Boolean).join(' · ');
-  const code = P.code.replace(/\/\d{4}\b/, '');
-  return `<li><a class="card${live?' is-live':''}${L?'':' is-next'}" href="#p-${c.slug}" data-ref="${c.slug}">
-    <span class="c-dot" aria-hidden="true"></span>
-    <div class="c-body">
-      <p class="c-top"><span class="pw ${POWER_GLYPH[L ? L.key : P.house]}" aria-hidden="true"></span>${where}${when ? ` · ${when}` : ''}${live ? ' <span class="c-live">ao vivo</span>' : ''}</p>
-      <h3 class="c-title"><span class="c-code" title="${esc(P.type)} ${esc(P.code)}">${esc(code)}</span> · ${esc(P.title)}</h3>
-      <p class="c-what">${esc(what)}${path}</p>
-      <p class="c-meta">${meta}</p>
-    </div></a></li>`;
+  // the four powers as stations on a line; the line is drawn between the first and last stations reached
+  const idx = S.path.map(k=> TRACK.indexOf(k)), now = TRACK.indexOf(S.here);
+  const lo = Math.min(...idx, now), hi = Math.max(...idx, now);
+  const stations = TRACK.map((k,i)=>`<li class="st${S.path.includes(k)?' v':''}${i===now?' now':''}">${POWER_NAME[k]}</li>`).join('');
+  const nextTx = S.next ? `${S.next.week ? 'semana de '+cardDate(S.next.date) : cardDate(S.next.date, S.next.time)}, ${POWER_NAME[S.next.key]}` : 'sem data marcada';
+  const cell = (k,v) => `<div><dt>${k}</dt><dd>${v}</dd></div>`;
+  return `<li><a class="card${live?' is-live':''}" href="#p-${c.slug}" data-ref="${c.slug}">
+    <p class="c-top"><span class="c-code" title="${esc(P.type)}">${esc(P.code)}</span><span class="c-when">${where}${when ? ' · '+when : ''}</span>${live ? '<span class="c-live"><span class="lv-dot" aria-hidden="true"></span>ao vivo</span>' : ''}</p>
+    <h3 class="c-title">${esc(P.title)}</h3>
+    <p class="c-what">${esc(what)}</p>
+    <ol class="c-track" style="--lo:${lo};--hi:${hi}" aria-label="Por onde passou; agora em ${POWER_NAME[S.here]}">${stations}</ol>
+    <dl class="c-meta">
+      ${cell(P.house==='stf' ? 'Autor' : 'Autoria', ok(P.author) ? esc(P.author) : 'não informado')}
+      ${cell(P.house==='stf' ? 'Relator(a)' : 'Relatoria', ok(P.rapporteur) ? esc(P.rapporteur) : 'não informado')}
+      ${cell('Votação', P.votes ? esc(P.votes.result) : 'ainda não houve')}
+      ${cell('Criado em', S.created ? cardDate(S.created) : 'não informado')}
+      ${cell('Próximo passo', nextTx)}
+    </dl></a></li>`;
 }
 function feedHTML(key){
   const list = CARDS.filter(c=> !key || c.P.house===key || c.ev.some(e=> e.key===key))
