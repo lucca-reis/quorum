@@ -1,0 +1,10 @@
+{
+ "AgendaPlenario": {
+  "Metadados": {
+   "Versao": "29/10/2026 13:26:13",
+   "VersaoServico": "2",
+   "DataVersaoServico": "2019-10-15",
+   "DescricaoDataSet": "Retorna a Agenda do dia nos Plenários do Senado e Congresso."
+  }
+ }
+}
