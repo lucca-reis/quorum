@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="quorum: pautas, votações e composição do Congresso, do Supremo e da Presidência.">
+<meta name="description" content="Quorum: pautas, votações e composição do Congresso, do Supremo e da Presidência.">
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
-<title>quorum</title>
+<title>Quorum</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout: one drawing board centered in the viewport. Opening a house moves it to its own edge. */
@@ -276,10 +276,11 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .brand-wrap{justify-self:start;display:flex;align-items:baseline;gap:10px;min-width:0}
 .menu .brand{font-size:18px;font-weight:400;letter-spacing:-.01em}
 .today-date{font-size:14px;color:var(--muted);white-space:nowrap}
-.menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:50px;display:flex;gap:2px;padding:3px;border-radius:999px;background:color-mix(in srgb, var(--ink) 6%, var(--bg));overflow-x:auto;scrollbar-width:none;max-width:100%}
+.menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:50px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;overflow-x:auto;scrollbar-width:none;max-width:100%}
 .menu nav a{flex:1 1 0;text-align:center;padding:7px 10px;border-radius:999px;color:color-mix(in srgb, var(--ink) 72%, var(--bg));transition:background-color .2s, color .2s, box-shadow .2s}
 .menu nav a:hover{color:var(--ink)}
-.menu nav a[aria-current="page"]{background:var(--bg);color:var(--ink);box-shadow:0 0 0 .5px color-mix(in srgb, var(--ink) 18%, transparent), 0 1px 2px color-mix(in srgb, var(--ink) 10%, transparent)}
+.menu nav a:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
+.menu nav a[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));color:var(--ink)}
 .menu .cal-link{grid-column:2;grid-row:1;justify-self:end;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;transition:background-color .2s}
 .menu .cal-link:hover{background:color-mix(in srgb, var(--ink) 6%, var(--bg))}
 .menu .cal-link[aria-current="page"]{background:var(--ink);color:var(--bg)}
@@ -617,12 +618,12 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
 <button class="back-arrow" id="back-arrow" type="button" aria-label="Voltar" title="Voltar" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <header class="menu">
-  <div class="brand-wrap"><a class="brand" href="#" data-nav="home">quorum</a><span class="today-date" id="today-date"></span></div>
+  <div class="brand-wrap"><a class="brand" href="#" data-nav="home">Quorum</a><span class="today-date" id="today-date"></span></div>
   <nav aria-label="Poderes">
-    <a href="#" data-nav="camara">congresso</a>
-    <a href="#" data-nav="senado">senado</a>
-    <a href="#" data-nav="stf">supremo<span class="long"> tribunal</span></a>
-    <a href="#" data-nav="pres">presidência</a>
+    <a href="#" data-nav="camara">Congresso</a>
+    <a href="#" data-nav="senado">Senado</a>
+    <a href="#" data-nav="stf">Supremo<span class="long"> Tribunal</span></a>
+    <a href="#" data-nav="pres">Presidência</a>
   </nav>
   <a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a>
 </header>
@@ -2514,14 +2515,14 @@ function showCal(){
   renderCal(false);
   cal.scrollTop = 0;
   cal.hidden = false; requestAnimationFrame(()=>cal.classList.add('show'));
-  document.title = 'Calendário · quorum';
+  document.title = 'Calendário · Quorum';
   cal.querySelector('#cal-title').setAttribute('tabindex','-1');
   cal.querySelector('#cal-title').focus({preventScroll:true});
 }
 function hideCal(){
   if (cal.hidden) return;
   cal.classList.remove('show'); cal.hidden = true; cal.innerHTML = '';
-  document.title = 'quorum';
+  document.title = 'Quorum';
 }
 function leaveCal(){ location.hash = ''; }
 
@@ -2533,12 +2534,12 @@ function showRoute(){
   if (m && renderProject(m[1])){
     if (proj.hidden){ projFocus = document.activeElement; proj.hidden = false; requestAnimationFrame(()=>proj.classList.add('show')); }
     proj.scrollTop = 0;
-    document.title = PROJECTS[m[1]].code + ' · quorum';
+    document.title = PROJECTS[m[1]].code + ' · Quorum';
     proj.querySelector('.pj-title').setAttribute('tabindex','-1');
     proj.querySelector('.pj-title').focus({preventScroll:true});
   } else if (!proj.hidden){
     proj.classList.remove('show'); proj.hidden = true; proj.innerHTML = '';
-    document.title = cal.hidden ? 'quorum' : 'Calendário · quorum';
+    document.title = cal.hidden ? 'Quorum' : 'Calendário · Quorum';
     if (projFocus && projFocus.focus) projFocus.focus({preventScroll:true});
   }
 }
