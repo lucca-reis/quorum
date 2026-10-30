@@ -373,7 +373,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   transition:background-color .45s}
 .landing[hidden]{display:none!important}
 .landing{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:stretch;column-gap:clamp(24px,4vw,64px)}
-.landing > .lx{place-self:center;--u:clamp(.45px, calc((50vw - 310px) / 330), 1px)}
+.landing > .lx{place-self:center;--u:clamp(.42px, min(calc((50vw - 310px) / 330), calc((100vh - var(--menu-h) - 230px) / 540)), 1px)}
 /* left half: an index of the three powers, each shape beside what is going on there */
 /* the three powers stacked, the whole block centred in the left half */
 .lx{display:grid;grid-template-columns:calc(330 * var(--u)) fit-content(270px);column-gap:clamp(18px,2.4vw,36px);width:max-content;max-width:100%;margin:0 auto;font-family:var(--display)}
@@ -625,11 +625,11 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
   <div class="lx" aria-label="Os três poderes">
     <div class="lx-row" data-k="stf">
-      <div class="lx-shape"><svg viewBox="1251 315 150 112" style="--vw:150" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Supremo Tribunal Federal"><rect id="stf-mini" x="1257" y="321" width="138" height="100" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <div class="lx-shape"><svg viewBox="1251 315 320 235.2" style="--vw:320" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Supremo Tribunal Federal"><rect id="stf-mini" x="1257" y="321" width="308" height="223.2" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
       <button type="button" class="lx-text" data-open="stf"><span class="lx-n" id="lx-n-stf"></span><span class="lx-l" id="lx-l-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
     </div>
     <div class="lx-row" data-k="pres">
-      <div class="lx-shape"><svg viewBox="598 247 237 116" style="--vw:237" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir a Presidência da República"><rect id="pres-mini" x="604" y="253" width="225" height="104" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <div class="lx-shape"><svg viewBox="598 247 320 154.4" style="--vw:320" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir a Presidência da República"><rect id="pres-mini" x="604" y="253" width="308" height="142.4" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
       <button type="button" class="lx-text" data-open="pres"><span class="lx-n" id="lx-n-pres"></span><span class="lx-l" id="lx-l-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
     </div>
     <div class="lx-row" data-k="cong">
