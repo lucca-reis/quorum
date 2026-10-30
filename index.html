@@ -3311,7 +3311,7 @@ const SIGLA_PARTY = {'UNIÃO':'União','UNIAO':'União','REPUBLICANOS':'Republic
 function vgLeis(){
   if (!trLeis) return '<p class="vd-none">Carregando…</p>';
   const L = trLeis, G = L.grupos || [];
-  if (!G.length) return '<p class="vd-none">Nenhuma norma encontrada no período.</p>';
+  if (!G.length) return `<p class="vd-none">${(L.erros||[]).length ? 'Os dados ainda estão sendo reunidos pelo robô; o gráfico aparece aqui na próxima atualização.' : 'Nenhuma norma encontrada no período.'}</p>`;
   const max = G[0][1];
   const color = g => { const k = SIGLA_PARTY[String(g).toUpperCase()]; return k ? PARTY[k] : /Executivo/.test(g) ? 'var(--ink)' : 'var(--nc)'; };
   const label = g => { const k = SIGLA_PARTY[String(g).toUpperCase()]; return k ? (PARTY_NAME[k]||k) : g; };
