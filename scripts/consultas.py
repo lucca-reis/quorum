@@ -33,7 +33,7 @@ def numero(t):
 def texto(t):
     return re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', t or ''))).strip()
 
-def curto(t, n=260):
+def curto(t, n=200):
     return t if len(t) <= n else t[:n].rsplit(' ', 1)[0].rstrip(',;:') + '…'
 
 # ---------- lista de proposições abertas (cerca de 100 por página) ----------
@@ -99,7 +99,7 @@ for x in itens:
     if a:
         x['d'] = (a.get('dataApresentacao') or '')[:10] or None
         x['a'] = (a.get('apelido') or '').strip() or None
-        x['au'] = curto((a.get('autoria') or '').strip(), 120) or None
+        x['au'] = curto((a.get('autoria') or '').strip(), 90) or None
         x['st'] = (a.get('situacaoAtual') or '').strip().capitalize() or None
     else:
         for k in ('d', 'a', 'au', 'st'):

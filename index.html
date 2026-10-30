@@ -701,6 +701,8 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .cs-empty a{color:var(--ink)}
 .cs .ag-more{margin-left:0;align-self:flex-start}
 .cs-list{display:flex;flex-direction:column;gap:18px}
+/* cards off screen skip layout and paint until they scroll near */
+.fd,.cs-card{content-visibility:auto;contain-intrinsic-size:auto 220px}
 .cs-card .c-pill{white-space:nowrap}
 .cs .feed{padding:0}
 @media (max-width:560px){ .cs-nums{font-size:12.5px} .cs-vote{padding:7px 13px} }
@@ -1413,7 +1415,16 @@ const AGENDA = {
   ]}
 };
 const WD=['dom','seg','ter','qua','qui','sex','sáb'], MO=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-function todayISO(){ try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo'}).format(new Date()); }catch(e){ return new Date().toISOString().slice(0,10); } }
+// formatters are built once: creating an Intl formatter on every call was the slowest part of each render
+const FMT_DAY = (()=>{ try{ return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo'}); }catch(e){ return null; } })();
+const FMT_HM = (()=>{ try{ return new Intl.DateTimeFormat('en-GB',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',hour12:false}); }catch(e){ return null; } })();
+const FMT_NUM = new Intl.NumberFormat('pt-BR'), FMT_PCT = new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1});
+let todayMemo = {t:0, v:''};
+function todayISO(){
+  const now = Date.now(); if (now - todayMemo.t < 30000) return todayMemo.v;
+  const v = FMT_DAY ? FMT_DAY.format(now) : new Date().toISOString().slice(0,10);
+  todayMemo = {t:now, v}; return v;
+}
 function esc(t){ return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 /* ---------- live: a box in each section while a plenary session is on ---------- */
 const LIVE = {
@@ -1423,7 +1434,7 @@ const LIVE = {
   exec:{name:'Canal Gov', start:'', hours:3, links:[{l:'Assistir no Canal Gov', u:'https://canalgov.ebc.com.br/'}]}
 };
 const LIVE_RE = /sess|live/i;
-function nowBR(){ try{ const f = new Intl.DateTimeFormat('en-GB',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).split(':'); return (+f[0])*60 + (+f[1]); }catch(e){ const d=new Date(); return d.getHours()*60+d.getMinutes(); } }
+function nowBR(){ try{ const f = FMT_HM.format(new Date()).split(':'); return (+f[0])*60 + (+f[1]); }catch(e){ const d=new Date(); return d.getHours()*60+d.getMinutes(); } }
 function hm(t){ const m = /(\d{1,2})h(\d{2})?/.exec(t||''); return m ? (+m[1])*60 + (+(m[2]||0)) : null; }
 // state of today's session: 'live', 'soon' (later today) or null
 // data/live.json is written every hour by the robot in the GitHub repository (scripts/atualizar.py)
@@ -1730,7 +1741,7 @@ function close(){
 /* ---------- party and person layers ---------- */
 const partyEl = document.getElementById('party');
 const PARTY_FULL = {PSOL:'Partido Socialismo e Liberdade',Rede:'Rede Sustentabilidade',PCdoB:'Partido Comunista do Brasil',PT:'Partido dos Trabalhadores',PV:'Partido Verde',PSB:'Partido Socialista Brasileiro',PDT:'Partido Democrático Trabalhista',Avante:'Avante',Solidariedade:'Solidariedade',MDB:'Movimento Democrático Brasileiro',PSD:'Partido Social Democrático',Podemos:'Podemos',PSDB:'Partido da Social Democracia Brasileira',PRD:'Partido Renovação Democrática','União':'União Brasil',PP:'Progressistas',Republicanos:'Republicanos','Missão':'Missão',Novo:'Partido Novo',PL:'Partido Liberal',NC:'Parlamentares sem partido'};
-const fmt = n => n.toLocaleString('pt-BR');
+const fmt = n => FMT_NUM.format(n);
 const initialsOf = n => n.replace(/^(Dr\.?|Dra\.?|Prof\.?|Professora?|Delegad[oa]|Sargento|Coronel|Capitão|Cabo|General|Pastor|Subtenente|Major|Defensor)\s+/i,'').split(/\s+/).filter(w=>w.length>2||/^[A-ZÀ-Ú]/.test(w)).filter((w,i,a)=>i===0||i===a.length-1).map(w=>w[0]).join('').toUpperCase();
 function onColor(color){
   const hex = /^#([0-9a-f]{6})$/i.exec(color);
@@ -2113,9 +2124,9 @@ function enterPlan(after){
   planSvg.getBoundingClientRect();
   landing.classList.add('instant'); landing.style.backgroundColor = 'transparent'; landing.getBoundingClientRect();
   landing.classList.remove('instant'); landing.classList.add('leaving');
-  requestAnimationFrame(()=>{ planSvg.style.transition = reduce ? 'none' : 'transform .9s cubic-bezier(.65,0,.35,1)'; planSvg.style.transform = 'none'; });
+  requestAnimationFrame(()=>{ planSvg.style.willChange = 'transform'; planSvg.style.transition = reduce ? 'none' : 'transform .9s cubic-bezier(.65,0,.35,1)'; planSvg.style.transform = 'none'; });
   setTimeout(()=>stage.classList.remove('zooming'), reduce?0:520);
-  setTimeout(()=>{ landing.hidden = true; landing.classList.remove('leaving'); landing.style.backgroundColor = ''; planSvg.style.transition = ''; planSvg.style.transform = ''; zoomBusy = false; after && after(); }, reduce?0:940);
+  setTimeout(()=>{ landing.hidden = true; landing.classList.remove('leaving'); landing.style.backgroundColor = ''; planSvg.style.transition = ''; planSvg.style.transform = ''; planSvg.style.willChange = ''; zoomBusy = false; after && after(); }, reduce?0:940);
 }
 function exitPlan(){
   if (!landing.hidden || zoomBusy) return;
@@ -2236,11 +2247,11 @@ function enterView(V){
   V.lg.classList.add('zoomsrc');
   landing.classList.add('instant'); landing.style.backgroundColor = 'transparent'; landing.getBoundingClientRect();
   landing.classList.remove('instant'); landing.classList.add('leaving');
-  requestAnimationFrame(()=>{ V.svg.style.transition = reduce ? 'none' : 'transform .9s cubic-bezier(.65,0,.35,1)'; V.svg.style.transform = 'none'; });
+  requestAnimationFrame(()=>{ V.svg.style.willChange = 'transform'; V.svg.style.transition = reduce ? 'none' : 'transform .9s cubic-bezier(.65,0,.35,1)'; V.svg.style.transform = 'none'; });
   setTimeout(()=>V.el.classList.remove('zooming'), reduce?0:520);
   setTimeout(()=>{
     landing.hidden = true; landing.classList.remove('leaving'); landing.style.backgroundColor = ''; V.lg.classList.remove('zoomsrc');
-    V.svg.style.transition = ''; V.svg.style.transform = '';
+    V.svg.style.transition = ''; V.svg.style.transform = ''; V.svg.style.willChange = '';
     V.el.classList.add('show'); zoomBusy = false;
   }, reduce?0:940);
 }
@@ -2424,10 +2435,20 @@ document.querySelectorAll('.menu [data-nav]').forEach(a=>a.addEventListener('cli
 // Legislativo opens Senado and Congresso: on hover with a mouse, on tap or Enter otherwise
 navLeg.addEventListener('click', e=>{ e.stopPropagation(); legOpen(!navGrp.classList.contains('open')); });
 navGrp.addEventListener('mouseleave', ()=> legOpen(false));
+// the consultations list is fetched as soon as someone points at its menu item, so the page opens ready
+document.querySelector('.menu [data-nav="consultas"]').addEventListener('pointerenter', ()=>{ if (typeof loadCons==='function') loadCons(); }, {once:true});
 navGrp.addEventListener('focusout', e=>{ if (!navGrp.contains(e.relatedTarget)) legOpen(false); });
 navGrp.addEventListener('keydown', e=>{ if (e.key==='Escape' && navGrp.classList.contains('open')){ e.stopPropagation(); legOpen(false); navLeg.focus(); } });
 document.addEventListener('click', e=>{ if (!navGrp.contains(e.target)) legOpen(false); });
-setInterval(()=>{ const here = (typeof cons!=='undefined' && !cons.hidden) ? 'consultas' : (typeof cal!=='undefined' && !cal.hidden) ? 'calendario' : (typeof VIEWS!=='undefined' && openView()) ? openView() : openKey; document.querySelectorAll('.menu [data-nav]:not(.brand)').forEach(a=>{ if (a.dataset.nav===here) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); }); if (here==='senado'||here==='camara') navLeg.setAttribute('aria-current','page'); else navLeg.removeAttribute('aria-current'); }, 200);
+const NAV_LINKS = [...document.querySelectorAll('.menu [data-nav]:not(.brand)')];
+let navHere;
+setInterval(()=>{
+  if (document.hidden) return;
+  const here = !cons.hidden ? 'consultas' : !cal.hidden ? 'calendario' : openView() || openKey;
+  if (here===navHere) return; navHere = here;
+  NAV_LINKS.forEach(a=>{ if (a.dataset.nav===here) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  if (here==='senado'||here==='camara') navLeg.setAttribute('aria-current','page'); else navLeg.removeAttribute('aria-current');
+}, 200);
 
 
 /* ---------- back arrow: one step up from wherever you are ---------- */
@@ -2443,7 +2464,7 @@ function goBack(){
   else if (openKey) close();
   else if (landing.hidden) exitPlan();
 }
-function syncBack(){ backBtn.hidden = !((typeof VIEWS!=='undefined' && openView()) || (typeof landing!=='undefined' && landing.hidden) || openKey || partyState || personState || (typeof proj!=='undefined' && !proj.hidden) || (typeof cal!=='undefined' && !cal.hidden) || (typeof cons!=='undefined' && !cons.hidden)); }
+function syncBack(){ if (document.hidden) return; const want = !((typeof VIEWS!=='undefined' && openView()) || (typeof landing!=='undefined' && landing.hidden) || openKey || partyState || personState || (typeof proj!=='undefined' && !proj.hidden) || (typeof cal!=='undefined' && !cal.hidden) || (typeof cons!=='undefined' && !cons.hidden)); if (backBtn.hidden!==want) backBtn.hidden = want; }
 backBtn.addEventListener('click', e=>{ e.stopPropagation(); goBack(); setTimeout(syncBack, 0); });
 setInterval(syncBack, 200);
 
@@ -2750,8 +2771,8 @@ const CONS_SOURCES = [
   {l:'e-Cidadania: todas as proposições abertas', u:'https://www12.senado.leg.br/ecidadania/pesquisamateria'},
   {l:'Senado: dados abertos de processos em tramitação', u:'https://legis.senado.leg.br/dadosabertos/'}
 ];
-let consData = null, consErr = false, consSort = 'rec', consQ = '', consN = 40, consLoading = null;
-const nf = n => Number(n||0).toLocaleString('pt-BR');
+let consData = null, consErr = false, consSort = 'rec', consQ = '', consN = 30, consLoading = null;
+const nf = n => FMT_NUM.format(Number(n||0));
 const fold = t => String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 function loadCons(){
   if (consData || consLoading) return consLoading;
@@ -2759,14 +2780,22 @@ function loadCons(){
   urls.push('https://lucca-reis.github.io/quorum/data/consultas.json');
   const tryAt = i => i>=urls.length ? Promise.reject() : fetch(urls[i], {cache:'no-store'}).then(r=> r.ok ? r.json() : Promise.reject()).catch(()=> tryAt(i+1));
   consLoading = tryAt(0).then(js=>{
-    js.itens.forEach(x=>{ x.t = x.y + x.n; x.k = fold([x.s, x.a, x.e, x.au].join(' ')); });
+    js.itens.forEach(x=>{ x.t = x.y + x.n; });
+    // the orders are computed once per download, not on every click
+    js.rec = js.itens.slice().sort((a,b)=> (a.d||'')<(b.d||'') ? 1 : (a.d||'')>(b.d||'') ? -1 : b.t-a.t);
+    js.top = js.itens.slice().sort((a,b)=> b.t-a.t);
+    js.alta = js.itens.filter(x=>x.h).sort((a,b)=> b.h-a.h);
     consData = js;
+    // the search index is built in small slices while the browser is idle
+    const idle = window.requestIdleCallback || (f=> setTimeout(()=>f({timeRemaining:()=>8}), 30));
+    let i = 0; const slice = dl=>{ const L = js.itens; while (i<L.length && dl.timeRemaining()>2){ for (const end = Math.min(L.length, i+150); i<end; i++){ const x = L[i]; x.k = fold([x.s, x.a, x.e, x.au].join(' ')); } } if (i<L.length) idle(slice); else js.indexed = true; };
+    idle(slice);
   }).catch(()=>{ consErr = true; }).finally(()=>{ consLoading = null; if (!cons.hidden) renderCons(true); });
   return consLoading;
 }
 function consCard(x){
   const t = x.t, py = t ? Math.round(x.y/t*1000)/10 : 0, pn = t ? Math.round((100-py)*10)/10 : 0;
-  const pct = v => v.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+  const pct = v => FMT_PCT.format(v)+'%';
   const title = x.a || x.e, url = CONS_ITEM(x.i);
   const people = [x.au && 'Autoria: '+esc(x.au), x.st && esc(x.st)].filter(Boolean).join(' · ');
   return `<li><article class="card cs-card"><div class="c-head">
@@ -2790,10 +2819,11 @@ function consListHTML(){
     ? `<p class="cs-empty">Não deu para carregar os números agora. Veja as consultas direto no <a href="${CONS_HOME}" target="_blank" rel="noopener">portal e-Cidadania</a>${FRAMED ? ' ou abra o <a href="https://lucca-reis.github.io/quorum/#consultas" target="_blank" rel="noopener">Quorum no navegador</a>' : ''}.</p>`
     : '<p class="cs-empty">Carregando as consultas abertas…</p>';
   const q = fold(consQ.trim()), words = q.split(/\s+/).filter(Boolean);
-  let list = consData.itens.filter(x=> words.every(w=> x.k.includes(w)));
-  if (consSort==='top') list = list.slice().sort((a,b)=> b.t-a.t);
-  else if (consSort==='alta') list = list.filter(x=>x.h).sort((a,b)=> b.h-a.h);
-  else list = list.slice().sort((a,b)=> (b.d||'').localeCompare(a.d||'') || b.t-a.t);
+  let list = consData[consSort] || consData.rec;
+  if (words.length){
+    if (!consData.indexed){ consData.itens.forEach(x=>{ if (x.k===undefined) x.k = fold([x.s, x.a, x.e, x.au].join(' ')); }); consData.indexed = true; }
+    list = list.filter(x=> words.every(w=> x.k.includes(w)));
+  }
   const shown = list.slice(0, consN);
   let body;
   if (!list.length) body = `<p class="cs-empty">${consSort==='alta' && !q ? 'Ainda não há uma leitura anterior para comparar. Volte daqui a uma hora.' : 'Nenhuma consulta aberta encontrada com essa busca.'}</p>`;
@@ -2803,7 +2833,7 @@ function consListHTML(){
   } else body = `<ol class="fd-cards" aria-label="Consultas abertas">${shown.map(consCard).join('')}</ol>`;
   const more = list.length - shown.length;
   return `<p class="cs-count">${nf(list.length)} ${list.length===1?'consulta':'consultas'}${q ? ' encontradas' : ''}</p>${body}
-    ${more>0 ? `<button type="button" class="ag-more" data-cmore="1">Mostrar mais ${Math.min(40, more)}</button>` : ''}`;
+    ${more>0 ? `<button type="button" class="ag-more" data-cmore="1">Mostrar mais ${Math.min(30, more)}</button>` : ''}`;
 }
 function renderCons(keep){
   const top = cons.scrollTop, D = consData, R = D && D.resumo || {};
@@ -2839,14 +2869,14 @@ function renderCons(keep){
   if (keep) cons.scrollTop = top;
 }
 cons.addEventListener('click', e=>{
-  const sb = e.target.closest('[data-csort]'); if (sb){ consSort = sb.dataset.csort; consN = 40; renderCons(true); return; }
-  if (e.target.closest('[data-cmore]')){ consN += 40; renderCons(true); }
+  const sb = e.target.closest('[data-csort]'); if (sb){ consSort = sb.dataset.csort; consN = 30; renderCons(true); return; }
+  if (e.target.closest('[data-cmore]')){ consN += 30; renderCons(true); }
 });
 let consT = null;
-cons.addEventListener('input', e=>{ if (e.target.id!=='cs-q') return; clearTimeout(consT); consT = setTimeout(()=>{ consQ = e.target.value; consN = 40; renderCons(true); }, 180); });
+cons.addEventListener('input', e=>{ if (e.target.id!=='cs-q') return; clearTimeout(consT); consT = setTimeout(()=>{ consQ = e.target.value; consN = 30; renderCons(true); }, 180); });
 function showCons(){
   if (!cons.hidden) return;
-  consN = 40;
+  consN = 30;
   renderCons(false); loadCons();
   cons.scrollTop = 0;
   cons.hidden = false; requestAnimationFrame(()=>cons.classList.add('show'));
