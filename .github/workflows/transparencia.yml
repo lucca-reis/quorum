@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['scripts/transparencia.py', '.github/workflows/transparencia.yml']
+    paths: ['scripts/transparencia.py', 'scripts/portal.py', '.github/workflows/transparencia.yml']
 
 permissions:
   contents: write
@@ -18,7 +18,7 @@ concurrency:
 jobs:
   transparencia:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,6 +26,12 @@ jobs:
           python-version: '3.12'
       - name: Baixar gastos da cota parlamentar
         run: python scripts/transparencia.py
+      - name: Portal da Transparência (Presidência e ministérios)
+        run: python scripts/portal.py
+        continue-on-error: true
+        timeout-minutes: 25
+        env:
+          PORTAL_TRANSPARENCIA_KEY: ${{ secrets.PORTAL_TRANSPARENCIA_KEY }}
       - name: Salvar se mudou
         run: |
           git config user.name "quorum-robo"
