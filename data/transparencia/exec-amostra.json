@@ -1,0 +1,27 @@
+{
+ "orgaos-siafi": {
+  "params": {
+   "pagina": 1,
+   "descricao": "Presidência da República"
+  },
+  "resposta": [
+   {
+    "codigo": "20000",
+    "descricao": "Presidência da República - Unidades com vínculo direto"
+   },
+   {
+    "codigo": "20101",
+    "descricao": "Presidência da República"
+   }
+  ]
+ },
+ "cartoes": {
+  "params": {
+   "mesExtratoInicio": "10/2026",
+   "mesExtratoFim": "10/2026",
+   "codigoOrgao": "20000",
+   "pagina": 1
+  },
+  "resposta": []
+ }
+}
