@@ -1079,7 +1079,7 @@ const PROJECTS = {
     author:'Anamatra', rapporteur:'Edson Fachin',
     status:'Julgada em 29/10/2026: regra validada; a isenção fica limitada ao teto do INSS',
     steps:[['2026-10-28','Na pauta do Plenário'],['2026-10-29','STF conclui o julgamento e valida a regra da Reforma da Previdência, por maioria']],
-    votes:{label:'Plenário do STF, 29/10/2026', result:'Regra validada, por maioria', note:'Venceu o entendimento de Luís Roberto Barroso (aposentado), seguido por Cármen Lúcia, Cristiano Zanin, André Mendonça, Nunes Marques, Alexandre de Moraes e Dias Toffoli. Ficaram vencidos Edson Fachin (relator), Rosa Weber (aposentada) e Luiz Fux. O STF não divulgou o placar em números.'},
+    votes:{label:'Plenário do STF, 29/10/2026', result:'Regra validada, por maioria', tally:[['Votação',7,3]], labels:['pela validade','contra'], note:'Venceu o entendimento de Luís Roberto Barroso (aposentado), seguido por Cármen Lúcia, Cristiano Zanin, André Mendonça, Nunes Marques, Alexandre de Moraes e Dias Toffoli. Ficaram vencidos Edson Fachin (relator), Rosa Weber (aposentada) e Luiz Fux. O STF não divulgou o placar em números.'},
     links:[{l:'ADI 6336 no portal do STF',u:'https://portal.stf.jus.br/processos/listarProcessos.asp?classe=ADI&numeroProcesso=6336'}],
     sources:[{l:'STF: regra sobre isenção de servidores incapacitados é validada (29/10)',u:'https://noticias.stf.jus.br/postsnoticias/stf-valida-regra-que-altera-isencao-de-contribuicao-previdenciaria-sobre-aposentadoria-de-servidores-incapacitados/'},{l:'STF: pauta de 28/10',u:'https://noticias.stf.jus.br/postsnoticias/confira-a-pauta-do-stf-desta-quarta-feira-28/'},{l:'Migalhas: pauta de 28 e 29/10',u:'https://www.migalhas.com.br/quentes/467234/stf-tem-na-pauta-poupanca-previdencia-e-caso-buser'}] },
 
@@ -1860,16 +1860,20 @@ function cardDate(iso, time){
 }
 const NI = /^n[ãa]o informad/i;
 /* mini plenary: one dot per seat, coloured by how it voted (only when the sources give the count) */
+const ALL_RE = /unanimidade|simbólica/i;
 function voteBody(P){
-  const v = P.votes; if (!v || !v.tally || !v.tally.length) return null;
+  const v = P.votes; if (!v || !((v.tally && v.tally.length) || ALL_RE.test(v.result||''))) return null;
   if (P.house==='stf' || /STF|Supremo|Plenário virtual|Plenário, /.test(v.label||'') && P.house==='stf') return 'stf';
   if (/Senado/i.test(v.label||'') || (P.house==='senado' && !/Câmara/i.test(v.label||''))) return 'senado';
   return 'camara';
 }
 function miniVote(P, big){
   const body = voteBody(P); if (!body) return '';
-  const v = P.votes, [lab, yes, no] = v.tally[v.tally.length-1], [ly, ln] = v.labels || ['sim','não'];
-  const total = body==='stf' ? 11 : body==='senado' ? 81 : 513, rest = Math.max(0, total - yes - no);
+  const v = P.votes, total = body==='stf' ? 11 : body==='senado' ? 81 : 513;
+  // no count in the sources: unanimous or symbolic votes paint every seat with the result, and the legend says so
+  const all = !(v.tally && v.tally.length);
+  const [lab, yes, no] = all ? ['Votação', total, 0] : v.tally[v.tally.length-1], [ly, ln] = v.labels || ['sim','não'];
+  const rest = Math.max(0, total - yes - no);
   const kinds = [...Array(yes).fill('y'), ...Array(no).fill('n'), ...Array(rest).fill('o')];
   let pts = [], vb, r;
   if (body==='stf'){
@@ -1888,9 +1892,9 @@ function miniVote(P, big){
   }
   const table = body==='stf' ? '<path d="M18 4 V48 H58 V4 H52 V42 H24 V4 Z" fill="none" stroke="var(--rule)" stroke-width="1"/>' : '';
   const dots = pts.map(([x,y],i)=>`<circle class="mv-${kinds[i]||'o'}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}"/>`).join('');
-  const legend = `<span><i class="mv-y"></i>${yes} ${esc(ly)}</span><span><i class="mv-n"></i>${no} ${esc(ln)}</span>${rest ? `<span><i class="mv-o"></i>${rest} ${body==='stf'?'sem voto':'não votaram'}</span>` : ''}`;
-  const label = `${v.tally.length>1 ? esc(lab)+' · ' : ''}${body==='stf'?'STF':body==='senado'?'Senado':'Câmara'}`;
-  return `<div class="mv${big?' big':''}" role="img" aria-label="${label}: ${yes} ${esc(ly)}, ${no} ${esc(ln)}${rest?', '+rest+' sem voto':''}"><svg viewBox="${vb}" aria-hidden="true">${table}${dots}</svg><p class="mv-leg"><b>${label}</b>${legend}</p></div>`;
+  const legend = all ? `<span><i class="mv-y"></i>${/simbólica/i.test(v.result) ? 'votação simbólica' : 'unanimidade'}</span><span>sem placar divulgado</span>` : `<span><i class="mv-y"></i>${yes} ${esc(ly)}</span><span><i class="mv-n"></i>${no} ${esc(ln)}</span>${rest ? `<span><i class="mv-o"></i>${rest} ${body==='stf'?'sem voto':'não votaram'}</span>` : ''}`;
+  const label = `${(v.tally||[]).length>1 ? esc(lab)+' · ' : ''}${body==='stf'?'STF':body==='senado'?'Senado':'Câmara'}`;
+  return `<div class="mv${big?' big':''}" role="img" aria-label="${label}: ${all ? esc(v.result)+', sem placar divulgado' : `${yes} ${esc(ly)}, ${no} ${esc(ln)}${rest?', '+rest+' sem voto':''}`}"><svg viewBox="${vb}" aria-hidden="true">${table}${dots}</svg><p class="mv-leg"><b>${label}</b>${legend}</p></div>`;
 }
 function cardHTML(c, key){
   const P = c.P, S = cardState(c, key), L = S.last;
