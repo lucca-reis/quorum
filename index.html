@@ -377,10 +377,10 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   transition:background-color .45s}
 .landing[hidden]{display:none!important}
 .landing{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:stretch;column-gap:clamp(24px,4vw,64px)}
-.landing > .lx{place-self:center;--u:clamp(.42px, .055vw, .66px)}
+.landing > .lx{place-self:center;--u:clamp(.45px, calc((50vw - 310px) / 330), 1px)}
 /* left half: an index of the three powers, each shape beside what is going on there */
 /* the three powers stacked, the whole block centred in the left half */
-.lx{display:grid;grid-template-columns:calc(330 * var(--u)) max-content;column-gap:clamp(18px,2.4vw,36px);width:max-content;max-width:100%;margin:0 auto;font-family:var(--display)}
+.lx{display:grid;grid-template-columns:calc(330 * var(--u)) fit-content(270px);column-gap:clamp(18px,2.4vw,36px);width:max-content;max-width:100%;margin:0 auto;font-family:var(--display)}
 .lx-row{display:contents}
 .lx-shape{display:flex;justify-content:center;align-items:center;padding:clamp(18px,3vh,30px) 0}
 .lx-shape svg{display:block;width:calc(var(--vw) * var(--u));height:auto;overflow:visible}
@@ -388,7 +388,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .landing.leaving .lx-text{opacity:0}
 .landing.instant .lx-text{transition:none}
 .lx-text:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
-.lx-n{font-size:clamp(36px,3.6vw,54px);font-weight:500;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.lx-n{font-size:clamp(24px,2vw,30px);font-weight:500;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
 .lx-l{font-size:14px;line-height:1.35}
 .lx-b{font-size:13px;line-height:1.35}
 .lx-s{font-size:13px;line-height:1.35;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
