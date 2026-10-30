@@ -383,7 +383,9 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .lx-row{display:grid;grid-template-columns:calc(330 * var(--u)) minmax(0,1fr);align-items:center;column-gap:clamp(18px,2.4vw,36px);padding:clamp(18px,3vh,30px) 0}
 .lx-shape{display:flex;justify-content:center}
 .lx-shape svg{display:block;width:calc(var(--vw) * var(--u));height:auto;overflow:visible}
-.lx-text{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0;border-radius:10px}
+.lx-text{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0;border-radius:10px;transition:opacity .3s}
+.landing.leaving .lx-text{opacity:0}
+.landing.instant .lx-text{transition:none}
 .lx-text:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
 .lx-n{font-size:clamp(36px,3.6vw,54px);font-weight:500;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
 .lx-l{font-size:14px;line-height:1.35}
@@ -393,9 +395,11 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .lx-s .lv-dot{width:7px;height:7px}
 .lx-text:hover .lx-l{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .lg{cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center;transition:transform .35s cubic-bezier(.3,.7,.3,1), opacity .4s}
-.lg rect,.lg circle{fill:transparent;stroke:var(--ink);stroke-width:1.8}
-.lg:hover,.lg:focus-visible{transform:scale(1.04)}
-.lg:focus-visible rect{stroke-dasharray:6 5}
+.lg > rect{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));stroke:none;transition:fill .2s}
+.lg > circle{fill:var(--bg);stroke:none}
+.lg:hover > rect{fill:color-mix(in srgb, var(--ink) 10%, var(--bg))}
+.lg:hover,.lg:focus-visible{transform:scale(1.03)}
+.lg:focus-visible > rect{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:5 4}
 .lg.soon{cursor:default}
 /* faint preview of each section inside its shape on the opening view */
 .lg .pv{pointer-events:none}
@@ -628,15 +632,15 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
   <div class="lx" aria-label="Os três poderes">
     <div class="lx-row" data-k="stf">
-      <div class="lx-shape"><svg viewBox="1251 315 150 112" style="--vw:150" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Supremo Tribunal Federal"><rect id="stf-mini" x="1257" y="321" width="138" height="100" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <div class="lx-shape"><svg viewBox="1251 315 150 112" style="--vw:150" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Supremo Tribunal Federal"><rect id="stf-mini" x="1257" y="321" width="138" height="100" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
       <button type="button" class="lx-text" data-open="stf"><span class="lx-n" id="lx-n-stf"></span><span class="lx-l" id="lx-l-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
     </div>
     <div class="lx-row" data-k="pres">
-      <div class="lx-shape"><svg viewBox="598 247 237 116" style="--vw:237" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir a Presidência da República"><rect id="pres-mini" x="604" y="253" width="225" height="104" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <div class="lx-shape"><svg viewBox="598 247 237 116" style="--vw:237" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir a Presidência da República"><rect id="pres-mini" x="604" y="253" width="225" height="104" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
       <button type="button" class="lx-text" data-open="pres"><span class="lx-n" id="lx-n-pres"></span><span class="lx-l" id="lx-l-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
     </div>
     <div class="lx-row" data-k="cong">
-      <div class="lx-shape"><svg viewBox="837 868 320 150" style="--vw:320" role="img" aria-label="Congresso Nacional"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Congresso Nacional"><rect x="843" y="873.9" width="308" height="138.2" id="mini-frame" vector-effect="non-scaling-stroke"/><circle cx="921.6" cy="942.8" r="32.2" vector-effect="non-scaling-stroke"/><circle cx="1063.9" cy="942.8" r="42.6" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <div class="lx-shape"><svg viewBox="837 868 320 150" style="--vw:320" role="img" aria-label="Congresso Nacional"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Congresso Nacional"><rect x="843" y="873.9" width="308" height="138.2" id="mini-frame" rx="20" vector-effect="non-scaling-stroke"/><circle cx="921.6" cy="942.8" r="32.2" vector-effect="non-scaling-stroke"/><circle cx="1063.9" cy="942.8" r="42.6" vector-effect="non-scaling-stroke"/></g></svg></div>
       <button type="button" class="lx-text" data-open="cong"><span class="lx-n" id="lx-n-cong"></span><span class="lx-l" id="lx-l-cong"></span><span class="lx-b" id="lx-b-cong"></span><span class="lx-s" id="lx-s-cong"></span></button>
     </div>
   </div>
