@@ -829,8 +829,9 @@ h1[tabindex="-1"]:focus{outline:none}
 .ve .cs-bar{height:8px;margin:0}
 .ve-n{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .ve-n b{font-weight:500;color:var(--ink)}
-.vc{display:grid;grid-template-columns:1.35fr 1fr .75fr;gap:28px;align-items:end}
-.vc-h.vc-stf svg{width:auto;max-width:100%;height:clamp(130px,13vw,172px);align-self:flex-start}
+.vc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;align-items:start}
+.vc-h > svg{max-width:300px}
+.vc-h.vc-stf svg{width:100%;max-width:300px;height:auto}
 .vc-h{display:flex;flex-direction:column;gap:10px;min-width:0}
 .vc-h svg{display:block;width:100%;height:auto}
 .vc-h h3{margin:0;font-size:14px;font-weight:500}
@@ -871,6 +872,8 @@ h1[tabindex="-1"]:focus{outline:none}
 .tr-more:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .tr-empty{margin:0;font-size:14px;color:var(--muted);line-height:1.5}
 .vt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-bottom:6px}
+.vt-pres{grid-column:1 / -1;padding-top:18px;border-top:1px solid var(--rule)}
+.vt-pres .tr-top{align-items:flex-end}
 .vt-h{display:flex;flex-direction:column;gap:12px;min-width:0}
 .vt-h h3{margin:0;font-size:14px;font-weight:500}
 .vt-h h3 span{font-weight:400;color:var(--muted)}
@@ -2583,11 +2586,13 @@ function openExec(el, i){
         <section><h3>Antecessor(a)</h3>${M.prev ? `<span class="big" style="font-size:24px;line-height:1.15">${esc(M.prev)}</span>` : '<p class="empty">Não levantado.</p>'}</section>
       </div>`;
   }
+  if (M.role==='Presidente da República' || M.role==='Vice-presidente') html += `<section class="p-tr" id="p-tr" aria-live="polite"><h3>Transparência · cartão de pagamento</h3><p class="tr-empty">Carregando…</p></section>`;
   html += `<div class="p-src">${infoBox(EXEC_SOURCES,'Fontes')}</div>`;
   layer.style.setProperty('--c', color);
   layer.style.setProperty('--on', /^#/.test(color) ? onColor(color) : 'var(--ink)');
   layer.innerHTML = `<div class="avatar" role="button" tabindex="0" aria-label="Voltar"><span class="ph">${esc(initialsOf(M.n))}</span></div><div class="p-info fade">${html}</div>`;
   personState = {src: el};
+  if (M.role==='Presidente da República' || M.role==='Vice-presidente') execTr(M.role==='Presidente da República' ? 'presidencia' : 'vice');
   const av = layer.querySelector('.avatar');
   growIn(layer, av, el);
   setTimeout(()=>av.focus({preventScroll:true}), 650);
@@ -3146,6 +3151,26 @@ function trSection(P, key){
     });
   }).catch(()=>{ const b = document.getElementById('p-tr'); if (b) b.innerHTML = `<h3>Transparência · cota parlamentar</h3><p class="tr-empty">Não deu para carregar os gastos agora. <a href="${TR_HOUSE[key].src}" target="_blank" rel="noopener" style="color:inherit">Ver no portal oficial ↗</a></p>`; });
 }
+// Executive: payment card of the Presidency (and Vice-Presidency) from the Portal da Transparência (CGU)
+let trExec = null;
+const loadExec = ()=> trExec ? Promise.resolve(trExec) : trFetch('data/transparencia/exec.json').then(js=> (trExec = js));
+function cardBlock(C, n){
+  const pct = C.total ? FMT_PCT.format(Math.floor(C.sigiloso/C.total*1000)/10) : 0;
+  const pend = C.meses.filter(m=> !m[1]).map(m=> monLab(m[0]));
+  return `<div class="tr-top"><div class="tr-tot"><b>${MONEY0.format(C.total)}</b><span>em 12 meses · ${FMT_NUM.format(C.transacoes)} transações</span></div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1 1 240px;max-width:420px">${trMonths(C.meses)}<div class="tr-mlab"><span>${monLab(C.meses[0][0])}</span><span>${monLab(C.meses[C.meses.length-1][0])}</span></div></div></div>
+    <p class="vb-note">${C.sigiloso ? `${MONEY0.format(C.sigiloso)} (${pct}%) estão marcados como sigilosos no Portal, que não mostra onde nem quando foram gastos. ` : ''}${pend.length ? `Os meses de ${pend.join(' e ')} ainda não foram publicados pelo Portal.` : ''}</p>
+    ${n && C.itens.length ? `<p class="vb-note" style="margin:4px 0 -6px">Gastos não sigilosos, do mais recente ao mais antigo</p><ul class="tr-list">${C.itens.slice(0,n).map(x=>{ const [y,m,d] = (x.d || x.m+'-').split('-'); return `<li><time datetime="${x.d||x.m}">${d ? +d+' ' : ''}${MO[+m-1]}${y!==todayISO().slice(0,4)?' '+y.slice(2):''}</time><span class="w">${esc(x.e)}<small>${esc(x.ug||'')}</small></span><span class="v">${MONEY.format(x.v)}</span></li>`; }).join('')}</ul>` : ''}`;
+}
+function execTr(which){
+  loadExec().then(E=>{
+    const box = document.getElementById('p-tr'); if (!box) return;
+    const C = E.cartoes && E.cartoes[which];
+    if (!C || !C.transacoes){ box.innerHTML = `<h3>Transparência · cartão de pagamento</h3><p class="tr-empty">O Portal da Transparência não traz gastos com cartão de pagamento para ${which==='vice'?'a Vice-Presidência':'a Presidência'} nos últimos 12 meses.</p><div class="tr-foot"><span></span><a href="https://portaldatransparencia.gov.br/cartoes" target="_blank" rel="noopener">Consultar no Portal ↗</a></div>`; return; }
+    box.innerHTML = `<h3>Transparência · cartão de pagamento da ${which==='vice'?'Vice-Presidência':'Presidência'}</h3>${cardBlock(C, 15)}
+      <div class="tr-foot"><span>Gastos do órgão (${esc(C.orgao.nome)}), não da pessoa. Valores como publicados pela CGU.</span><a href="${C.fonte}" target="_blank" rel="noopener">Fonte ↗</a></div>`;
+  }).catch(()=>{ const b = document.getElementById('p-tr'); if (b) b.innerHTML = '<h3>Transparência · cartão de pagamento</h3><p class="tr-empty">Não deu para carregar agora. <a href="https://portaldatransparencia.gov.br/cartoes" target="_blank" rel="noopener" style="color:inherit">Ver no Portal ↗</a></p>'; });
+}
 function vgTransp(){
   if (!trResumo) return '<p class="vd-none">Carregando os gastos da cota parlamentar…</p>';
   const R = trResumo;
@@ -3156,7 +3181,9 @@ function vgTransp(){
       <div style="display:flex;flex-direction:column;gap:4px">${trMonths(H.meses)}<div class="tr-mlab"><span>${monLab(H.meses[0][0])}</span><span>${monLab(H.meses[H.meses.length-1][0])}</span></div></div>
       ${trCats(H.cats, 4)}
       <div><p class="vb-note" style="margin-bottom:6px">Maiores totais no período</p><ul class="vt-who">${top.map(p=>`<li><span>${esc(p.n)}</span><span>${MONEY0.format(p.t)}</span></li>`).join('')}</ul></div></div>`; };
-  return `<div class="vt">${house('camara')}${house('senado')}</div><p class="vb-note">A cota parlamentar paga despesas do mandato, como escritório, passagens, combustível e divulgação, mediante nota fiscal. Valores como publicados pela <a href="${TR_HOUSE.camara.src}" target="_blank" rel="noopener" style="color:inherit">Câmara</a> e pelo <a href="${TR_HOUSE.senado.src}" target="_blank" rel="noopener" style="color:inherit">Senado</a>, atualizados uma vez por dia; o mês atual ainda está incompleto. O detalhe de cada gasto está no perfil de cada parlamentar.</p>`;
+  const C = trExec && trExec.cartoes && trExec.cartoes.presidencia;
+  const pres = C && C.transacoes ? `<div class="vt-h vt-pres"><h3>Presidência <span>cartão de pagamento</span></h3>${cardBlock(C, 0)}<p class="vb-note"><a href="${C.fonte}" target="_blank" rel="noopener" style="color:inherit">Portal da Transparência ↗</a></p></div>` : '';
+  return `<div class="vt">${house('camara')}${house('senado')}${pres}</div><p class="vb-note">A cota parlamentar paga despesas do mandato, como escritório, passagens, combustível e divulgação, mediante nota fiscal. Valores como publicados pela <a href="${TR_HOUSE.camara.src}" target="_blank" rel="noopener" style="color:inherit">Câmara</a> e pelo <a href="${TR_HOUSE.senado.src}" target="_blank" rel="noopener" style="color:inherit">Senado</a>, atualizados uma vez por dia; o mês atual ainda está incompleto. O detalhe de cada gasto está no perfil de cada parlamentar.</p>`;
 }
 
 /* ---------- overview (#visao-geral) ----------
@@ -3263,12 +3290,16 @@ function vgCadeiras(){
     const ps = PEOPLE_RAW[key].map(x=>x.p).sort((a,b)=> ORDER.indexOf(a)-ORDER.indexOf(b));
     const cnt = {}; ps.forEach(p=> cnt[p]=(cnt[p]||0)+1);
     const top = Object.entries(cnt).sort((a,b)=> b[1]-a[1]).slice(0,5);
-    return `<div class="vc-h"><h3>${title} <span>${ps.length} cadeiras</span></h3>${hemi(ps, rows, r)}<ul class="vc-leg">${top.map(([p,n])=>`<li><i style="background:${PARTY[p]||'var(--nc)'}"></i>${esc(PARTY_NAME[p]||p)} <b>${n}</b></li>`).join('')}</ul></div>`;
+    // the same circle and seat layout as the house's own section
+    const seats = HOUSES[key].seats.map(c=>`<circle cx="${c.getAttribute('cx')}" cy="${c.getAttribute('cy')}" r="${(+c.getAttribute('r')*.92).toFixed(4)}" fill="${PARTY[c.dataset.p]||'var(--nc)'}"/>`).join('');
+    const g = HOUSES[key].g, arc = g.querySelector('.arc'), pr = g.querySelector('.pres');
+    const draw = `<svg viewBox="-1.02 -1.02 2.04 2.04" aria-hidden="true"><circle r="1" fill="var(--bg)"/>${arc ? `<path d="${arc.getAttribute('d')}" fill="none" stroke="var(--rule)" stroke-width=".012"/>` : ''}${pr ? `<circle cx="${pr.getAttribute('cx')}" cy="0" r="${pr.getAttribute('r')}" fill="var(--ink)"/>` : ''}${seats}</svg>`;
+    return `<div class="vc-h"><h3>${title} <span>${ps.length} cadeiras</span></h3>${draw}<ul class="vc-leg">${top.map(([p,n])=>`<li><i style="background:${PARTY[p]||'var(--nc)'}"></i>${esc(PARTY_NAME[p]||p)} <b>${n}</b></li>`).join('')}</ul></div>`;
   };
   // the court: the same U table and eleven seats as the Supremo drawing, coloured by the president who appointed each minister
   const seats = [[345,450],[450,450],[240,450],[533,360],[157,360],[533,285],[157,285],[533,210],[157,210],[533,135],[157,135]];
   const by = {}; STF_MIN.forEach(m=>{ const k = m.vacant ? 'Vaga' : m.by; by[k] = (by[k]||0)+1; });
-  const stf = `<div class="vc-h vc-stf"><h3>Supremo <span>11 cadeiras</span></h3><svg viewBox="128 84 434 394" aria-hidden="true"><path d="M195 96 L195 412 L495 412 L495 96 L449 96 L449 366 L241 366 L241 96 Z" fill="none" stroke="var(--rule)" stroke-width="3" stroke-linejoin="round"/>${seats.map(([x,y],i)=>{ const m = STF_MIN[i]; return `<circle cx="${x}" cy="${y}" r="19" fill="${m && !m.vacant ? (STF_BY_COLOR[m.by]||'var(--ink)') : 'var(--nc)'}"/>`; }).join('')}</svg><ul class="vc-leg">${Object.entries(by).sort((a,b)=> b[1]-a[1]).map(([k,n])=>`<li><i style="background:${STF_BY_COLOR[k]||'var(--nc)'}"></i>${k==='Vaga'?'vaga':esc(PRES_SHORT[k]||k)} <b>${n}</b></li>`).join('')}</ul></div>`;
+  const stf = `<div class="vc-h vc-stf"><h3>Supremo <span>11 cadeiras</span></h3><svg viewBox="80 25 530 530" aria-hidden="true"><circle cx="345" cy="290" r="265" fill="var(--bg)"/><path d="M195 96 L195 412 L495 412 L495 96 L449 96 L449 366 L241 366 L241 96 Z" fill="none" stroke="var(--rule)" stroke-width="3" stroke-linejoin="round"/>${seats.map(([x,y],i)=>{ const m = STF_MIN[i]; return `<circle cx="${x}" cy="${y}" r="19" fill="${m && !m.vacant ? (STF_BY_COLOR[m.by]||'var(--ink)') : 'var(--nc)'}"/>`; }).join('')}</svg><ul class="vc-leg">${Object.entries(by).sort((a,b)=> b[1]-a[1]).map(([k,n])=>`<li><i style="background:${STF_BY_COLOR[k]||'var(--nc)'}"></i>${k==='Vaga'?'vaga':esc(PRES_SHORT[k]||k)} <b>${n}</b></li>`).join('')}</ul></div>`;
   return `<div class="vc">${house('camara', 9, 1.25, 'Câmara')}${house('senado', 4, 2.3, 'Senado')}${stf}</div><p class="vb-note">Deputados e senadores pintados por partido; ministros do Supremo pela cor do presidente que os indicou.</p>`;
 }
 function renderVg(keep){
@@ -3284,7 +3315,7 @@ function renderVg(keep){
       <section class="vb w7" aria-labelledby="vb4"><div class="vb-h"><h2 id="vb4">Últimas votações</h2></div>${vgVotes(all)}</section>
       <section class="vb w5" aria-labelledby="vb5"><div class="vb-h"><h2 id="vb5">${consData && !consData.alta.length ? 'Enquetes mais votadas' : 'Enquetes em alta'}</h2><a href="#consultas">Ver todas →</a></div><div id="vg-enq">${vgEnquetes()}</div></section>
       <section class="vb w12" aria-labelledby="vb6"><div class="vb-h"><h2 id="vb6">Quem ocupa as cadeiras</h2></div>${vgCadeiras()}</section>
-      <section class="vb w12" aria-labelledby="vb7"><div class="vb-h"><h2 id="vb7">Transparência · cota parlamentar nos últimos 12 meses</h2></div><div id="vg-tr">${vgTransp()}</div></section>
+      <section class="vb w12" aria-labelledby="vb7"><div class="vb-h"><h2 id="vb7">Transparência · últimos 12 meses</h2></div><div id="vg-tr">${vgTransp()}</div></section>
     </div>
   </div>`;
   if (keep) vg.scrollTop = top;
@@ -3297,6 +3328,7 @@ function showVg(){
   if (!vg.hidden) return;
   renderVg(false);
   if (!consData) Promise.resolve(loadCons()).then(()=>{ if (!vg.hidden) renderVg(true); });
+  if (!trExec) loadExec().then(()=>{ if (!vg.hidden) renderVg(true); }).catch(()=>{});
   if (!trResumo) loadTr().then(()=>{ if (!vg.hidden) renderVg(true); }).catch(()=>{ const b = document.getElementById('vg-tr'); if (b) b.innerHTML = '<p class="vd-none">Não deu para carregar os gastos agora.</p>'; });
   vg.scrollTop = 0;
   vg.hidden = false; requestAnimationFrame(()=>vg.classList.add('show'));
