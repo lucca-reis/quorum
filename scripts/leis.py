@@ -42,13 +42,18 @@ def coletar():
 
     # 2) proposições nessa situação com tramitação no período
     props = {}
+    # a API recusa períodos longos: busca em janelas de até 80 dias
+    janelas, ini = [], INICIO
+    while ini <= HOJE:
+        fim = min(HOJE, ini + datetime.timedelta(days=80)); janelas.append((ini, fim)); ini = fim + datetime.timedelta(days=1)
     for cod in cods:
-        for pag in range(1, 40):
-            js = get(CAM + 'proposicoes?' + urllib.parse.urlencode({'codSituacao': cod, 'dataInicio': INICIO.isoformat(), 'dataFim': HOJE.isoformat(),
-                                                                    'itens': 100, 'pagina': pag, 'ordem': 'DESC', 'ordenarPor': 'id'}))
-            dados = (js or {}).get('dados', [])
-            for p in dados: props[p['id']] = p
-            if len(dados) < 100: break
+        for ini, fim in janelas:
+            for pag in range(1, 30):
+                js = get(CAM + 'proposicoes?' + urllib.parse.urlencode({'codSituacao': cod, 'dataInicio': ini.isoformat(), 'dataFim': fim.isoformat(),
+                                                                        'itens': 100, 'pagina': pag}))
+                dados = (js or {}).get('dados', [])
+                for p in dados: props[p['id']] = p
+                if len(dados) < 100: break
 
     # partidos dos senadores em exercício (para autores do Senado)
     sen = {}
