@@ -88,6 +88,7 @@ body{box-sizing:border-box;display:grid;place-items:center;
   .panel{position:absolute;top:3%;bottom:3%}
   .stage.open-senado .panel{left:47%;right:3%}
   .stage.open-camara .panel{left:3%;right:53%}
+  .stage.open-camara.house-left .panel{left:51%;right:3%}
 }
 @media (max-width:999px){ .panel{margin-top:20px} .tl{overflow:visible} }
 
@@ -438,7 +439,6 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .d.j::before{content:"";position:absolute;top:4%;right:4%;width:5px;height:5px;border-radius:1px;background:currentColor}
 .d.j:not(.c):not(.s){border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--ink)}
 .legend .d.j::before{display:none}
-@media (min-width:901px){ #stfv .stf-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)} #stfv .stf-panel{order:1} #stfv #stf-svg{order:2} }
 #pres-svg{display:block;width:100%;height:auto;max-height:calc(100vh - var(--menu-h) - 130px);overflow:visible}
 #pres-frame{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));stroke:none}
 .jz.ex{fill:var(--c)}
@@ -1625,10 +1625,14 @@ function tween(H, to, dur){
   anim = requestAnimationFrame(step);
 }
 
-function open(key){
+// left: open the house on the left with the panel on the right. Used when a house is reached from the
+// menu, the feed or anywhere outside the plenary drawing; clicking the Câmara inside the drawing keeps it on the right.
+function open(key, left){
   if (openKey) return;
   openKey = key; const H = HOUSES[key];
+  const toLeft = key==='camara' && !!left && matchMedia('(min-width:1000px)').matches;   // on phones the panel sits below anyway
   stage.classList.add('is-open','open-'+key);
+  stage.classList.toggle('house-left', toLeft);
   renderPanel(key); panel.hidden = false;
   requestAnimationFrame(()=>{
     panel.classList.add('show');
@@ -1637,7 +1641,7 @@ function open(key){
   });
   H.g.classList.add('is-active');
   Object.values(HOUSES).forEach(o=>o.g.setAttribute('tabindex','-1'));
-  tween(H, H.open, 750);
+  tween(H, toLeft ? {...H.open, x:340} : H.open, 750);
   const n = H.seats.length;
   H.seats.forEach((s,i)=> s.style.transitionDelay = reduce ? '0ms' : (i/n*520).toFixed(0)+'ms, 0ms');
   clearTimeout(colorTimer);
@@ -1654,7 +1658,7 @@ function close(){
   clearTimeout(colorTimer);
   H.seats.forEach(s=> s.style.transitionDelay='');
   H.g.classList.remove('colored','is-active');
-  stage.classList.remove('is-open','open-senado','open-camara');
+  stage.classList.remove('is-open','open-senado','open-camara','house-left');
   panel.classList.remove('show'); panel.hidden = true;
   Object.values(HOUSES).forEach(o=>o.g.setAttribute('tabindex','0'));
   tween(H, H.home, 650);
@@ -1998,7 +2002,7 @@ function placeToday(){ /* the feed sits in the landing grid, beside the drawing 
 renderToday(); refreshLive();
 todayEl.addEventListener('click', e=>{
   const b = e.target.closest('.lv-tag[data-go]');
-  if (b){ e.stopPropagation(); const k = b.dataset.go; if (k==='camara'||k==='senado') enterPlan(()=>open(k)); else enterView(VIEWS[k==='exec'?'pres':'stf']); return; }
+  if (b){ e.stopPropagation(); const k = b.dataset.go; if (k==='camara'||k==='senado') enterPlan(()=>open(k, true)); else enterView(VIEWS[k==='exec'?'pres':'stf']); return; }
   cardClick(e);
 });
 
@@ -2319,9 +2323,9 @@ function navTo(key){
   }
   if (key==='home'){ const cur = openView(); if (cur) exitView(VIEWS[cur]); else exitPlan(); return; }
   if (openView()) hideViewNow(VIEWS[openView()]);
-  if (!landing.hidden){ enterPlan(()=>open(key)); return; }
+  if (!landing.hidden){ enterPlan(()=>open(key, true)); return; }
   if (openKey===key) return;
-  if (openKey){ close(); setTimeout(()=>open(key), reduce?0:680); } else open(key);
+  if (openKey){ close(); setTimeout(()=>open(key, true), reduce?0:680); } else open(key, true);
 }
 document.querySelectorAll('.menu [data-nav]').forEach(a=>a.addEventListener('click', e=>{
   e.preventDefault(); e.stopPropagation(); navTo(a.dataset.nav);
