@@ -271,6 +271,8 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .menu a{color:var(--ink);text-decoration:none;white-space:nowrap}
 .brand-wrap{justify-self:start;display:flex;align-items:baseline;gap:10px;min-width:0}
 .menu .brand{font-size:18px;font-weight:400;letter-spacing:-.01em}
+/* the o of Quorum is a solid dot, the size of a lowercase letter */
+.brand-o{display:inline-block;width:.54em;height:.54em;margin:0 .045em;border-radius:50%;background:currentColor;vertical-align:baseline}
 .today-date{font-size:14px;color:var(--muted);white-space:nowrap}
 .menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:50px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;max-width:100%}
 .nav-grp{flex:1 1 0;position:relative;display:flex}
@@ -736,7 +738,7 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
 <button class="back-arrow" id="back-arrow" type="button" aria-label="Voltar" title="Voltar" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 <header class="menu">
-  <div class="brand-wrap"><a class="brand" href="#" data-nav="home">Quorum</a><span class="today-date" id="today-date"></span></div>
+  <div class="brand-wrap"><a class="brand" href="#" data-nav="home" aria-label="Quorum"><span aria-hidden="true">Qu<i class="brand-o"></i>rum</span></a><span class="today-date" id="today-date"></span></div>
   <nav aria-label="Poderes">
     <a href="#" data-nav="pres">Executivo</a>
     <div class="nav-grp">
