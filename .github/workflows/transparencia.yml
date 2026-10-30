@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['scripts/transparencia.py', 'scripts/portal.py', 'scripts/votos.py', '.github/workflows/transparencia.yml']
+    paths: ['scripts/transparencia.py', 'scripts/portal.py', 'scripts/votos.py', 'scripts/leis.py', '.github/workflows/transparencia.yml']
 
 permissions:
   contents: write
@@ -30,6 +30,10 @@ jobs:
         run: python scripts/votos.py
         continue-on-error: true
         timeout-minutes: 15
+      - name: Normas aprovadas no último ano, por partido do autor
+        run: python scripts/leis.py
+        continue-on-error: true
+        timeout-minutes: 20
       - name: Portal da Transparência (Presidência e ministérios)
         run: python scripts/portal.py
         continue-on-error: true
@@ -40,7 +44,7 @@ jobs:
         run: |
           git config user.name "quorum-robo"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A data/transparencia data/votos.json data/votos-amostra.json
+          git add -A data/transparencia data/votos.json data/votos-amostra.json data/leis.json
           if git diff --cached --quiet; then echo "Nada mudou."; exit 0; fi
           git commit -m "Transparência atualizada $(TZ=America/Sao_Paulo date '+%d/%m')"
           git pull --rebase origin main
