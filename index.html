@@ -272,8 +272,23 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .brand-wrap{justify-self:start;display:flex;align-items:baseline;gap:10px;min-width:0}
 .menu .brand{font-size:18px;font-weight:400;letter-spacing:-.01em}
 .today-date{font-size:14px;color:var(--muted);white-space:nowrap}
-.menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:50px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;overflow-x:auto;scrollbar-width:none;max-width:100%}
-.menu nav a{flex:1 1 0;text-align:center;padding:7px 10px;border-radius:999px;color:color-mix(in srgb, var(--ink) 72%, var(--bg));transition:background-color .2s, color .2s, box-shadow .2s}
+.menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:50px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;max-width:100%}
+.nav-grp{flex:1 1 0;position:relative;display:flex}
+.nav-leg{all:unset;box-sizing:border-box;flex:1;cursor:pointer;text-align:center;padding:7px 10px;border-radius:999px;color:color-mix(in srgb, var(--ink) 72%, var(--bg));display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;transition:background-color .2s, color .2s}
+.nav-leg:hover,.nav-grp:hover .nav-leg,.nav-grp.open .nav-leg{color:var(--ink);background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
+.nav-leg[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));color:var(--ink)}
+.nav-leg:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.nav-car{width:4px;height:4px;border-right:1.25px solid currentColor;border-bottom:1.25px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s}
+.nav-grp.open .nav-car{transform:translateY(1px) rotate(-135deg)}
+.nav-sub{position:absolute;top:100%;left:50%;min-width:100%;padding-top:6px;transform:translate(-50%,-4px);display:flex;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transition:opacity .18s, transform .18s, visibility 0s .18s;z-index:2}
+.nav-sub::before{content:"";position:absolute;inset:6px 0 0;border-radius:18px;background:var(--bg);box-shadow:0 0 0 1px var(--rule), 0 10px 30px -12px rgba(0,0,0,.25);z-index:-1}
+.nav-sub a{display:block;margin:0 4px;padding:9px 16px;border-radius:14px;text-align:left;color:color-mix(in srgb, var(--ink) 80%, var(--bg))}
+.nav-sub a:first-child{margin-top:4px}.nav-sub a:last-child{margin-bottom:4px}
+.nav-sub a:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg));color:var(--ink)}
+.nav-sub a[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));color:var(--ink)}
+.nav-grp.open .nav-sub{opacity:1;visibility:visible;transform:translate(-50%,0);transition:opacity .18s, transform .18s}
+@media (hover:hover){ .nav-grp:hover .nav-sub{opacity:1;visibility:visible;transform:translate(-50%,0);transition:opacity .18s, transform .18s} .nav-grp:hover .nav-car{transform:translateY(1px) rotate(-135deg)} }
+.menu nav > a{flex:1 1 0;text-align:center;padding:7px 10px;border-radius:999px;color:color-mix(in srgb, var(--ink) 72%, var(--bg));transition:background-color .2s, color .2s, box-shadow .2s}
 .menu nav a:hover{color:var(--ink)}
 .menu nav a:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
 .menu nav a[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));color:var(--ink)}
@@ -283,7 +298,7 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .menu a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .menu .brand:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
 @media (max-width:1180px){ .menu nav .long{display:none} }
-@media (max-width:1000px){ .menu nav a{padding:7px 4px;font-size:13px} .menu nav{margin-right:46px} }
+@media (max-width:1000px){ .menu nav > a,.nav-leg{padding:7px 4px;font-size:13px} .menu nav{margin-right:46px} }
 @media (max-width:760px){
   :root{--menu-h:96px}
   .menu{grid-template-columns:1fr auto;grid-template-rows:auto auto;row-gap:8px;column-gap:12px;align-content:center}
@@ -291,7 +306,7 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
   .today-date{font-size:13px}
   .menu .brand{font-size:17px}
   .menu nav{grid-column:1 / -1;grid-row:2;justify-self:stretch}
-  .menu nav a{padding:7px 4px;flex:1 1 0;text-align:center;font-size:13.5px}
+  .menu nav > a,.nav-leg{padding:7px 4px;flex:1 1 0;text-align:center;font-size:13.5px}
   .menu nav .long{display:none}
   .menu .cal-link{grid-column:2;grid-row:1}
 }
@@ -499,6 +514,14 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .c-full{align-self:flex-start;margin-top:2px;font-size:13.5px;color:var(--ink);text-decoration:none;padding:6px 12px;border-radius:999px;background:var(--bg)}
 .c-full:hover{text-decoration:underline;text-underline-offset:3px}
 .c-full:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.xm{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.xm-sig .sg{display:block;width:96px;height:auto;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.xm-sig .sg-l{stroke:var(--muted);stroke-width:.8}
+.xm-cap{font-size:11px;line-height:1.3;color:var(--muted);text-align:right;white-space:nowrap}
+.xm-stamp{display:inline-block;padding:4px 8px 3px;border:1.6px solid var(--ink);border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;line-height:1.1;transform:rotate(-5deg);box-shadow:inset 0 0 0 2px var(--card), inset 0 0 0 3px color-mix(in srgb, var(--ink) 55%, transparent)}
+.xm-stamp.no{color:#E24B4A;border-color:#E24B4A;box-shadow:inset 0 0 0 2px var(--card), inset 0 0 0 3px color-mix(in srgb, #E24B4A 55%, transparent)}
+.xm-stamp.wait{border-style:dashed;border-color:var(--muted);color:var(--muted);box-shadow:none;transform:none;font-weight:600}
+@media (max-width:560px){ .xm-sig .sg{width:72px} }
 .mv{display:flex;align-items:center;gap:10px;max-width:100%}
 .mv svg{display:block;width:52px;height:auto;flex:none}
 .mv.big{gap:14px;padding:10px 14px;border-radius:14px;background:var(--bg);align-self:flex-start}
@@ -646,6 +669,41 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
   .cv-day{grid-template-columns:3.6em minmax(0,1fr);gap:10px}
 }
 
+/* public consultations page (#consultas) */
+.cw.cs{max-width:880px}
+.cs-lede{margin:0;font-size:clamp(16px,1.6vw,19px);line-height:1.45;max-width:60ch;text-wrap:pretty}
+.cs-stats{margin:8px 0 0;font-size:13.5px;color:var(--muted)}
+.cs-stats b{font-weight:500;color:var(--ink)}
+.cs-intro{display:flex;flex-direction:column;gap:4px}
+.cs-search{all:unset;box-sizing:border-box;flex:1 1 220px;min-width:0;padding:8px 14px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--rule);font-size:14px;color:var(--ink)}
+.cs-search::placeholder{color:var(--muted)}
+.cs-search:focus-visible{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.cs-count{margin:0;font-size:13px;color:var(--muted)}
+.cs-card .c-head{cursor:default;gap:8px;padding-bottom:16px}
+.cs-card .c-title{color:var(--ink);text-decoration:none}
+.cs-card a.c-title:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.cs-code{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.cs-bar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:color-mix(in srgb, var(--ink) 12%, var(--bg));margin-top:4px}
+.cs-bar .y{background:var(--ink)}
+.cs-bar .n{background:#E24B4A;flex:1}
+.cs-bar.empty .n{background:transparent}
+.cs-nums{display:flex;justify-content:space-between;gap:12px;font-size:13px;line-height:1.3;font-variant-numeric:tabular-nums}
+.cs-nums b{font-weight:600}
+.cs-nums .n{text-align:right}
+.cs-nums .n b{color:#E24B4A}
+.cs-nums small{font-size:12px;color:var(--muted)}
+.cs-foot{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap;margin-top:4px}
+.cs-hot{font-size:12px;color:var(--muted)}
+.cs-vote{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:13.5px;font-weight:500;text-decoration:none;white-space:nowrap}
+.cs-vote:hover{opacity:.86}
+.cs-vote:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.cs-empty{margin:0;padding:16px 18px;border-radius:18px;box-shadow:inset 0 0 0 1px var(--rule);color:var(--muted);font-size:14px;line-height:1.45}
+.cs-empty a{color:var(--ink)}
+.cs .ag-more{margin-left:0;align-self:flex-start}
+.cs-list{display:flex;flex-direction:column;gap:18px}
+.cs-card .c-pill{white-space:nowrap}
+.cs .feed{padding:0}
+@media (max-width:560px){ .cs-nums{font-size:12.5px} .cs-vote{padding:7px 13px} }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -656,10 +714,13 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 <header class="menu">
   <div class="brand-wrap"><a class="brand" href="#" data-nav="home">Quorum</a><span class="today-date" id="today-date"></span></div>
   <nav aria-label="Poderes">
-    <a href="#" data-nav="camara">Congresso</a>
-    <a href="#" data-nav="senado">Senado</a>
-    <a href="#" data-nav="stf">Supremo<span class="long"> Tribunal</span></a>
-    <a href="#" data-nav="pres">Presidência</a>
+    <a href="#" data-nav="pres">Executivo</a>
+    <div class="nav-grp">
+      <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub">Legislativo<span class="nav-car" aria-hidden="true"></span></button>
+      <div class="nav-sub" id="nav-sub"><a href="#" data-nav="senado">Senado</a><a href="#" data-nav="camara">Congresso</a></div>
+    </div>
+    <a href="#" data-nav="stf">Judiciário</a>
+    <a href="#consultas" data-nav="consultas">Consultas<span class="long"> públicas</span></a>
   </nav>
   <a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a>
 </header>
@@ -711,6 +772,7 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 <section class="ov person" id="person" hidden aria-live="polite"></section>
 <article class="proj" id="proj" hidden aria-live="polite"></article>
 <article class="proj cal" id="cal" hidden aria-labelledby="cal-title"></article>
+<article class="proj cal cons" id="cons" hidden aria-labelledby="cons-title"></article>
 
 <script>
 const NS = 'http://www.w3.org/2000/svg';
@@ -1946,14 +2008,14 @@ function cardHTML(c, key){
   const stf = P.house==='stf', ph = phaseOf(P.status), since = L ? agoTx(L.date) : '';
   const people = [ok(P.rapporteur) && `${stf ? 'Relator(a)' : 'Relatoria'}: ${esc(P.rapporteur)}`, ok(P.author) && `${stf ? 'Autor' : 'Autoria'}: ${esc(P.author)}`].filter(Boolean).join(' · ');
   const facts = [S.created && `Criado em ${cardDate(S.created)} (${agoTx(S.created)})`, S.next && `Próximo passo: ${S.next.week ? 'semana de '+cardDate(S.next.date) : cardDate(S.next.date, S.next.time)}, ${POWER_NAME[S.next.key]}`].filter(Boolean).join(' · ');
-  const v = P.votes, mv = miniVote(P), who = whoVoted(v);
+  const v = P.votes, ex = S.here==='exec', mv = ex ? execMark(P) : miniVote(P), who = ex ? '' : whoVoted(v);
   const id = 'cx-'+c.slug+(key?'-'+key:'');
   return `<li><article class="card${live?' is-live':''}">
     <button type="button" class="c-head" aria-expanded="false" aria-controls="${id}">
       <span class="c-top"><span class="c-pill"><span class="c-dot" aria-hidden="true"></span>${POWER_NAME[S.here]}${live ? ' · ao vivo' : ph ? ' · '+ph : ''}</span></span>
       <span class="c-main"><span class="c-text"><span class="c-title">${esc(P.title)}</span>
       ${ok(P.status) ? `<span class="c-phase">${esc(P.status)}</span>` : ''}
-      ${v && !mv ? `<span class="c-vres">${esc(v.result)}</span>` : ''}</span>
+      ${v && !mv && !ex ? `<span class="c-vres">${esc(v.result)}</span>` : ''}</span>
       ${mv ? `<span class="c-vline">${mv}</span>` : ''}</span>
       <span class="c-more" aria-hidden="true"></span>
     </button>
@@ -1961,9 +2023,36 @@ function cardHTML(c, key){
       ${ok(P.summary) ? `<p class="c-desc">${esc(P.summary)}</p>` : ''}
       ${people ? `<p class="c-people">${people}</p>` : ''}
       ${facts ? `<p class="c-facts">${facts}</p>` : ''}
-      ${v ? `<div class="c-votes"><p class="c-vlab">Votação${v.label ? ' · '+esc(v.label) : ''}</p><p class="c-vres">${esc(v.result)}</p>${who ? `<p class="c-who">${esc(who)}</p>` : ''}</div>` : ''}
+      ${v ? `<div class="c-votes"><p class="c-vlab">${ex ? 'Votação no Congresso' : 'Votação'}${v.label ? ' · '+esc(v.label) : ''}</p><p class="c-vres">${esc(v.result)}</p>${who ? `<p class="c-who">${esc(who)}</p>` : ''}</div>` : ''}
       <a class="c-full" href="#p-${c.slug}" data-ref="${c.slug}">Ver página completa <span aria-hidden="true">→</span></a>
     </div></article></li>`;
+}
+// at the Presidência a card shows the act of the president instead of a floor count:
+// his mark when he signed it (sanction, MP, bill sent), a stamp while the text waits for sanction.
+// The mark is a drawn flourish, not a copy of the real signature.
+const PRESIDENTE = {nome:'Luiz Inácio Lula da Silva', curto:'Lula', desde:'2023-01-01'};
+const SIGN_SVG = '<svg class="sg" viewBox="0 0 140 46" aria-hidden="true"><path d="M8 32c4-10 9-22 15-22 4 0-2 20-6 24-2 2-3-1 0-4 6-6 13-8 15-3 1 4-3 8-1 8 4 0 8-12 12-12 2 0 0 9 3 9 5 0 9-14 14-14 2 0-1 10 3 10s8-9 11-9c2 0 1 6 4 6 4 0 7-5 10-5"/><path d="M95 26c6-1 16-3 26-8 5-2 9-6 7-8-3-2-10 6-14 14-3 6-5 10-1 10 6 0 12-5 18-6"/><path class="sg-l" d="M10 41h120"/></svg>';
+function execMark(P){
+  const all = [P.status||''].concat(P.steps.map(x=>x[1]));
+  const dated = re => { const st = P.steps.slice().reverse().find(x=> re.test(x[1])); return st ? st[0] : null; };
+  const dd = iso => iso ? iso.slice(8,10)+'/'+iso.slice(5,7) : '';
+  const signed = (what, iso) => iso && iso>=PRESIDENTE.desde ? `<span class="xm"><span class="xm-sig" role="img" aria-label="Assinado por ${PRESIDENTE.nome}">${SIGN_SVG}</span><span class="xm-cap">${PRESIDENTE.curto} · ${what} ${dd(iso)}</span></span>` : '';
+  if (all.some(t=>/vetad|veta\b|veto total/i.test(t) && !/sanção ou veto/i.test(t))){
+    const iso = dated(/vet/i); return `<span class="xm"><span class="xm-stamp no">Vetado</span>${iso ? `<span class="xm-cap">${dd(iso)}</span>` : ''}</span>`;
+  }
+  if (all.some(t=>/sancion/i.test(t))){
+    const iso = dated(/sancion/i);
+    return signed('sancionou em', iso) || `<span class="xm"><span class="xm-stamp">Sancionado</span>${iso ? `<span class="xm-cap">${dd(iso)}</span>` : ''}</span>`;
+  }
+  if (all.some(t=>/à sanção/i.test(t))){
+    const lim = /até (\d{2}\/\d{2})/.exec(P.status||'');
+    return `<span class="xm"><span class="xm-stamp wait">Aguarda sanção</span>${lim ? `<span class="xm-cap">prazo até ${lim[1]}</span>` : ''}</span>`;
+  }
+  if (P.house==='exec'){
+    const iso = dated(/MP publicada|Governo (envia|edita)|Decreto publicado|publicad/i);
+    return signed(/^MP|Medida Provis/i.test((P.code||'')+' '+(P.type||'')) ? 'assinou em' : 'enviou em', iso);
+  }
+  return '';
 }
 // a card opens in place; the link inside goes to the full page
 function cardClick(e){
@@ -2313,7 +2402,7 @@ presv.addEventListener('keydown', e=>{
 
 function navTo(key){
   resetLayers();
-  if (key==='calendario'){ location.hash = '#calendario'; return; }
+  if (key==='calendario' || key==='consultas'){ location.hash = '#'+key; return; }
   if (VIEWS[key]){
     const cur = openView();
     if (cur===key) return;
@@ -2327,10 +2416,18 @@ function navTo(key){
   if (openKey===key) return;
   if (openKey){ close(); setTimeout(()=>open(key, true), reduce?0:680); } else open(key, true);
 }
+const navGrp = document.querySelector('.nav-grp'), navLeg = navGrp.querySelector('.nav-leg');
+function legOpen(on){ navGrp.classList.toggle('open', on); navLeg.setAttribute('aria-expanded', String(on)); }
 document.querySelectorAll('.menu [data-nav]').forEach(a=>a.addEventListener('click', e=>{
-  e.preventDefault(); e.stopPropagation(); navTo(a.dataset.nav);
+  e.preventDefault(); e.stopPropagation(); legOpen(false); a.blur(); navTo(a.dataset.nav);
 }));
-setInterval(()=>{ const here = (typeof cal!=='undefined' && !cal.hidden) ? 'calendario' : (typeof VIEWS!=='undefined' && openView()) ? openView() : openKey; document.querySelectorAll('.menu [data-nav]:not(.brand)').forEach(a=>{ if (a.dataset.nav===here) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); }); }, 200);
+// Legislativo opens Senado and Congresso: on hover with a mouse, on tap or Enter otherwise
+navLeg.addEventListener('click', e=>{ e.stopPropagation(); legOpen(!navGrp.classList.contains('open')); });
+navGrp.addEventListener('mouseleave', ()=> legOpen(false));
+navGrp.addEventListener('focusout', e=>{ if (!navGrp.contains(e.relatedTarget)) legOpen(false); });
+navGrp.addEventListener('keydown', e=>{ if (e.key==='Escape' && navGrp.classList.contains('open')){ e.stopPropagation(); legOpen(false); navLeg.focus(); } });
+document.addEventListener('click', e=>{ if (!navGrp.contains(e.target)) legOpen(false); });
+setInterval(()=>{ const here = (typeof cons!=='undefined' && !cons.hidden) ? 'consultas' : (typeof cal!=='undefined' && !cal.hidden) ? 'calendario' : (typeof VIEWS!=='undefined' && openView()) ? openView() : openKey; document.querySelectorAll('.menu [data-nav]:not(.brand)').forEach(a=>{ if (a.dataset.nav===here) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); }); if (here==='senado'||here==='camara') navLeg.setAttribute('aria-current','page'); else navLeg.removeAttribute('aria-current'); }, 200);
 
 
 /* ---------- back arrow: one step up from wherever you are ---------- */
@@ -2339,13 +2436,14 @@ function goBack(){
   const o = document.querySelector('details.info[open]'); if (o){ o.open = false; return; }
   if (!proj.hidden) leaveProject();
   else if (!cal.hidden) leaveCal();
+  else if (!cons.hidden) leaveCal();
   else if (personState) closePerson();
   else if (partyState) closeParty();
   else if (openView()) exitView(VIEWS[openView()]);
   else if (openKey) close();
   else if (landing.hidden) exitPlan();
 }
-function syncBack(){ backBtn.hidden = !((typeof VIEWS!=='undefined' && openView()) || (typeof landing!=='undefined' && landing.hidden) || openKey || partyState || personState || (typeof proj!=='undefined' && !proj.hidden) || (typeof cal!=='undefined' && !cal.hidden)); }
+function syncBack(){ backBtn.hidden = !((typeof VIEWS!=='undefined' && openView()) || (typeof landing!=='undefined' && landing.hidden) || openKey || partyState || personState || (typeof proj!=='undefined' && !proj.hidden) || (typeof cal!=='undefined' && !cal.hidden) || (typeof cons!=='undefined' && !cons.hidden)); }
 backBtn.addEventListener('click', e=>{ e.stopPropagation(); goBack(); setTimeout(syncBack, 0); });
 setInterval(syncBack, 200);
 
@@ -2639,10 +2737,136 @@ function hideCal(){
 }
 function leaveCal(){ location.hash = ''; }
 
+/* ---------- public consultations (#consultas) ----------
+   data/consultas.json is written every hour by the robot (scripts/consultas.py) from the Senado's
+   e-Cidadania portal: every proposal in the Senado takes SIM/NÃO opinions there. Voting happens only
+   on the official site; the button on each card sends people there. */
+const cons = document.getElementById('cons');
+const CONS_HOME = 'https://www12.senado.leg.br/ecidadania/principalmateria';
+const CONS_ITEM = id => 'https://www12.senado.leg.br/ecidadania/visualizacaomateria?id='+id;
+const CONS_SOURCES = [
+  {l:'Senado Federal: e-Cidadania, Consulta Pública', u:CONS_HOME},
+  {l:'e-Cidadania: como funciona a consulta pública', u:'https://www12.senado.leg.br/ecidadania/comofuncionaconsultapublica'},
+  {l:'e-Cidadania: todas as proposições abertas', u:'https://www12.senado.leg.br/ecidadania/pesquisamateria'},
+  {l:'Senado: dados abertos de processos em tramitação', u:'https://legis.senado.leg.br/dadosabertos/'}
+];
+let consData = null, consErr = false, consSort = 'rec', consQ = '', consN = 40, consLoading = null;
+const nf = n => Number(n||0).toLocaleString('pt-BR');
+const fold = t => String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+function loadCons(){
+  if (consData || consLoading) return consLoading;
+  const urls = /^https?:$/.test(location.protocol) && !FRAMED ? ['data/consultas.json'] : [];
+  urls.push('https://lucca-reis.github.io/quorum/data/consultas.json');
+  const tryAt = i => i>=urls.length ? Promise.reject() : fetch(urls[i], {cache:'no-store'}).then(r=> r.ok ? r.json() : Promise.reject()).catch(()=> tryAt(i+1));
+  consLoading = tryAt(0).then(js=>{
+    js.itens.forEach(x=>{ x.t = x.y + x.n; x.k = fold([x.s, x.a, x.e, x.au].join(' ')); });
+    consData = js;
+  }).catch(()=>{ consErr = true; }).finally(()=>{ consLoading = null; if (!cons.hidden) renderCons(true); });
+  return consLoading;
+}
+function consCard(x){
+  const t = x.t, py = t ? Math.round(x.y/t*1000)/10 : 0, pn = t ? Math.round((100-py)*10)/10 : 0;
+  const pct = v => v.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+  const title = x.a || x.e, url = CONS_ITEM(x.i);
+  const people = [x.au && 'Autoria: '+esc(x.au), x.st && esc(x.st)].filter(Boolean).join(' · ');
+  return `<li><article class="card cs-card"><div class="c-head">
+    <span class="c-top"><span class="c-pill"><span class="c-dot" aria-hidden="true"></span>Senado · consulta aberta</span><span class="cs-code">${esc(x.s)}</span></span>
+    <a class="c-title" href="${url}" target="_blank" rel="noopener">${esc(title)}</a>
+    ${x.a && x.e ? `<p class="c-desc">${esc(x.e)}</p>` : ''}
+    ${people ? `<p class="c-people">${people}</p>` : ''}
+    <div class="cs-bar${t?'':' empty'}" role="img" aria-label="${t ? `SIM ${pct(py)}, NÃO ${pct(pn)}` : 'Ainda sem votos'}"><span class="y" style="width:${py}%"></span><span class="n"></span></div>
+    <p class="cs-nums">${t ? `<span><b>SIM</b> ${nf(x.y)} <small>${pct(py)}</small></span><span class="n"><small>${pct(pn)}</small> ${nf(x.n)} <b>NÃO</b></span>` : '<span><small>Ainda sem votos</small></span>'}</p>
+    <div class="cs-foot"><span class="cs-hot">${x.d ? 'Apresentado '+agoTx(x.d) : ''}${x.h ? `${x.d?' · ':''}+${nf(x.h)} votos na última hora` : ''}</span>
+      <a class="cs-vote" href="${url}" target="_blank" rel="noopener" aria-label="Dar seu voto sobre ${esc(x.s)} no site do Senado">Dar seu voto <span aria-hidden="true">↗</span></a></div>
+  </div></article></li>`;
+}
+function consDate(iso){
+  const t = todayISO(); if (!iso) return 'sem data de apresentação';
+  const [y,m,dd] = iso.split('-').map(Number), wd = ['dom','seg','ter','qua','qui','sex','sáb'][new Date(y,m-1,dd).getDay()];
+  return iso===t ? 'hoje' : `${wd}, ${dd} ${MO[m-1]}${y!==+t.slice(0,4)?' '+y:''}`;
+}
+function consListHTML(){
+  if (!consData) return consErr
+    ? `<p class="cs-empty">Não deu para carregar os números agora. Veja as consultas direto no <a href="${CONS_HOME}" target="_blank" rel="noopener">portal e-Cidadania</a>${FRAMED ? ' ou abra o <a href="https://lucca-reis.github.io/quorum/#consultas" target="_blank" rel="noopener">Quorum no navegador</a>' : ''}.</p>`
+    : '<p class="cs-empty">Carregando as consultas abertas…</p>';
+  const q = fold(consQ.trim()), words = q.split(/\s+/).filter(Boolean);
+  let list = consData.itens.filter(x=> words.every(w=> x.k.includes(w)));
+  if (consSort==='top') list = list.slice().sort((a,b)=> b.t-a.t);
+  else if (consSort==='alta') list = list.filter(x=>x.h).sort((a,b)=> b.h-a.h);
+  else list = list.slice().sort((a,b)=> (b.d||'').localeCompare(a.d||'') || b.t-a.t);
+  const shown = list.slice(0, consN);
+  let body;
+  if (!list.length) body = `<p class="cs-empty">${consSort==='alta' && !q ? 'Ainda não há uma leitura anterior para comparar. Volte daqui a uma hora.' : 'Nenhuma consulta aberta encontrada com essa busca.'}</p>`;
+  else if (consSort==='rec'){
+    const groups = []; shown.forEach(x=>{ const g = groups[groups.length-1]; if (g && g.d===(x.d||'')) g.items.push(x); else groups.push({d:x.d||'', items:[x]}); });
+    body = `<ol class="feed" aria-label="Consultas abertas, da proposição mais recente à mais antiga">${groups.map(g=>`<li class="fd${g.d===todayISO()?' is-today':''}"><p class="fd-date">${consDate(g.d)}</p><ol class="fd-cards">${g.items.map(consCard).join('')}</ol></li>`).join('')}</ol>`;
+  } else body = `<ol class="fd-cards" aria-label="Consultas abertas">${shown.map(consCard).join('')}</ol>`;
+  const more = list.length - shown.length;
+  return `<p class="cs-count">${nf(list.length)} ${list.length===1?'consulta':'consultas'}${q ? ' encontradas' : ''}</p>${body}
+    ${more>0 ? `<button type="button" class="ag-more" data-cmore="1">Mostrar mais ${Math.min(40, more)}</button>` : ''}`;
+}
+function renderCons(keep){
+  const top = cons.scrollTop, D = consData, R = D && D.resumo || {};
+  const upd = D && D.atualizado ? new Date(D.atualizado) : null;
+  const when = upd ? upd.toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) : '';
+  const head = cons.querySelector('.cs-list');
+  if (keep && head){
+    head.innerHTML = consListHTML();
+    cons.querySelector('.cs-stats').innerHTML = statsTx();
+    cons.querySelectorAll('[data-csort]').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.csort===consSort)));
+    cons.scrollTop = top; return;
+  }
+  function statsTx(){ return D ? `<b>${nf(D.total)}</b> consultas abertas${R.pessoas ? ` · <b>${nf(R.pessoas)}</b> pessoas já votaram no portal` : ''} · números de ${when}, atualizados de hora em hora` : ''; }
+  cons.innerHTML = `<div class="cw ag cs">
+    <header class="cw-head">
+      <h1 id="cons-title">Consultas públicas</h1>
+      ${infoBox(CONS_SOURCES,'Fontes','Os votos SIM e NÃO são os do portal e-Cidadania do Senado. A data de apresentação vem dos dados abertos do Senado.')}
+    </header>
+    <div class="cs-intro">
+      <p class="cs-lede">Toda proposta em andamento no Senado fica aberta à opinião de qualquer pessoa no portal e-Cidadania. Aqui você acompanha o placar de cada uma. Para votar, use o botão do cartão: o voto é dado no site oficial do Senado, com login gov.br ou e-mail.</p>
+      <p class="cs-stats">${statsTx()}</p>
+    </div>
+    <div class="cv-bar">
+      <div class="cv-chips" role="group" aria-label="Ordenar">
+        <button type="button" class="chip" data-csort="rec" aria-pressed="${consSort==='rec'}">Mais recentes</button>
+        <button type="button" class="chip" data-csort="top" aria-pressed="${consSort==='top'}">Mais votadas</button>
+        <button type="button" class="chip" data-csort="alta" aria-pressed="${consSort==='alta'}">Em alta agora</button>
+      </div>
+      <input type="search" class="cs-search" id="cs-q" placeholder="Buscar por tema, número ou autor" aria-label="Buscar consultas" value="${esc(consQ)}">
+    </div>
+    <section class="cs-list" aria-live="polite">${consListHTML()}</section>
+  </div>`;
+  if (keep) cons.scrollTop = top;
+}
+cons.addEventListener('click', e=>{
+  const sb = e.target.closest('[data-csort]'); if (sb){ consSort = sb.dataset.csort; consN = 40; renderCons(true); return; }
+  if (e.target.closest('[data-cmore]')){ consN += 40; renderCons(true); }
+});
+let consT = null;
+cons.addEventListener('input', e=>{ if (e.target.id!=='cs-q') return; clearTimeout(consT); consT = setTimeout(()=>{ consQ = e.target.value; consN = 40; renderCons(true); }, 180); });
+function showCons(){
+  if (!cons.hidden) return;
+  consN = 40;
+  renderCons(false); loadCons();
+  cons.scrollTop = 0;
+  cons.hidden = false; requestAnimationFrame(()=>cons.classList.add('show'));
+  document.title = 'Consultas públicas · Quorum';
+  cons.querySelector('#cons-title').setAttribute('tabindex','-1');
+  cons.querySelector('#cons-title').focus({preventScroll:true});
+}
+function hideCons(){
+  if (cons.hidden) return;
+  cons.classList.remove('show'); cons.hidden = true; cons.innerHTML = '';
+  document.title = 'Quorum';
+}
+// refresh the numbers when the page has been open for a while
+setInterval(()=>{ if (!cons.hidden && consData && Date.now() - Date.parse(consData.atualizado) > 70*60e3){ consData = null; loadCons(); } }, 10*60e3);
+
 function showRoute(){
   // the calendar stays underneath while a project opened from it is on top
   if (location.hash === '#calendario') showCal();
   else if (!/^#p-/.test(location.hash)) hideCal();
+  if (location.hash === '#consultas') showCons(); else hideCons();
   const m = location.hash.match(/^#p-([a-z0-9-]+)$/);
   if (m && renderProject(m[1])){
     if (proj.hidden){ projFocus = document.activeElement; proj.hidden = false; requestAnimationFrame(()=>proj.classList.add('show')); }
@@ -2672,7 +2896,7 @@ document.addEventListener('click', e=>{
 }, true);
 // click anywhere that isn't a seat closes the open view (person first, then house)
 document.addEventListener('click', e=>{
-  if (!proj.hidden || !cal.hidden || e.target.closest('.proj, .ov')) return;
+  if (!proj.hidden || !cal.hidden || !cons.hidden || e.target.closest('.proj, .ov')) return;
   if (personState || partyState) return;
   if (!openKey) return;
   if (e.target.closest('.seat, .pres, .panel')) return;
