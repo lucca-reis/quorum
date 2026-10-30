@@ -13,23 +13,18 @@ jobs:
           set +e; mkdir out; cd out
           UA='Mozilla/5.0 (X11; Linux x86_64) quorum'
           probe(){ n=$1; u=$2; curl -sSL -m 40 -A "$UA" -o "$n.txt" -w "$n %{http_code} %{size_download} %{content_type} %{url_effective}\n" "$u" >> log.out 2>>log.out || echo "$n FAIL" >> log.out; }
-          probe stj-rss "https://www.stj.jus.br/sites/portalp/Paginas/Comunicacao/Noticias/RSS.aspx"
+          probe minlist "https://www.gov.br/pt-br/orgaos-do-governo/ministerios-e-orgaos-com-status-de-ministerios"
           probe stj-not "https://www.stj.jus.br/sites/portalp/Comunicacao/Ultimas-noticias"
-          probe tst-not "https://www.tst.jus.br/noticias"
-          probe tst-rss "https://www.tst.jus.br/rss"
-          probe tse-not "https://www.tse.jus.br/comunicacao/noticias"
-          probe tse-rss "https://www.tse.jus.br/comunicacao/noticias/RSS"
-          probe stm-not "https://www.stm.jus.br/informacao/agencia-de-noticias"
-          probe stm-rss "https://www.stm.jus.br/rss"
-          probe saude-rss "https://www.gov.br/saude/pt-br/assuntos/noticias/RSS"
-          probe saude-not "https://www.gov.br/saude/pt-br/assuntos/noticias"
-          probe agenciagov "https://agenciagov.ebc.com.br/noticias/RSS"
-          probe eagendas "https://eagendas.cgu.gov.br/"
-          probe eagendas-api "https://eagendas.cgu.gov.br/api/v1/orgaos"
-          probe planalto-min "https://www.gov.br/planalto/pt-br/conheca-a-presidencia/ministerios"
-          probe govbr-orgaos "https://www.gov.br/pt-br/orgaos-do-governo"
+          probe gn-tse "https://news.google.com/rss/search?q=site:tse.jus.br&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+          probe gn-tst "https://news.google.com/rss/search?q=site:tst.jus.br&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+          probe gn-stm "https://news.google.com/rss/search?q=site:stm.jus.br&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+          probe gn-stj "https://news.google.com/rss/search?q=site:stj.jus.br&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+          probe eag-readme "https://raw.githubusercontent.com/cgugovbr/eagendas-publico/main/api-consulta/README.md"
+          probe cnj-rss "https://www.cnj.jus.br/feed/"
+          probe abr-just "https://agenciabrasil.ebc.com.br/rss/justica/feed.xml"
+          cp minlist.txt minlist.html; cp stj-not.txt stj.html; cp eag-readme.txt eag.md; cp gn-tse.txt gn-tse.xml; cp gn-tst.txt gn-tst.xml
           for f in *.txt; do echo "=== $f"; grep -oiE '(href|src)="[^"]*(rss|feed|xml|api)[^"]*"' "$f" | sort -u | head -15; head -c 400 "$f" | tr '\n' ' '; echo; done >> log.out
           rm -f *.txt
-          git init -q; git checkout -qb sonda; git add log.out
+          git init -q; git checkout -qb sonda; git add log.out minlist.html stj.html eag.md gn-tse.xml gn-tst.xml
           git -c user.name=robo -c user.email=robo@x commit -qm sonda
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" sonda
