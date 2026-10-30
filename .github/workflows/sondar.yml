@@ -14,13 +14,9 @@ jobs:
           mkdir out; cd out
           B=https://www12.senado.leg.br/ecidadania
           UA='Mozilla/5.0 (X11; Linux x86_64) quorum'
-          curl -sSL -A "$UA" "$B/principalmateria" -o principal.html -w '%{http_code} %{url_effective}\n' || true
-          curl -sSL -A "$UA" "$B/pesquisamateria?tipo=consulta" -o pesquisa.html -w '%{http_code}\n' || true
-          curl -sSL -A "$UA" "https://www12.senado.leg.br/robots.txt" -o robots.txt || true
-          ID=$(grep -o 'visualizacaomateria?id=[0-9]*' principal.html | head -1 | cut -d= -f2)
-          echo "id=$ID"
-          [ -n "$ID" ] && curl -sSL -A "$UA" "$B/visualizacaomateria?id=$ID" -o materia.html -w '%{http_code}\n'
-          ls -la; grep -o 'href="[^"]*"' principal.html | sort -u | head -200
+          for q in "" "?p=2" "?p=78" "?fechada=on" "?tipo=PEC"; do n=$(echo "lista$q" | tr -c 'a-zA-Z0-9\n' _); curl -sSL -A "$UA" "$B/pesquisamateria$q" -o "$n.html" -w "$q %{http_code}\n"; sleep 1; done
+          curl -sSL -A "$UA" "$B/visualizacaomateria?id=164123" -o mat2.html; sleep 1
+          curl -sSL -A "$UA" "$B/comofuncionaconsultapublica" -o como.html
           git init -q; git checkout -qb sonda; git add -A
           git -c user.name=robo -c user.email=robo@x commit -qm sonda
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" sonda
