@@ -12,7 +12,7 @@ jobs:
       - run: |
           set +e; mkdir out; cd out
           UA='Mozilla/5.0 (X11; Linux x86_64) quorum'
-          probe(){ n=$1; u=$2; curl -sSL -m 40 -A "$UA" -o "$n.txt" -w "$n %{http_code} %{size_download} %{content_type} %{url_effective}\n" "$u" >> log.txt 2>>log.txt || echo "$n FAIL" >> log.txt; }
+          probe(){ n=$1; u=$2; curl -sSL -m 40 -A "$UA" -o "$n.txt" -w "$n %{http_code} %{size_download} %{content_type} %{url_effective}\n" "$u" >> log.out 2>>log.out || echo "$n FAIL" >> log.out; }
           probe stj-rss "https://www.stj.jus.br/sites/portalp/Paginas/Comunicacao/Noticias/RSS.aspx"
           probe stj-not "https://www.stj.jus.br/sites/portalp/Comunicacao/Ultimas-noticias"
           probe tst-not "https://www.tst.jus.br/noticias"
@@ -28,8 +28,8 @@ jobs:
           probe eagendas-api "https://eagendas.cgu.gov.br/api/v1/orgaos"
           probe planalto-min "https://www.gov.br/planalto/pt-br/conheca-a-presidencia/ministerios"
           probe govbr-orgaos "https://www.gov.br/pt-br/orgaos-do-governo"
-          for f in *.txt; do echo "=== $f"; grep -oiE '(href|src)="[^"]*(rss|feed|xml|api)[^"]*"' "$f" | sort -u | head -15; head -c 400 "$f" | tr '\n' ' '; echo; done >> log.txt
+          for f in *.txt; do echo "=== $f"; grep -oiE '(href|src)="[^"]*(rss|feed|xml|api)[^"]*"' "$f" | sort -u | head -15; head -c 400 "$f" | tr '\n' ' '; echo; done >> log.out
           rm -f *.txt
-          git init -q; git checkout -qb sonda; git add log.txt
+          git init -q; git checkout -qb sonda; git add log.out
           git -c user.name=robo -c user.email=robo@x commit -qm sonda
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" sonda
