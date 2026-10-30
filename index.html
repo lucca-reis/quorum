@@ -373,7 +373,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   transition:background-color .45s}
 .landing[hidden]{display:none!important}
 .landing{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:stretch;column-gap:clamp(24px,4vw,64px)}
-.landing > .lx{place-self:center;--u:clamp(.42px, min(calc((50vw - 310px) / 330), calc((100vh - var(--menu-h) - 230px) / 540)), 1px)}
+.landing > .lx{place-self:center;--u:clamp(.36px, min(calc((50vw - 310px) / 420), calc((100vh - var(--menu-h) - 230px) / 680)), .76px)}
 /* left half: an index of the three powers, each shape beside what is going on there */
 /* the three powers stacked, the whole block centred in the left half */
 .lx{display:grid;grid-template-columns:calc(330 * var(--u)) fit-content(270px);column-gap:clamp(18px,2.4vw,36px);width:max-content;max-width:100%;margin:0 auto;font-family:var(--display)}
@@ -482,7 +482,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 @media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 16px 16px;border-radius:18px} }
 @media (max-width:700px){
   .landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;align-content:start;justify-items:center;gap:32px;overflow:auto;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 24px)}
-  .landing > .lx{--u:.5px}
+  .landing > .lx{--u:.42px}
   .lx{grid-template-columns:calc(330 * var(--u)) minmax(0,1fr);width:100%;row-gap:22px}
   .lx-shape{padding:0}
   .today{max-width:640px;height:auto;padding-bottom:56px}
