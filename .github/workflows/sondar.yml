@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths: ['.github/workflows/sondar.yml']
+permissions:
+  contents: write
 jobs:
   sondar:
     runs-on: ubuntu-latest
@@ -19,5 +21,6 @@ jobs:
           echo "id=$ID"
           [ -n "$ID" ] && curl -sSL -A "$UA" "$B/visualizacaomateria?id=$ID" -o materia.html -w '%{http_code}\n'
           ls -la; grep -o 'href="[^"]*"' principal.html | sort -u | head -200
-      - uses: actions/upload-artifact@v4
-        with: {name: sonda, path: out}
+          git init -q; git checkout -qb sonda; git add -A
+          git -c user.name=robo -c user.email=robo@x commit -qm sonda
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" sonda
