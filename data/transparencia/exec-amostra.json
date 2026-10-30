@@ -108,37 +108,5 @@
     }
    }
   ]
- },
- "orgaos-siape": {
-  "params": {
-   "pagina": 1,
-   "descricao": "Presidência"
-  },
-  "resposta": [
-   {
-    "codigo": "11000",
-    "descricao": "Presidência da República"
-   },
-   {
-    "codigo": "20101",
-    "descricao": "Presidência da República"
-   }
-  ]
- },
- "servidores": {
-  "params": {
-   "pagina": 1,
-   "nome": "Luiz Inácio Lula da Silva",
-   "orgaoServidorExercicio": "11000"
-  },
-  "resposta": []
- },
- "servidores/remuneracao": {
-  "params": {
-   "id": 520325395,
-   "mesAno": "202605",
-   "pagina": 1
-  },
-  "resposta": []
  }
 }
