@@ -476,6 +476,9 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .c-what{font-size:14px;line-height:1.4}
 .mv{display:flex;align-items:center;gap:10px;margin:2px 0 0;align-self:flex-start;max-width:100%}
 .c-meta dd:has(.mv){display:block;overflow:visible}
+.c-meta .c-vote{grid-column:3;grid-row:1 / span 2;align-self:end}
+.c-meta .c-vote.tall{grid-row:1 / span 3}
+@media (max-width:560px){ .c-meta .c-vote,.c-meta .c-vote.tall{grid-column:1 / -1;grid-row:auto;order:9;align-self:start} }
 .c-meta .mv{align-items:flex-start;gap:8px}
 .c-meta .mv svg{width:44px;margin-top:2px}
 .c-meta .mv-leg{flex-direction:column;flex-wrap:nowrap;font-size:11.5px}
@@ -1896,7 +1899,8 @@ function cardHTML(c, key){
   const live = S.here && liveState(S.here)?.s==='live' && L && L.date===todayISO() && L.key===S.here;
   const ok = v => v && !NI.test(v);
   const nextTx = S.next ? `${S.next.week ? 'semana de '+cardDate(S.next.date) : cardDate(S.next.date, S.next.time)}, ${POWER_NAME[S.next.key]}` : 'sem data marcada';
-  const cell = (k,v) => `<div><dt>${k}</dt><dd>${v}</dd></div>`;
+  const cell = (k,v,cls='') => `<div${cls?` class="${cls}"`:''}><dt>${k}</dt><dd>${v}</dd></div>`;
+  const mv = miniVote(P);
   return `<li><a class="card${live?' is-live':''}" href="#p-${c.slug}" data-ref="${c.slug}">
     <p class="c-pill"><span class="c-dot" aria-hidden="true"></span>${POWER_NAME[S.here]}${live ? ' · ao vivo' : ''}</p>
     <h3 class="c-title">${esc(P.title)}</h3>
@@ -1905,7 +1909,7 @@ function cardHTML(c, key){
     <dl class="c-meta">
       ${cell(P.house==='stf' ? 'Autor' : 'Autoria', ok(P.author) ? esc(P.author) : 'não informado')}
       ${cell(P.house==='stf' ? 'Relator(a)' : 'Relatoria', ok(P.rapporteur) ? esc(P.rapporteur) : 'não informado')}
-      ${cell('Votação', miniVote(P) || (P.votes ? esc(P.votes.result) : 'ainda não houve'))}
+      ${cell('Votação', mv || (P.votes ? esc(P.votes.result) : 'ainda não houve'), mv ? (S.path.length>1 ? 'c-vote tall' : 'c-vote') : '')}
       ${cell('Criado em', S.created ? cardDate(S.created) : 'não informado')}
       ${cell('Próximo passo', nextTx)}
       ${S.path.length>1 ? cell('Passou por', S.path.map(k=>POWER_NAME[k]).join(' → ')) : ''}
