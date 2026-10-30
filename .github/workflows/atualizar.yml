@@ -29,6 +29,12 @@ jobs:
         run: python scripts/instituicoes.py
         continue-on-error: true
         timeout-minutes: 15
+      - name: Agenda dos ministros (e-Agendas)
+        run: python scripts/agendas.py
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          EAGENDAS_TOKEN: ${{ secrets.EAGENDAS_TOKEN }}
       - name: Buscar consultas públicas do e-Cidadania
         run: python scripts/consultas.py
         continue-on-error: true
