@@ -881,6 +881,16 @@ h1[tabindex="-1"]:focus{outline:none}
 .vt-who li{display:flex;justify-content:space-between;gap:10px}
 .vt-who li span:last-child{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 @media (max-width:760px){ .vt{grid-template-columns:minmax(0,1fr)} .tr-list li{grid-template-columns:4.6em minmax(0,1fr) auto;gap:2px 10px} }
+/* phones: the vote drawing or the president's mark sits under the text, on the right, instead of over it */
+@media (max-width:560px){
+  .c-main{flex-direction:column;align-items:stretch;gap:6px}
+  .c-main:has(.c-vline) .c-text,.c-main:has(.xm) .c-text{padding-right:0}
+  .c-head .c-vline{position:static;align-self:flex-end;margin:0}
+  .c-head .c-vline .mv{flex-direction:row;align-items:center;gap:8px}
+  .c-head .c-vline .mv svg{width:44px}
+  .c-head .xm{flex-direction:row-reverse;align-items:center;gap:10px}
+  .xm-stamp{transform:rotate(-3deg)}
+}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -1891,7 +1901,9 @@ function open(key, left){
   });
   H.g.classList.add('is-active');
   Object.values(HOUSES).forEach(o=>o.g.setAttribute('tabindex','-1'));
-  tween(H, toLeft ? {...H.open, x:340} : H.open, 750);
+  // on phones the panel sits below the drawing, so the house opens centered and as large as the strip allows
+  const phone = !matchMedia('(min-width:1000px)').matches;
+  tween(H, phone ? {x:700, y:320, s:292} : toLeft ? {...H.open, x:340} : H.open, 750);
   const n = H.seats.length;
   H.seats.forEach((s,i)=> s.style.transitionDelay = reduce ? '0ms' : (i/n*520).toFixed(0)+'ms, 0ms');
   clearTimeout(colorTimer);
@@ -2376,7 +2388,8 @@ const BENCH = {cx:345, cy:273, r:15};          // bench centre and seat radius a
 function sizeBench(){
   const pu = svgUnit(planSvg, 1400, 640), su = svgUnit(stfSvg, 690, 500);
   if (!pu || !su) return;
-  const target = HOUSES.camara.r * HOUSES.camara.open.s * pu;   // seat radius on screen in an opened house
+  // seat radius on screen in an opened house; on phones the plan is tiny, so the bench is drawn larger
+  const target = HOUSES.camara.r * HOUSES.camara.open.s * pu * (matchMedia('(min-width:1000px)').matches ? 1 : 2.4);
   const f = Math.min(1.6, target / su / BENCH.r);
   const fx = 10 + 670/2, fy = 10 + 485/2;
   document.getElementById('stf-bench').setAttribute('transform', `translate(${fx} ${fy}) scale(${f.toFixed(4)}) translate(${-BENCH.cx} ${-BENCH.cy})`);
@@ -2403,7 +2416,7 @@ const PRES_BENCH = (()=>{ const cols = Math.ceil(EXEC_MIN.length/4), left = -10,
 function sizePresBench(){
   const pu = svgUnit(planSvg, 1400, 640), su = svgUnit(presSvg, 549, 260);
   if (!pu || !su) return;
-  const target = HOUSES.camara.r * HOUSES.camara.open.s * pu;
+  const target = HOUSES.camara.r * HOUSES.camara.open.s * pu * (matchMedia('(min-width:1000px)').matches ? 1 : 2.4);
   const f = Math.min(2.4, target / su / PRES_BENCH.r, (536.5-40)/PRES_BENCH.w, (248-40)/PRES_BENCH.h);
   const fr = presFrame;
   const fx = +fr.getAttribute('x') + +fr.getAttribute('width')/2, fy = +fr.getAttribute('y') + +fr.getAttribute('height')/2;
