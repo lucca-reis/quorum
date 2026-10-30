@@ -741,6 +741,7 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .pw{display:inline-flex;align-items:center;border:0;width:auto;height:auto;background:none;transform:none}
 .pw .gl{height:11px}
 @media (max-width:420px){ .menu nav .gl{display:none} }
+h1[tabindex="-1"]:focus{outline:none}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -2816,7 +2817,7 @@ const CONS_SOURCES = [
   {l:'e-Cidadania: todas as proposições abertas', u:'https://www12.senado.leg.br/ecidadania/pesquisamateria'},
   {l:'Senado: dados abertos de processos em tramitação', u:'https://legis.senado.leg.br/dadosabertos/'}
 ];
-let consData = null, consErr = false, consSort = 'rec', consQ = '', consN = 30, consLoading = null;
+let consData = null, consErr = false, consSort = 'alta', consQ = '', consN = 30, consLoading = null;
 const nf = n => FMT_NUM.format(Number(n||0));
 const fold = t => String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 function loadCons(){
@@ -2830,6 +2831,7 @@ function loadCons(){
     js.rec = js.itens.slice().sort((a,b)=> (a.d||'')<(b.d||'') ? 1 : (a.d||'')>(b.d||'') ? -1 : b.t-a.t);
     js.top = js.itens.slice().sort((a,b)=> b.t-a.t);
     js.alta = js.itens.filter(x=>x.h).sort((a,b)=> b.h-a.h);
+    if (!js.alta.length && consSort==='alta') consSort = 'top';
     consData = js;
     // the search index is built in small slices while the browser is idle
     const idle = window.requestIdleCallback || (f=> setTimeout(()=>f({timeRemaining:()=>8}), 30));
@@ -2850,9 +2852,14 @@ function consCard(x){
     ${people ? `<p class="c-people">${people}</p>` : ''}
     <div class="cs-bar${t?'':' empty'}" role="img" aria-label="${t ? `SIM ${pct(py)}, NÃO ${pct(pn)}` : 'Ainda sem votos'}"><span class="y" style="width:${py}%"></span><span class="n"></span></div>
     <p class="cs-nums">${t ? `<span><b>SIM</b> ${nf(x.y)} <small>${pct(py)}</small></span><span class="n"><small>${pct(pn)}</small> ${nf(x.n)} <b>NÃO</b></span>` : '<span><small>Ainda sem votos</small></span>'}</p>
-    <div class="cs-foot"><span class="cs-hot">${x.d ? 'Apresentado '+agoTx(x.d) : ''}${x.h ? `${x.d?' · ':''}+${nf(x.h)} votos na última hora` : ''}</span>
+    <div class="cs-foot"><span class="cs-hot">${x.d ? 'Apresentado '+agoTx(x.d) : ''}${x.h ? `${x.d?' · ':''}+${nf(x.h)} ${x.h===1?'voto':'votos'} ${consSpan()}` : ''}</span>
       <a class="cs-vote" href="${url}" target="_blank" rel="noopener" aria-label="Dar seu voto sobre ${esc(x.s)} no site do Senado">Dar seu voto <span aria-hidden="true">↗</span></a></div>
   </div></article></li>`;
+}
+// the robot compares each reading with the one before; usually an hour apart, sooner when it runs twice
+function consSpan(){
+  const D = consData, m = D && D.anterior ? Math.round((Date.parse(D.atualizado) - Date.parse(D.anterior))/60000) : 60;
+  return m>=50 && m<=80 ? 'na última hora' : m<50 ? `nos últimos ${Math.max(1,m)} min` : `desde ${new Date(D.anterior).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit'})}`;
 }
 function consDate(iso){
   const t = todayISO(); if (!iso) return 'sem data de apresentação';
@@ -2903,9 +2910,9 @@ function renderCons(keep){
     </div>
     <div class="cv-bar">
       <div class="cv-chips" role="group" aria-label="Ordenar">
-        <button type="button" class="chip" data-csort="rec" aria-pressed="${consSort==='rec'}">Mais recentes</button>
-        <button type="button" class="chip" data-csort="top" aria-pressed="${consSort==='top'}">Mais votadas</button>
         <button type="button" class="chip" data-csort="alta" aria-pressed="${consSort==='alta'}">Em alta agora</button>
+        <button type="button" class="chip" data-csort="top" aria-pressed="${consSort==='top'}">Mais votadas</button>
+        <button type="button" class="chip" data-csort="rec" aria-pressed="${consSort==='rec'}">Mais recentes</button>
       </div>
       <input type="search" class="cs-search" id="cs-q" placeholder="Buscar por tema, número ou autor" aria-label="Buscar consultas" value="${esc(consQ)}">
     </div>
