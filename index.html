@@ -50,7 +50,7 @@ body{box-sizing:border-box;display:grid;place-items:center;
 
 .stage.is-open #frame,.stage.is-open .house:not(.is-active){opacity:0;pointer-events:none}
 .stage.is-open .house.is-active{cursor:default}
-.stage.is-open .house.is-active .shell{opacity:0;pointer-events:none}
+.stage.is-open .house.is-active .shell{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));pointer-events:none}
 .house.colored .seat{fill:var(--c)}
 .house.colored .seat:hover,.house.colored .pres:hover{transform:scale(1.6)}
 .pres{transition:transform .18s ease;transform-box:fill-box;transform-origin:center}
@@ -262,11 +262,6 @@ body{box-sizing:border-box;display:grid;place-items:center;
 
 .house.colored .seat,.house.colored .pres{stroke:var(--ring);stroke-width:1.2px;vector-effect:non-scaling-stroke}
 html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, color .35s}
-.schemes{position:fixed;z-index:26;right:max(16px, env(safe-area-inset-right, 0px));bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);display:flex;gap:8px;padding:6px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--rule)}
-.scheme{width:22px;height:22px;border-radius:50%;padding:0;cursor:pointer;border:1px solid var(--rule);background:linear-gradient(135deg, var(--a) 50%, var(--b) 50%)}
-.scheme[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
-.scheme:hover{transform:scale(1.12)}
-.scheme:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 /* top menu: name on the left, the four powers in a soft segmented control in the middle, calendar icon on the right */
 .menu{position:fixed;z-index:27;top:0;left:0;right:0;height:var(--menu-h);box-sizing:content-box;padding-top:env(safe-area-inset-top, 0px);
@@ -627,12 +622,6 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
   </nav>
   <a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a>
 </header>
-<div class="schemes" role="group" aria-label="Esquema de cores">
-  <button class="scheme" type="button" data-scheme="branco-preto" style="--a:#FAFAF7;--b:#121417" aria-label="Branco e preto" title="Branco e preto"></button>
-  <button class="scheme" type="button" data-scheme="preto-branco" style="--a:#121417;--b:#FAFAF7" aria-label="Preto e branco" title="Preto e branco"></button>
-  <button class="scheme" type="button" data-scheme="verde-amarelo" style="--a:#007A33;--b:#FFD500" aria-label="Verde e amarelo" title="Verde e amarelo"></button>
-  <button class="scheme" type="button" data-scheme="branco-vermelho" style="--a:#FFFFFF;--b:#C8102E" aria-label="Branco e vermelho" title="Branco e vermelho"></button>
-</div>
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
   <div class="lx" aria-label="Os três poderes">
     <div class="lx-row" data-k="stf">
@@ -700,7 +689,7 @@ const HOUSES = {
     arcR:.74, arcA:42, presU:-.44,
   },
   camara:{
-    side:-1, home:{x:997,y:319,s:189}, open:{x:1050,y:320,s:420},
+    side:-1, home:{x:997,y:319,s:189}, open:{x:1020,y:320,s:340},
     arcR:.69, arcA:34, presU:-.57,
   }
 };
@@ -2204,20 +2193,6 @@ document.querySelectorAll('.menu [data-nav]').forEach(a=>a.addEventListener('cli
 }));
 setInterval(()=>{ const here = (typeof cal!=='undefined' && !cal.hidden) ? 'calendario' : (typeof VIEWS!=='undefined' && openView()) ? openView() : openKey; document.querySelectorAll('.menu [data-nav]:not(.brand)').forEach(a=>{ if (a.dataset.nav===here) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); }); }, 200);
 
-/* ---------- colour schemes ---------- */
-(function(){
-  const btns = [...document.querySelectorAll('.scheme')];
-  const apply = k => {
-    if (k) document.documentElement.setAttribute('data-scheme', k); else document.documentElement.removeAttribute('data-scheme');
-    btns.forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.scheme===k)));
-  };
-  let saved = null; try { saved = localStorage.getItem('plenario-scheme'); } catch(e){}
-  apply(btns.some(b=>b.dataset.scheme===saved) ? saved : null);
-  btns.forEach(b=>b.addEventListener('click', e=>{
-    e.stopPropagation(); apply(b.dataset.scheme);
-    try { localStorage.setItem('plenario-scheme', b.dataset.scheme); } catch(err){}
-  }));
-})();
 
 /* ---------- back arrow: one step up from wherever you are ---------- */
 const backBtn = document.getElementById('back-arrow');
