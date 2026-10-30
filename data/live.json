@@ -1,5 +1,5 @@
 {
- "atualizado": "2026-10-29T23:49-03:00",
+ "atualizado": "2026-10-30T00:48-03:00",
  "camara": [
   {
    "id": 83076,
@@ -60,16 +60,6 @@
    "descricao": "Homenagem aos 45 anos da Associação do Senhor Jesus (ASJ)\r\n Homenagem aos 45 anos da Associação do Senhor Jesus (ASJ)",
    "video": null,
    "aoVivo": false
-  },
-  {
-   "id": 83108,
-   "inicio": "2026-10-28T14:34-03:00",
-   "fim": "2026-10-28T17:27-03:00",
-   "situacao": "Encerrada",
-   "tipo": "Sessão Deliberativa",
-   "descricao": "Sessão Deliberativa Extraordinária Semipresencial (AM nº 123/2020)",
-   "video": "https://www.youtube.com/watch?v=G-IH2lRUdzI",
-   "aoVivo": false
   }
  ],
  "senado": [
@@ -99,6 +89,16 @@
    "fim": null,
    "situacao": "Agendada",
    "tipo": "SESSÃO ESPECIAL ",
+   "descricao": "",
+   "video": null,
+   "aoVivo": false
+  },
+  {
+   "id": "594171",
+   "inicio": "2026-11-06T10:00-03:00",
+   "fim": null,
+   "situacao": "Agendada",
+   "tipo": "SESSÃO NÃO DELIBERATIVA ",
    "descricao": "",
    "video": null,
    "aoVivo": false
