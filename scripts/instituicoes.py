@@ -20,7 +20,7 @@ log = []
 
 def baixar(url):
     req = urllib.request.Request(url, headers=UA)
-    with urllib.request.urlopen(req, timeout=40) as r:
+    with urllib.request.urlopen(req, timeout=15) as r:
         return r.read().decode('utf-8', 'replace')
 
 def slug(t):
@@ -79,18 +79,16 @@ GOVBR = {
 html_site = (ROOT / 'index.html').read_text(encoding='utf-8')
 bloco = html_site[html_site.index('const EXEC_MIN = ['):]
 pastas = re.findall(r"\['([^']+)','[^']+'", bloco[:bloco.index('];')])
-ministerios = {}
-for pasta in pastas:
+def um_ministerio(pasta):
     g = GOVBR.get(pasta)
     item = {'pasta': pasta, 'fonte': f'https://www.gov.br/{g}' if g else None, 'itens': []}
     if g:
-        for caminho in ('/pt-br/assuntos/noticias/RSS', '/pt-br/assuntos/noticias/noticias/RSS', '/pt-br/noticias/RSS', '/pt-br/canais_atendimento/imprensa/noticias/RSS'):
+        for caminho in ('/pt-br/assuntos/noticias/RSS', '/pt-br/assuntos/noticias/noticias/RSS'):
             try:
                 it = itens_rss(baixar(f'https://www.gov.br/{g}{caminho}'))
                 if it: item['itens'] = it; item['rss'] = f'https://www.gov.br/{g}{caminho}'; break
             except Exception:
                 pass
-            time.sleep(0.4)
     if not item['itens']:
         # sem feed no gov.br: notícias do próprio site do ministério pelo Google Notícias
         q = f'site:gov.br/{g}' if g else f'"{pasta}" site:gov.br'
@@ -99,9 +97,13 @@ for pasta in pastas:
             item['via'] = 'Google Notícias'
         except Exception as ex:
             log.append(f'{pasta}: {ex}')
-        time.sleep(1)
     if not item['itens']: log.append(f'sem notícias: {pasta}')
-    ministerios[slug(pasta)] = item
+    return slug(pasta), item
+
+# alguns de cada vez, para terminar em poucos minutos sem sobrecarregar os sites
+from concurrent.futures import ThreadPoolExecutor
+with ThreadPoolExecutor(max_workers=5) as ex:
+    ministerios = dict(ex.map(um_ministerio, pastas))
 
 res = {'atualizado': AGORA.isoformat(timespec='minutes'), 'tribunais': tribunais, 'ministerios': ministerios, 'erros': log}
 OUT.parent.mkdir(exist_ok=True)
