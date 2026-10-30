@@ -377,8 +377,22 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   transition:background-color .45s}
 .landing[hidden]{display:none!important}
 .landing{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:stretch;column-gap:clamp(24px,4vw,64px)}
-.landing > svg{place-self:center}
-.landing svg{display:block;height:min(600px, calc(100vh - var(--menu-h) - 72px));width:auto;aspect-ratio:336/482;overflow:visible}
+.landing > .lx{place-self:center stretch;--u:clamp(.42px, .055vw, .66px)}
+/* left half: an index of the three powers, each shape beside what is going on there */
+.lx{display:flex;flex-direction:column;max-width:560px;width:100%;margin:0 auto;font-family:var(--display)}
+.lx-row{display:grid;grid-template-columns:calc(330 * var(--u)) minmax(0,1fr);align-items:center;column-gap:clamp(18px,2.4vw,36px);padding:clamp(18px,3vh,30px) 0;border-top:1px solid var(--rule)}
+.lx-row:last-child{border-bottom:1px solid var(--rule)}
+.lx-shape{display:flex;justify-content:center}
+.lx-shape svg{display:block;width:calc(var(--vw) * var(--u));height:auto;overflow:visible}
+.lx-text{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0;border-radius:10px}
+.lx-text:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+.lx-n{font-size:clamp(36px,3.6vw,54px);font-weight:500;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.lx-l{font-size:14px;line-height:1.35}
+.lx-b{font-size:13px;line-height:1.35}
+.lx-s{font-size:13px;line-height:1.35;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.lx-s.on{color:#E0242B}
+.lx-s .lv-dot{width:7px;height:7px}
+.lx-text:hover .lx-l{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .lg{cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center;transition:transform .35s cubic-bezier(.3,.7,.3,1), opacity .4s}
 .lg rect,.lg circle{fill:transparent;stroke:var(--ink);stroke-width:1.8}
 .lg:hover,.lg:focus-visible{transform:scale(1.04)}
@@ -468,7 +482,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 @media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 16px 16px;border-radius:18px} }
 @media (max-width:700px){
   .landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;align-content:start;justify-items:center;gap:32px;overflow:auto;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 24px)}
-  .landing svg{height:min(380px, 48vh)}
+  .landing > .lx{--u:.5px}
   .today{max-width:640px;height:auto;padding-bottom:56px}
   .today > .feed{overflow:visible;padding-right:0}
 }
@@ -613,11 +627,20 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
   <button class="scheme" type="button" data-scheme="branco-vermelho" style="--a:#FFFFFF;--b:#C8102E" aria-label="Branco e vermelho" title="Branco e vermelho"></button>
 </div>
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
-  <svg viewBox="-14 -14 336 482" role="img" aria-label="Três formas, uma sobre a outra: Supremo Tribunal, Presidência e Congresso">
-    <g transform="translate(-1172 -321)"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Supremo Tribunal Federal"><rect id="stf-mini" x="1257" y="321" width="138" height="100" vector-effect="non-scaling-stroke"/></g></g>
-    <g transform="translate(-562.5 -97)"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir a Presidência da República"><rect id="pres-mini" x="604" y="253" width="225" height="104" vector-effect="non-scaling-stroke"/></g></g>
-    <g transform="translate(-843 -557.9)"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Congresso Nacional"><rect x="843" y="873.9" width="308" height="138.2" id="mini-frame" vector-effect="non-scaling-stroke"/><circle cx="921.6" cy="942.8" r="32.2" vector-effect="non-scaling-stroke"/><circle cx="1063.9" cy="942.8" r="42.6" vector-effect="non-scaling-stroke"/></g></g>
-  </svg>
+  <div class="lx" aria-label="Os três poderes">
+    <div class="lx-row" data-k="stf">
+      <div class="lx-shape"><svg viewBox="1251 315 150 112" style="--vw:150" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Supremo Tribunal Federal"><rect id="stf-mini" x="1257" y="321" width="138" height="100" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <button type="button" class="lx-text" data-open="stf"><span class="lx-n" id="lx-n-stf"></span><span class="lx-l" id="lx-l-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
+    </div>
+    <div class="lx-row" data-k="pres">
+      <div class="lx-shape"><svg viewBox="598 247 237 116" style="--vw:237" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir a Presidência da República"><rect id="pres-mini" x="604" y="253" width="225" height="104" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <button type="button" class="lx-text" data-open="pres"><span class="lx-n" id="lx-n-pres"></span><span class="lx-l" id="lx-l-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
+    </div>
+    <div class="lx-row" data-k="cong">
+      <div class="lx-shape"><svg viewBox="837 868 320 150" style="--vw:320" role="img" aria-label="Congresso Nacional"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Congresso Nacional"><rect x="843" y="873.9" width="308" height="138.2" id="mini-frame" vector-effect="non-scaling-stroke"/><circle cx="921.6" cy="942.8" r="32.2" vector-effect="non-scaling-stroke"/><circle cx="1063.9" cy="942.8" r="42.6" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <button type="button" class="lx-text" data-open="cong"><span class="lx-n" id="lx-n-cong"></span><span class="lx-l" id="lx-l-cong"></span><span class="lx-b" id="lx-b-cong"></span><span class="lx-s" id="lx-s-cong"></span></button>
+    </div>
+  </div>
   <div class="today" id="today" aria-live="polite"></div>
 </section>
 <section class="stfv" id="stfv" hidden aria-label="Supremo Tribunal Federal">
@@ -1337,7 +1360,49 @@ function liveBox(key){
     ? `<div class="live-slot" data-k="${key}"><div class="live on" role="status"><p class="lv-h"><span class="lv-dot" aria-hidden="true"></span>Ao vivo · ${esc(st.day.kind)} em curso</p><p class="lv-t">Transmissão pela ${L.name}, desde as ${h}.</p>${player}<div class="lv-links">${links}</div></div></div>`
     : `<div class="live-slot" data-k="${key}"><div class="live"><p class="lv-h"><span class="lv-dot off" aria-hidden="true"></span>Hoje às ${h} · ${esc(st.day.kind)}</p><p class="lv-t">A transmissão pela ${L.name} aparece aqui quando a sessão começar.</p><div class="lv-links">${links}</div></div></div>`;
 }
+/* index on the opening view: items in course in each power, and what is happening there now */
+const LX = {stf:{keys:['stf'], none:'nenhum processo em curso', one:'processo em curso no Supremo', many:'processos em curso no Supremo'},
+            pres:{keys:['exec'], none:'nada em curso na Presidência', one:'item em curso na Presidência', many:'itens em curso na Presidência'},
+            cong:{keys:['camara','senado'], none:'nenhum projeto em curso', one:'projeto em curso no Congresso', many:'projetos em curso no Congresso'}};
+const DONE_RE = /sancionad|promulgad|vetad|arquivad|rejeitad|decidid|conclu[ií]d|transitad|virou lei|perdeu a validade/i;
+function renderIndex(){
+  if (typeof CARDS==='undefined' || !document.getElementById('lx-n-stf')) return;
+  const t = todayISO();
+  for (const k in LX){
+    const X = LX[k];
+    const here = CARDS.map(c=>({c, S:cardState(c,null)})).filter(x=> X.keys.includes(x.S.here) && !DONE_RE.test(x.c.P.status||''));
+    const n = here.length;
+    document.getElementById('lx-n-'+k).textContent = n;
+    let lab = n===0 ? X.none : n===1 ? X.one : X.many;
+    document.getElementById('lx-l-'+k).textContent = lab;
+    const sp = document.getElementById('lx-b-'+k);
+    if (sp){ const c = here.filter(x=>x.S.here==='camara').length; sp.textContent = n ? `${c} na Câmara · ${n-c} no Senado` : ''; }
+    const st = document.getElementById('lx-s-'+k);
+    const liveK = X.keys.find(x=> liveState(x)?.s==='live');
+    if (liveK){
+      st.className = 'lx-s on';
+      st.innerHTML = `<span class="lv-dot" aria-hidden="true"></span>ao vivo agora${k==='cong' ? ' · '+POWER_NAME[liveK] : ''}`;
+      continue;
+    }
+    st.className = 'lx-s';
+    const days = X.keys.flatMap(x=> AGENDA[x].days.map(d=>({...d, key:x})));
+    const soon = X.keys.map(x=> liveState(x)).find(v=> v && v.s==='soon');
+    const next = days.filter(d=> d.date>t).sort((a,b)=> a.date.localeCompare(b.date))[0];
+    const last = days.filter(d=> d.date<=t && !d.label).sort((a,b)=> b.date.localeCompare(a.date))[0];
+    const word = k==='pres' ? 'próximo compromisso' : 'próxima sessão';
+    st.textContent = soon ? `hoje às ${Math.floor(soon.st/60)}h${soon.st%60?String(soon.st%60).padStart(2,'0'):''}`
+      : next ? `${word}: ${next.label ? 'semana de '+cardDate(next.date) : cardDate(next.date, next.time)}`
+      : last ? `última atividade: ${cardDate(last.date)}` : '';
+  }
+}
+document.querySelector('.lx')?.addEventListener('click', e=>{
+  const b = e.target.closest('[data-open]'); if (!b) return;
+  e.stopPropagation();
+  const id = {stf:'lg-stf', pres:'lg-pres', cong:'mini'}[b.dataset.open];
+  document.getElementById(id).dispatchEvent(new MouseEvent('click', {bubbles:true}));
+});
 function refreshLive(){
+  renderIndex();
   document.querySelectorAll('.live-slot').forEach(el=>{ const n = document.createElement('div'); n.innerHTML = liveBox(el.dataset.k); el.replaceWith(n.firstChild); });
   const fl = document.getElementById('feed-live');
   if (fl){
