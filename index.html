@@ -841,6 +841,43 @@ h1[tabindex="-1"]:focus{outline:none}
 .vc-leg b{font-weight:500;color:var(--ink)}
 @media (max-width:900px){ .vb,.vb.w7,.vb.w5{grid-column:span 12} .vc{grid-template-columns:1fr 1fr} .vc-h:first-child{grid-column:1 / -1} }
 @media (max-width:560px){ .vb{padding:16px;border-radius:18px} .vp{grid-template-columns:minmax(0,1fr)} .vp-i{flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:10px} .vp-p{width:100%} .vp-n{font-size:44px} .vp-s{width:100%;margin-top:2px} .vv{grid-template-columns:repeat(2,minmax(0,1fr))} .vc{grid-template-columns:minmax(0,1fr)} .vm-lab{font-size:11.5px} }
+/* transparency: the parliamentary allowance (cota) of each member, from the official files of each house */
+.p-tr{width:100%;display:flex;flex-direction:column;gap:14px;padding:18px 20px 20px;border-radius:20px;background:color-mix(in srgb, var(--ink) 5%, var(--bg));box-sizing:border-box}
+.p-tr h3{margin:0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tr-top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 28px}
+.tr-tot{display:flex;flex-direction:column;gap:2px}
+.tr-tot b{font-size:clamp(28px,3vw,40px);font-weight:500;letter-spacing:-.03em;line-height:1}
+.tr-tot span{font-size:13px;color:var(--muted)}
+.tr-months{display:flex;align-items:flex-end;gap:4px;height:56px;flex:none;width:100%}
+.tr-months i{flex:1;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--ink);opacity:.85;position:relative}
+.tr-months i:last-child{opacity:.35}
+.tr-mlab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);width:100%}
+.tr-cats{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px 18px}
+.tr-cats li{display:flex;flex-direction:column;gap:4px;font-size:12.5px}
+.tr-cats li span{display:flex;justify-content:space-between;gap:8px}
+.tr-cats li span b{font-weight:500;font-variant-numeric:tabular-nums}
+.tr-cats .bar{height:5px;border-radius:999px;background:color-mix(in srgb, var(--ink) 10%, var(--bg));overflow:hidden}
+.tr-cats .bar i{display:block;height:100%;background:var(--ink)}
+.tr-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tr-list li{display:grid;grid-template-columns:5.2em minmax(0,1fr) auto;gap:4px 14px;align-items:baseline;padding:9px 0;border-top:1px solid var(--rule);font-size:13.5px;line-height:1.35}
+.tr-list time{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tr-list .w{min-width:0;display:flex;flex-direction:column}
+.tr-list .w small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr-list .v{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.tr-list a{color:inherit}
+.tr-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;font-size:12.5px;color:var(--muted)}
+.tr-foot a{color:var(--ink)}
+.tr-more{all:unset;cursor:pointer;padding:7px 14px;border-radius:999px;background:var(--bg);font-size:13px;color:var(--ink)}
+.tr-more:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tr-empty{margin:0;font-size:14px;color:var(--muted);line-height:1.5}
+.vt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;margin-bottom:6px}
+.vt-h{display:flex;flex-direction:column;gap:12px;min-width:0}
+.vt-h h3{margin:0;font-size:14px;font-weight:500}
+.vt-h h3 span{font-weight:400;color:var(--muted)}
+.vt-who{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.vt-who li{display:flex;justify-content:space-between;gap:10px}
+.vt-who li span:last-child{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:760px){ .vt{grid-template-columns:minmax(0,1fr)} .tr-list li{grid-template-columns:4.6em minmax(0,1fr) auto;gap:2px 10px} }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -1987,6 +2024,7 @@ function openPerson(src, key, P){
           ? 'O histórico do mandato atual está no portal do Senado. Ainda não foi carregado nesta página.'
           : 'Começam a ser registradas após a posse, em fevereiro de 2027.'}</p></section>
       </div>
+      <section class="p-tr" id="p-tr" aria-live="polite"><h3>Transparência · cota parlamentar</h3><p class="tr-empty">Carregando os gastos…</p></section>
       ${note ? `<p class="p-note">${esc(note)}</p>` : ''}
       <div class="p-src">${infoBox(src2,'Fontes')}</div>`;
   }
@@ -1995,6 +2033,7 @@ function openPerson(src, key, P){
   person.innerHTML = `<div class="avatar" role="button" tabindex="0" aria-label="Voltar"><span class="ph">${P?esc(initialsOf(P.n)):''}</span></div>
     <div class="p-info fade">${html}</div>`;
   personState = {src};
+  if (P) trSection(P, key);
   const av = person.querySelector('.avatar');
   growIn(person, av, src);
   setTimeout(()=>av.focus({preventScroll:true}), 650);
@@ -3051,6 +3090,75 @@ function hideCons(){
 // refresh the numbers when the page has been open for a while
 setInterval(()=>{ if (!cons.hidden && consData && Date.now() - Date.parse(consData.atualizado) > 70*60e3){ consData = null; loadCons(); } }, 10*60e3);
 
+/* ---------- transparency: parliamentary allowance (cota) ----------
+   data/transparencia/ is written once a day by scripts/transparencia.py from the official files of the Câmara (CEAP)
+   and the Senado (CEAPS): totals in resumo.json and one file per member with each expense, newest first. */
+const TR_BASE = 'https://lucca-reis.github.io/quorum/';
+const TR_HOUSE = {camara:{name:'Câmara', src:'https://www.camara.leg.br/transparencia/gastos-parlamentares', doc:'https://www.camara.leg.br/cota-parlamentar/documentos/publ/'},
+                  senado:{name:'Senado', src:'https://www12.senado.leg.br/transparencia/sen/verba-indenizatoria-ceaps', doc:''}};
+const MONEY = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+const MONEY0 = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const moneyShort = v => v>=1e6 ? 'R$ '+FMT_PCT.format(Math.round(v/1e5)/10)+' mi' : v>=1e3 ? 'R$ '+FMT_NUM.format(Math.round(v/1e3))+' mil' : MONEY0.format(v);
+const slugName = t => String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function trFetch(path){
+  const urls = /^https?:$/.test(location.protocol) && !FRAMED ? [path, TR_BASE+path] : [TR_BASE+path];
+  const tryAt = i => i>=urls.length ? Promise.reject() : fetch(urls[i], {cache:'no-cache'}).then(r=> r.ok ? r.json() : Promise.reject()).catch(()=> tryAt(i+1));
+  return tryAt(0);
+}
+let trResumo = null, trResumoP = null;
+function loadTr(){ return trResumo ? Promise.resolve(trResumo) : (trResumoP = trResumoP || trFetch('data/transparencia/resumo.json').then(js=> (trResumo = js)).finally(()=>{ trResumoP = null; })); }
+const monLab = m => MO[+m.slice(5)-1];
+function trMonths(meses){
+  const max = Math.max(1, ...meses.map(x=>x[1]));
+  return `<div class="tr-months" role="img" aria-label="Gastos por mês: ${meses.map(([m,v])=>monLab(m)+' '+moneyShort(v)).join(', ')}">${meses.map(([m,v])=>`<i style="height:${Math.max(2, v/max*100).toFixed(1)}%" title="${monLab(m)} ${m.slice(0,4)}: ${MONEY.format(v)}"></i>`).join('')}</div>`;
+}
+function trCats(cats, n){
+  const tot = cats.reduce((a,c)=> a+Math.max(0,c[1]), 0) || 1;
+  return `<ul class="tr-cats">${cats.filter(c=>c[1]>0).slice(0,n).map(([c,v])=>`<li><span>${esc(c)}<b>${moneyShort(v)}</b></span><span class="bar"><i style="width:${(v/tot*100).toFixed(1)}%"></i></span></li>`).join('')}</ul>`;
+}
+// the member's section inside the profile: looked up by name in both houses (someone elected senator may be a deputy today)
+function trSection(P, key){
+  const box = document.getElementById('p-tr'); if (!box) return;
+  const s = slugName(P.n), order = key==='senado' ? ['senado','camara'] : ['camara','senado'];
+  loadTr().then(R=>{
+    const casa = order.find(c=> R[c] && R[c].pessoas && R[c].pessoas[s]);
+    if (!casa){
+      box.innerHTML = `<h3>Transparência · cota parlamentar</h3><p class="tr-empty">Não há gastos na cota parlamentar em nome de ${esc(P.n)} nos últimos 12 meses, nos arquivos da Câmara e do Senado. Quem toma posse em 2027 ainda não usa a cota; o nome também pode aparecer escrito de outro jeito nos arquivos oficiais.</p><div class="tr-foot"><span></span><a href="${TR_HOUSE[key].src}" target="_blank" rel="noopener">Consultar no portal ${key==='senado'?'do Senado':'da Câmara'} ↗</a></div>`;
+      return;
+    }
+    return trFetch(`data/transparencia/p/${casa}-${s}.json`).then(D=>{
+      if (!document.getElementById('p-tr')) return;
+      const H = TR_HOUSE[casa];
+      let shown = 15;
+      const item = x=>{ const [y,m,d] = x.d.split('-'); const url = x.u ? H.doc + x.u + '.pdf' : '';
+        return `<li><time datetime="${x.d}">${+d} ${MO[+m-1]}${y!==todayISO().slice(0,4)?' '+y.slice(2):''}</time><span class="w">${esc(x.c)}<small>${esc(x.f||'')}</small></span><span class="v">${url ? `<a href="${url}" target="_blank" rel="noopener" title="Ver nota fiscal">${MONEY.format(x.v)}</a>` : MONEY.format(x.v)}</span></li>`; };
+      const draw = ()=>{
+        box.innerHTML = `<h3>Transparência · cota parlamentar${casa!==key ? ` (como ${casa==='camara'?'deputado(a)':'senador(a)'})` : ''}</h3>
+          <div class="tr-top"><div class="tr-tot"><b>${MONEY0.format(D.total)}</b><span>nos últimos 12 meses · ${FMT_NUM.format(D.itens.length)} documentos</span></div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1 1 240px;max-width:420px">${trMonths(D.meses)}<div class="tr-mlab"><span>${monLab(D.meses[0][0])}</span><span>${monLab(D.meses[D.meses.length-1][0])}</span></div></div></div>
+          ${trCats(D.cats, 6)}
+          <ul class="tr-list">${D.itens.slice(0, shown).map(item).join('')}</ul>
+          <div class="tr-foot">${D.itens.length>shown ? `<button type="button" class="tr-more">Mostrar mais</button>` : '<span></span>'}<span>Valores publicados pela ${casa==='camara'?'Câmara':'Senado'}; o mês atual ainda está incompleto. <a href="${H.src}" target="_blank" rel="noopener">Fonte ↗</a></span></div>`;
+        const more = box.querySelector('.tr-more');
+        if (more) more.addEventListener('click', e=>{ e.stopPropagation(); shown += 30; draw(); });
+      };
+      draw();
+    });
+  }).catch(()=>{ const b = document.getElementById('p-tr'); if (b) b.innerHTML = `<h3>Transparência · cota parlamentar</h3><p class="tr-empty">Não deu para carregar os gastos agora. <a href="${TR_HOUSE[key].src}" target="_blank" rel="noopener" style="color:inherit">Ver no portal oficial ↗</a></p>`; });
+}
+function vgTransp(){
+  if (!trResumo) return '<p class="vd-none">Carregando os gastos da cota parlamentar…</p>';
+  const R = trResumo;
+  const house = c=>{ const H = R[c]; if (!H) return '';
+    const top = Object.values(H.pessoas).sort((a,b)=> b.t-a.t).slice(0,3);
+    return `<div class="vt-h"><h3>${TR_HOUSE[c].name} <span>${H.parlamentares} parlamentares com gastos no período</span></h3>
+      <div class="tr-top"><div class="tr-tot"><b>${moneyShort(H.total)}</b><span>em 12 meses · ${FMT_NUM.format(H.documentos)} documentos</span></div></div>
+      <div style="display:flex;flex-direction:column;gap:4px">${trMonths(H.meses)}<div class="tr-mlab"><span>${monLab(H.meses[0][0])}</span><span>${monLab(H.meses[H.meses.length-1][0])}</span></div></div>
+      ${trCats(H.cats, 4)}
+      <div><p class="vb-note" style="margin-bottom:6px">Maiores totais no período</p><ul class="vt-who">${top.map(p=>`<li><span>${esc(p.n)}</span><span>${MONEY0.format(p.t)}</span></li>`).join('')}</ul></div></div>`; };
+  return `<div class="vt">${house('camara')}${house('senado')}</div><p class="vb-note">A cota parlamentar paga despesas do mandato, como escritório, passagens, combustível e divulgação, mediante nota fiscal. Valores como publicados pela <a href="${TR_HOUSE.camara.src}" target="_blank" rel="noopener" style="color:inherit">Câmara</a> e pelo <a href="${TR_HOUSE.senado.src}" target="_blank" rel="noopener" style="color:inherit">Senado</a>, atualizados uma vez por dia; o mês atual ainda está incompleto. O detalhe de cada gasto está no perfil de cada parlamentar.</p>`;
+}
+
 /* ---------- overview (#visao-geral) ----------
    A dashboard made only from what the site already has: the cards (PROJECTS + AGENDA), the composition of
    each house, the robot's live.json and the e-Cidadania numbers in consultas.json. */
@@ -3176,6 +3284,7 @@ function renderVg(keep){
       <section class="vb w7" aria-labelledby="vb4"><div class="vb-h"><h2 id="vb4">Últimas votações</h2></div>${vgVotes(all)}</section>
       <section class="vb w5" aria-labelledby="vb5"><div class="vb-h"><h2 id="vb5">${consData && !consData.alta.length ? 'Enquetes mais votadas' : 'Enquetes em alta'}</h2><a href="#consultas">Ver todas →</a></div><div id="vg-enq">${vgEnquetes()}</div></section>
       <section class="vb w12" aria-labelledby="vb6"><div class="vb-h"><h2 id="vb6">Quem ocupa as cadeiras</h2></div>${vgCadeiras()}</section>
+      <section class="vb w12" aria-labelledby="vb7"><div class="vb-h"><h2 id="vb7">Transparência · cota parlamentar nos últimos 12 meses</h2></div><div id="vg-tr">${vgTransp()}</div></section>
     </div>
   </div>`;
   if (keep) vg.scrollTop = top;
@@ -3188,6 +3297,7 @@ function showVg(){
   if (!vg.hidden) return;
   renderVg(false);
   if (!consData) Promise.resolve(loadCons()).then(()=>{ if (!vg.hidden) renderVg(true); });
+  if (!trResumo) loadTr().then(()=>{ if (!vg.hidden) renderVg(true); }).catch(()=>{ const b = document.getElementById('vg-tr'); if (b) b.innerHTML = '<p class="vd-none">Não deu para carregar os gastos agora.</p>'; });
   vg.scrollTop = 0;
   vg.hidden = false; requestAnimationFrame(()=>vg.classList.add('show'));
   document.title = 'Visão geral · Quorum';
