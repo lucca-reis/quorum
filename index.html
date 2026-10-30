@@ -460,7 +460,14 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .today > .feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 10px 32px 0;scrollbar-width:thin}
 
 /* cards: the same piece on the opening view and in every section. Compact by default, they open in place */
-.feed{list-style:none;margin:0;display:flex;flex-direction:column;gap:10px}
+.feed{list-style:none;margin:0;display:flex;flex-direction:column;gap:22px}
+.fd{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start}
+.fd-date{margin:14px 0 0;display:flex;flex-direction:column;align-items:center;line-height:1;text-align:center;color:var(--muted)}
+.fd-date span{font-size:10px;letter-spacing:.04em}
+.fd-date b{font-size:17px;font-weight:400;margin:3px 0;color:color-mix(in srgb, var(--ink) 70%, var(--bg))}
+.fd.is-today .fd-date b{font-size:12.5px;font-weight:500;color:var(--ink);margin:2px 0}
+.fd-cards{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+@media (max-width:560px){ .fd{grid-template-columns:32px minmax(0,1fr);gap:8px} }
 .card{--card:color-mix(in srgb, var(--ink) 5%, var(--bg));border-radius:20px;background:var(--card);color:var(--ink);font-family:var(--display);transition:background-color .2s}
 .card:hover{--card:color-mix(in srgb, var(--ink) 8%, var(--bg))}
 .card p{margin:0}
@@ -477,8 +484,8 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .c-vline{display:flex;margin-top:2px}
 .c-vline .mv svg{width:44px}
 .c-vres{font-size:13.5px;font-weight:500}
-.c-more{position:absolute;right:16px;bottom:16px;width:9px;height:9px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
-.card.open .c-more{transform:rotate(-135deg) translate(-3px,-3px)}
+.c-more{position:absolute;right:16px;bottom:16px;width:5px;height:5px;border-right:1.25px solid var(--muted);border-bottom:1.25px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+.card.open .c-more{transform:rotate(-135deg) translate(-2px,-2px)}
 .c-body{display:flex;flex-direction:column;gap:8px;padding:0 18px 16px}
 .c-body[hidden]{display:none}
 .c-desc{font-size:14px;line-height:1.45;color:color-mix(in srgb, var(--ink) 82%, var(--bg))}
@@ -1936,7 +1943,7 @@ function cardHTML(c, key){
   const id = 'cx-'+c.slug+(key?'-'+key:'');
   return `<li><article class="card${live?' is-live':''}">
     <button type="button" class="c-head" aria-expanded="false" aria-controls="${id}">
-      <span class="c-top"><span class="c-pill"><span class="c-dot" aria-hidden="true"></span>${POWER_NAME[S.here]}${live ? ' · ao vivo' : ph ? ' · '+ph : ''}</span><span class="c-since">${since}</span></span>
+      <span class="c-top"><span class="c-pill"><span class="c-dot" aria-hidden="true"></span>${POWER_NAME[S.here]}${live ? ' · ao vivo' : ph ? ' · '+ph : ''}</span></span>
       <span class="c-title">${esc(P.title)}</span>
       ${ok(P.status) ? `<span class="c-phase">${esc(P.status)}</span>` : ''}
       ${v ? `<span class="c-vline">${mv || `<span class="c-vres">${esc(v.result)}</span>`}</span>` : ''}
@@ -1963,7 +1970,16 @@ function feedHTML(key){
   const list = CARDS.filter(c=> !key || c.P.house===key || c.ev.some(e=> e.key===key))
     .map(c=> ({c, L: cardState(c, key).last}))
     .sort((a,b)=> (b.L ? b.L.date+String(evMin(b.L)+10).padStart(5,'0') : '0') .localeCompare(a.L ? a.L.date+String(evMin(a.L)+10).padStart(5,'0') : '0'));
-  return list.map(x=> cardHTML(x.c, key)).join('');
+  // grouped by the day each item was last dealt with, like the calendar but quieter
+  const t = todayISO(), groups = [];
+  list.forEach(x=>{ const d = x.L ? x.L.date : ''; const g = groups[groups.length-1];
+    if (g && g.d===d) g.items.push(x); else groups.push({d, items:[x]}); });
+  return groups.map(g=>{
+    let date = '';
+    if (g.d){ const [y,m,dd] = g.d.split('-').map(Number), wd = ['dom','seg','ter','qua','qui','sex','sáb'][new Date(y,m-1,dd).getDay()];
+      date = g.d===t ? '<b>hoje</b>' : `<span>${wd}</span><b>${dd}</b><span>${MO[m-1]}${y!==+t.slice(0,4)?' '+y:''}</span>`; }
+    return `<li class="fd${g.d===t?' is-today':''}"><p class="fd-date">${date}</p><ol class="fd-cards">${g.items.map(x=> cardHTML(x.c, key)).join('')}</ol></li>`;
+  }).join('');
 }
 
 /* the feed on the opening view */
