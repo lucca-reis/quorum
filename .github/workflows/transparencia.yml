@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: atualizar
+  group: transparencia
   cancel-in-progress: false
 
 jobs:
