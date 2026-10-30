@@ -474,6 +474,17 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .c-sub{font-size:13px;color:var(--muted)}
 .c-code{font-variant-numeric:tabular-nums}
 .c-what{font-size:14px;line-height:1.4}
+.mv{display:flex;align-items:center;gap:14px;margin:6px 0 0;padding:10px 14px;border-radius:14px;background:var(--bg);align-self:flex-start;max-width:100%}
+.mv svg{display:block;width:96px;height:auto;flex:none}
+.mv.big svg{width:150px}
+.mv circle.mv-y{fill:var(--ink)}
+.mv circle.mv-n{fill:#E24B4A}
+.mv circle.mv-o{fill:color-mix(in srgb, var(--ink) 14%, var(--bg))}
+.mv-leg{margin:0;display:flex;flex-direction:column;gap:3px;font-size:12px;line-height:1.3;color:var(--muted)}
+.mv-leg b{font-weight:500;color:var(--ink)}
+.mv-leg span{display:inline-flex;align-items:center;gap:6px}
+.mv-leg i{width:8px;height:8px;border-radius:50%;flex:none}
+.mv-leg i.mv-y{background:var(--ink)}.mv-leg i.mv-n{background:#E24B4A}.mv-leg i.mv-o{background:color-mix(in srgb, var(--ink) 14%, var(--bg))}
 .c-meta{margin:8px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px;font-size:12.5px;line-height:1.35}
 .c-meta div{min-width:0}
 .c-meta dt{font-size:11.5px;color:var(--muted);margin-bottom:1px}
@@ -1838,6 +1849,39 @@ function cardDate(iso, time){
   return time ? `${day}, ${time}` : day;
 }
 const NI = /^n[ãa]o informad/i;
+/* mini plenary: one dot per seat, coloured by how it voted (only when the sources give the count) */
+function voteBody(P){
+  const v = P.votes; if (!v || !v.tally || !v.tally.length) return null;
+  if (P.house==='stf' || /STF|Supremo|Plenário virtual|Plenário, /.test(v.label||'') && P.house==='stf') return 'stf';
+  if (/Senado/i.test(v.label||'') || (P.house==='senado' && !/Câmara/i.test(v.label||''))) return 'senado';
+  return 'camara';
+}
+function miniVote(P, big){
+  const body = voteBody(P); if (!body) return '';
+  const v = P.votes, [lab, yes, no] = v.tally[v.tally.length-1], [ly, ln] = v.labels || ['sim','não'];
+  const total = body==='stf' ? 11 : body==='senado' ? 81 : 513, rest = Math.max(0, total - yes - no);
+  const kinds = [...Array(yes).fill('y'), ...Array(no).fill('n'), ...Array(rest).fill('o')];
+  let pts = [], vb, r;
+  if (body==='stf'){
+    // the U table: four seats up each arm and three across the bottom, filled left arm → bottom → right arm
+    const L = [[10,10],[10,22],[10,34],[10,46]], B = [[24,56],[38,56],[52,56]], R = [[66,46],[66,34],[66,22],[66,10]];
+    pts = [...L, ...B, ...R]; vb = '0 0 76 64'; r = 4.2;
+  } else {
+    // hemicycle: rows of seats on concentric arcs, filled by angle from left to right
+    const rows = body==='senado' ? 4 : 9, R1 = 50, R0 = body==='senado' ? 26 : 18, all = [];
+    const radii = Array.from({length:rows}, (_,i)=> R0 + (R1-R0)*i/(rows-1));
+    const sum = radii.reduce((a,b)=>a+b,0);
+    let left = total;
+    radii.forEach((rad,i)=>{ const n = i===rows-1 ? left : Math.round(total*rad/sum); left -= n;
+      for (let j=0;j<n;j++){ const a = Math.PI*(n===1?.5:j/(n-1)); all.push({a, x:54-Math.cos(a)*rad, y:54-Math.sin(a)*rad}); } });
+    all.sort((p,q)=> p.a-q.a); pts = all.map(p=>[p.x,p.y]); vb = '0 0 108 58'; r = body==='senado' ? 2.3 : 1.25;
+  }
+  const table = body==='stf' ? '<path d="M18 4 V48 H58 V4 H52 V42 H24 V4 Z" fill="none" stroke="var(--rule)" stroke-width="1"/>' : '';
+  const dots = pts.map(([x,y],i)=>`<circle class="mv-${kinds[i]||'o'}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}"/>`).join('');
+  const legend = `<span><i class="mv-y"></i>${yes} ${esc(ly)}</span><span><i class="mv-n"></i>${no} ${esc(ln)}</span>${rest ? `<span><i class="mv-o"></i>${rest} ${body==='stf'?'sem voto':'não votaram'}</span>` : ''}`;
+  const label = `${v.tally.length>1 ? esc(lab)+' · ' : ''}${body==='stf'?'STF':body==='senado'?'Senado':'Câmara'}`;
+  return `<div class="mv${big?' big':''}" role="img" aria-label="${label}: ${yes} ${esc(ly)}, ${no} ${esc(ln)}${rest?', '+rest+' sem voto':''}"><svg viewBox="${vb}" aria-hidden="true">${table}${dots}</svg><p class="mv-leg"><b>${label}</b>${legend}</p></div>`;
+}
 function cardHTML(c, key){
   const P = c.P, S = cardState(c, key), L = S.last;
   const when = L ? `${POWER_NAME[L.key]} · ${cardDate(L.date, L.time)}` : 'ainda não foi a plenário';
@@ -1851,6 +1895,7 @@ function cardHTML(c, key){
     <h3 class="c-title">${esc(P.title)}</h3>
     <p class="c-sub"><span class="c-code" title="${esc(P.type)}">${esc(P.code)}</span> · ${when}</p>
     <p class="c-what">${esc(what)}</p>
+    ${miniVote(P)}
     <dl class="c-meta">
       ${cell(P.house==='stf' ? 'Autor' : 'Autoria', ok(P.author) ? esc(P.author) : 'não informado')}
       ${cell(P.house==='stf' ? 'Relator(a)' : 'Relatoria', ok(P.rapporteur) ? esc(P.rapporteur) : 'não informado')}
@@ -2259,7 +2304,7 @@ function renderProject(slug){
         <section><h3>Resumo</h3><p class="pj-lede">${esc(P.summary)}</p></section>
         ${P.points && P.points.length ? `<section><h3>O que muda</h3><ul class="pj-points">${P.points.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>` : ''}
         <section><h3>${isStf?'Andamento':'Tramitação'}</h3><ol class="pj-steps">${P.steps.map(([d,t])=>`<li class="${d>today?'future':''}"><time datetime="${d}">${fmtDate(d)}</time><i aria-hidden="true"></i><span>${esc(t)}</span></li>`).join('')}</ol></section>
-        <section><h3>${isStf?'Julgamento':'Votação'}</h3>${v ? `<div class="pj-vote"><span class="lbl">${esc(v.label)}</span><span class="res">${esc(v.result)}</span>${tally}${v.note?`<p class="note">${esc(v.note)}</p>`:''}</div>` : `<p class="pj-none">${isStf?'Ainda sem julgamento concluído no Plenário.':'Ainda sem votação registrada em Plenário.'}</p>`}</section>
+        <section><h3>${isStf?'Julgamento':'Votação'}</h3>${v ? `<div class="pj-vote"><span class="lbl">${esc(v.label)}</span><span class="res">${esc(v.result)}</span>${miniVote(P,true)}${tally}${v.note?`<p class="note">${esc(v.note)}</p>`:''}</div>` : `<p class="pj-none">${isStf?'Ainda sem julgamento concluído no Plenário.':'Ainda sem votação registrada em Plenário.'}</p>`}</section>
       </div>
       <aside class="pj-side">
         <dl class="pj-facts">
