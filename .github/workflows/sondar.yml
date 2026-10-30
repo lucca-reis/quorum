@@ -1,0 +1,28 @@
+name: Sondar transparência (temporário)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/sondar.yml']
+permissions:
+  contents: write
+jobs:
+  sondar:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir out; cd out
+          UA='Mozilla/5.0 (X11; Linux x86_64) quorum'
+          curl -sSL -A "$UA" -o cam.zip -w "camzip %{http_code} %{size_download}\n" "https://www.camara.leg.br/cotas/Ano-2026.csv.zip" | tee log.txt
+          unzip -o cam.zip >/dev/null 2>&1; ls -la >> log.txt
+          for f in *.csv; do echo "== $f" >> log.txt; wc -l "$f" >> log.txt; head -4 "$f" >> log.txt; done
+          curl -sSL -A "$UA" -o sen.csv -w "sen %{http_code} %{size_download}\n" "https://www.senado.gov.br/transparencia/LAI/verba/despesa_ceaps_2026.csv" >> log.txt
+          head -c 1500 sen.csv >> log.txt; echo >> log.txt; wc -l sen.csv >> log.txt; tail -3 sen.csv >> log.txt
+          curl -sSL -H 'Accept: application/json' -A "$UA" "https://dadosabertos.camara.leg.br/api/v2/deputados?itens=3&ordem=ASC&ordenarPor=nome" -o dep.json -w "dep %{http_code}\n" >> log.txt
+          curl -sSL -H 'Accept: application/json' -A "$UA" "https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json" -o sen-atual.json -w "senatual %{http_code} %{size_download}\n" >> log.txt
+          curl -sSL -H 'Accept: application/json' -A "$UA" "https://legis.senado.leg.br/dadosabertos/senador/lista/atual" -o sen-atual.xml -w "senatualxml %{http_code} %{size_download}\n" >> log.txt
+          head -c 1500 sen-atual.json >> log.txt
+          rm -f cam.zip *.csv; head -c 3000 dep.json > dep.head; mv sen-atual.json sa.json
+          git init -q; git checkout -qb sonda; git add log.txt dep.head sa.json
+          git -c user.name=robo -c user.email=robo@x commit -qm sonda
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" sonda
