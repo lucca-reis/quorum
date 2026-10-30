@@ -274,7 +274,7 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 /* the o of Quorum is a solid dot, the size of a lowercase letter */
 .brand-o{display:inline-block;width:.54em;height:.54em;margin:0 .045em;border-radius:50%;background:currentColor;vertical-align:baseline}
 .today-date{font-size:14px;color:var(--muted);white-space:nowrap}
-.menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:50px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;max-width:100%}
+.menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:150px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;max-width:100%}
 .nav-grp{flex:1 1 0;position:relative;display:flex}
 .nav-leg{all:unset;box-sizing:border-box;flex:1;cursor:pointer;text-align:center;padding:7px 10px;border-radius:999px;color:color-mix(in srgb, var(--ink) 72%, var(--bg));display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;transition:background-color .2s, color .2s}
 .nav-leg:hover,.nav-grp:hover .nav-leg,.nav-grp.open .nav-leg{color:var(--ink);background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
@@ -294,14 +294,19 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .menu nav a:hover{color:var(--ink)}
 .menu nav a:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
 .menu nav a[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));color:var(--ink)}
-.menu .cal-link{grid-column:2;grid-row:1;justify-self:end;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;transition:background-color .2s}
+.menu-tools{grid-column:2;grid-row:1;justify-self:end;display:flex;align-items:center;gap:6px}
+.menu .vg-link{padding:7px 12px;border-radius:999px;color:color-mix(in srgb, var(--ink) 72%, var(--bg));transition:background-color .2s, color .2s}
+.menu .vg-link:hover{color:var(--ink);background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
+.menu .vg-link[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));color:var(--ink)}
+.menu .cal-link{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;transition:background-color .2s}
 .menu .cal-link:hover{background:color-mix(in srgb, var(--ink) 6%, var(--bg))}
 .menu .cal-link[aria-current="page"]{background:var(--ink);color:var(--bg)}
 .menu a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .menu .brand{padding:6px 10px;margin:0 -6px 0 -10px;border-radius:999px;transition:background-color .2s}
 .menu .brand:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
-@media (max-width:1180px){ .menu nav .long{display:none} }
-@media (max-width:1000px){ .menu nav > a,.nav-leg{padding:7px 4px;font-size:13px} .menu nav{margin-right:46px} }
+@media (max-width:1180px){ .menu nav .long{display:none} .menu nav > a,.nav-leg{padding:7px 6px} }
+@media (min-width:761px) and (max-width:1100px){ .menu{grid-template-columns:auto minmax(0,1fr)} .menu nav{margin-left:auto;max-width:460px} }
+@media (max-width:1000px){ .menu nav > a,.nav-leg{padding:7px 4px;font-size:13px} .menu nav{margin-right:138px} .menu .vg-link{padding:7px 8px;font-size:13px} }
 @media (max-width:760px){
   :root{--menu-h:96px}
   .menu{grid-template-columns:1fr auto;grid-template-rows:auto auto;row-gap:8px;column-gap:12px;align-content:center}
@@ -312,7 +317,8 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
   .menu nav > a,.nav-leg{padding:7px 2px;flex:1 1 auto;text-align:center;font-size:12.5px}
   .nav-car{margin-left:4px}
   .menu nav .long{display:none}
-  .menu .cal-link{grid-column:2;grid-row:1}
+  .menu-tools{grid-column:2;grid-row:1}
+  .menu .vg-link{font-size:13.5px}
 }
 @media (max-width:380px){
   .menu nav > a,.nav-leg{padding:7px 1px;font-size:11.5px}
@@ -823,7 +829,8 @@ h1[tabindex="-1"]:focus{outline:none}
 .ve .cs-bar{height:8px;margin:0}
 .ve-n{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .ve-n b{font-weight:500;color:var(--ink)}
-.vc{display:grid;grid-template-columns:1.3fr 1fr .8fr;gap:20px;align-items:end}
+.vc{display:grid;grid-template-columns:1.35fr 1fr .75fr;gap:28px;align-items:end}
+.vc-h.vc-stf svg{width:auto;max-width:100%;height:clamp(130px,13vw,172px);align-self:flex-start}
 .vc-h{display:flex;flex-direction:column;gap:10px;min-width:0}
 .vc-h svg{display:block;width:100%;height:auto}
 .vc-h h3{margin:0;font-size:14px;font-weight:500}
@@ -844,7 +851,6 @@ h1[tabindex="-1"]:focus{outline:none}
 <header class="menu">
   <div class="brand-wrap"><a class="brand" href="#" data-nav="home" aria-label="Quorum"><span aria-hidden="true">Qu<i class="brand-o"></i>rum</span></a><span class="today-date" id="today-date"></span></div>
   <nav aria-label="Poderes">
-    <a href="#visao-geral" data-nav="visao">Visão geral</a>
     <a href="#" data-nav="pres">Executivo</a>
     <div class="nav-grp">
       <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub">
@@ -854,7 +860,7 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
     <a href="#" data-nav="stf">Judiciário</a>
     <a href="#consultas" data-nav="consultas">Enquetes</a>
   </nav>
-  <a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a>
+  <div class="menu-tools"><a class="vg-link" href="#visao-geral" data-nav="visao">Visão geral</a><a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a></div>
 </header>
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
   <div class="lx" aria-label="Os três poderes">
@@ -3151,11 +3157,10 @@ function vgCadeiras(){
     const top = Object.entries(cnt).sort((a,b)=> b[1]-a[1]).slice(0,5);
     return `<div class="vc-h"><h3>${title} <span>${ps.length} cadeiras</span></h3>${hemi(ps, rows, r)}<ul class="vc-leg">${top.map(([p,n])=>`<li><i style="background:${PARTY[p]||'var(--nc)'}"></i>${esc(PARTY_NAME[p]||p)} <b>${n}</b></li>`).join('')}</ul></div>`;
   };
-  // the court: eleven seats in a U, coloured by the president who appointed each minister
-  const seats = [[1.5,1],[1.5,2],[1.5,3],[1.5,4],[10.5,1],[10.5,2],[10.5,3],[10.5,4],[3.75,5],[6,5],[8.25,5]];
-  const mins = STF_MIN.slice();
-  const by = {}; mins.forEach(m=>{ const k = m.vacant ? 'Vaga' : m.by; by[k] = (by[k]||0)+1; });
-  const stf = `<div class="vc-h"><h3>Supremo <span>11 cadeiras</span></h3><svg viewBox="0 0 12 6.2" aria-hidden="true" style="max-width:150px">${seats.map(([x,y],i)=>{ const m = mins[i]; return `<circle cx="${x}" cy="${y}" r=".62" fill="${m && !m.vacant ? (STF_BY_COLOR[m.by]||'var(--ink)') : 'var(--nc)'}"/>`; }).join('')}</svg><ul class="vc-leg">${Object.entries(by).sort((a,b)=> b[1]-a[1]).map(([k,n])=>`<li><i style="background:${STF_BY_COLOR[k]||'var(--nc)'}"></i>${k==='Vaga'?'vaga':esc(PRES_SHORT[k]||k)} <b>${n}</b></li>`).join('')}</ul></div>`;
+  // the court: the same U table and eleven seats as the Supremo drawing, coloured by the president who appointed each minister
+  const seats = [[345,450],[450,450],[240,450],[533,360],[157,360],[533,285],[157,285],[533,210],[157,210],[533,135],[157,135]];
+  const by = {}; STF_MIN.forEach(m=>{ const k = m.vacant ? 'Vaga' : m.by; by[k] = (by[k]||0)+1; });
+  const stf = `<div class="vc-h vc-stf"><h3>Supremo <span>11 cadeiras</span></h3><svg viewBox="128 84 434 394" aria-hidden="true"><path d="M195 96 L195 412 L495 412 L495 96 L449 96 L449 366 L241 366 L241 96 Z" fill="none" stroke="var(--rule)" stroke-width="3" stroke-linejoin="round"/>${seats.map(([x,y],i)=>{ const m = STF_MIN[i]; return `<circle cx="${x}" cy="${y}" r="19" fill="${m && !m.vacant ? (STF_BY_COLOR[m.by]||'var(--ink)') : 'var(--nc)'}"/>`; }).join('')}</svg><ul class="vc-leg">${Object.entries(by).sort((a,b)=> b[1]-a[1]).map(([k,n])=>`<li><i style="background:${STF_BY_COLOR[k]||'var(--nc)'}"></i>${k==='Vaga'?'vaga':esc(PRES_SHORT[k]||k)} <b>${n}</b></li>`).join('')}</ul></div>`;
   return `<div class="vc">${house('camara', 9, 1.25, 'Câmara')}${house('senado', 4, 2.3, 'Senado')}${stf}</div><p class="vb-note">Deputados e senadores pintados por partido; ministros do Supremo pela cor do presidente que os indicou.</p>`;
 }
 function renderVg(keep){
