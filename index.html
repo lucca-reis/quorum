@@ -891,6 +891,38 @@ h1[tabindex="-1"]:focus{outline:none}
   .c-head .xm{flex-direction:row-reverse;align-items:center;gap:10px}
   .xm-stamp{transform:rotate(-3deg)}
 }
+/* menu lists: ministries scroll inside the Executivo list; courts show their initials and full name */
+.nav-sub-wide{min-width:290px}
+.nav-grp-exec .nav-sub{left:0;transform:translate(0,-4px)}
+.nav-grp-exec.open .nav-sub{transform:translate(0,0)}
+@media (hover:hover){ .nav-grp-exec:hover .nav-sub{transform:translate(0,0)} }
+.nav-h{margin:8px 20px 2px;font-size:11.5px;color:var(--muted)}
+.nav-scroll{display:flex;flex-direction:column;gap:2px;max-height:min(56vh,420px);overflow-y:auto;overscroll-behavior:contain;margin-bottom:4px;scrollbar-width:thin}
+.nav-scroll a{white-space:normal;line-height:1.25;padding:7px 16px}
+.nav-sub-courts{min-width:300px}
+.nav-sub-courts a{display:flex;gap:10px;align-items:baseline}
+.nav-sub-courts a b{font-weight:500;color:var(--ink);min-width:2.6em}
+/* institution pages (#tribunal-*, #ministerio-*): text only for now */
+.cw.inst-w{max-width:880px;gap:28px}
+.inst-eye{margin:0 0 6px;font-size:13px;color:var(--muted)}
+.inst-lede{margin:0;font-size:clamp(16px,1.6vw,19px);line-height:1.5;max-width:62ch}
+.inst-card{background:color-mix(in srgb, var(--ink) 5%, var(--bg));border-radius:22px;padding:20px 22px;display:flex;flex-direction:column;gap:18px}
+.inst-card h2{margin:0;font-size:13px;font-weight:400;color:var(--muted)}
+.inst-dl{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 28px}
+.inst-dl dt{font-size:12px;color:var(--muted);margin:0 0 3px}
+.inst-dl dd{margin:0;font-size:16px;line-height:1.35}
+.inst-dl dd small{display:block;font-size:13px;color:var(--muted)}
+.inst-links{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.inst-links li + li{border-top:1px solid var(--rule)}
+.inst-links a{display:flex;justify-content:space-between;gap:12px;padding:11px 0;color:var(--ink);text-decoration:none;font-size:15px}
+.inst-links a::after{content:"↗";color:var(--muted)}
+.inst-links a.int::after{content:"→"}
+.inst-links a:hover{text-decoration:underline;text-underline-offset:3px}
+.inst-more{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.inst-more a{display:inline-block;padding:7px 13px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--rule);color:var(--ink);text-decoration:none;font-size:13.5px}
+.inst-more a:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
+.inst-more a[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));box-shadow:none}
+@media (max-width:560px){ .inst-dl{grid-template-columns:minmax(0,1fr)} .inst-card{padding:16px;border-radius:18px} .nav-sub-wide,.nav-sub-courts{min-width:260px} }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -901,13 +933,19 @@ h1[tabindex="-1"]:focus{outline:none}
 <header class="menu">
   <div class="brand-wrap"><a class="brand" href="#" data-nav="home" aria-label="Quorum"><span aria-hidden="true">Qu<i class="brand-o"></i>rum</span></a><span class="today-date" id="today-date"></span></div>
   <nav aria-label="Poderes">
-    <a href="#" data-nav="pres">Executivo</a>
-    <div class="nav-grp">
+    <div class="nav-grp nav-grp-exec" data-grp="exec">
+      <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub-exec">Executivo<span class="nav-car" aria-hidden="true"></span></button>
+      <div class="nav-sub nav-sub-wide" id="nav-sub-exec"><a href="#" data-nav="pres">Presidência</a><p class="nav-h">Ministérios</p><div class="nav-scroll" id="nav-min"></div></div>
+    </div>
+    <div class="nav-grp" data-grp="leg">
       <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub">
 Legislativo<span class="nav-car" aria-hidden="true"></span></button>
       <div class="nav-sub" id="nav-sub"><a href="#" data-nav="senado">Senado</a><a href="#" data-nav="camara">Congresso</a></div>
     </div>
-    <a href="#" data-nav="stf">Judiciário</a>
+    <div class="nav-grp" data-grp="jud">
+      <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub-jud">Judiciário<span class="nav-car" aria-hidden="true"></span></button>
+      <div class="nav-sub nav-sub-courts" id="nav-sub-jud"><a href="#" data-nav="stf"><b>STF</b> Supremo Tribunal Federal</a><a href="#tribunal-stj" data-route="t:stj"><b>STJ</b> Superior Tribunal de Justiça</a><a href="#tribunal-tst" data-route="t:tst"><b>TST</b> Tribunal Superior do Trabalho</a><a href="#tribunal-tse" data-route="t:tse"><b>TSE</b> Tribunal Superior Eleitoral</a><a href="#tribunal-stm" data-route="t:stm"><b>STM</b> Superior Tribunal Militar</a></div>
+    </div>
     <a href="#consultas" data-nav="consultas">Enquetes</a>
   </nav>
   <div class="menu-tools"><a class="vg-link" href="#visao-geral" data-nav="visao">Visão geral</a><a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a></div>
@@ -962,6 +1000,7 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
 <article class="proj cal" id="cal" hidden aria-labelledby="cal-title"></article>
 <article class="proj cal cons" id="cons" hidden aria-labelledby="cons-title"></article>
 <article class="proj cal vgp" id="vg" hidden aria-labelledby="vg-title"></article>
+<article class="proj cal inst" id="inst" hidden aria-labelledby="inst-title"></article>
 
 <script>
 const NS = 'http://www.w3.org/2000/svg';
@@ -2636,27 +2675,35 @@ function navTo(key){
   if (openKey===key) return;
   if (openKey){ close(); setTimeout(()=>open(key, true), reduce?0:680); } else open(key, true);
 }
-const navGrp = document.querySelector('.nav-grp'), navLeg = navGrp.querySelector('.nav-leg');
-function legOpen(on){ navGrp.classList.toggle('open', on); navLeg.setAttribute('aria-expanded', String(on)); }
+// Executivo, Legislativo and Judiciário open their lists: on hover with a mouse, on tap or Enter otherwise
+const NAV_GRPS = [...document.querySelectorAll('.nav-grp')];
+const grpBtn = g => g.querySelector('.nav-leg');
+function grpOpen(g, on){ g.classList.toggle('open', on); grpBtn(g).setAttribute('aria-expanded', String(on)); }
+function legOpen(on){ if (!on) NAV_GRPS.forEach(g=> grpOpen(g, false)); }
+document.getElementById('nav-min').innerHTML = EXEC_MIN.map(M=>`<a href="#ministerio-${slugName(M.pasta)}" data-route="m:${slugName(M.pasta)}">${esc(M.pasta)}</a>`).join('');
+document.querySelectorAll('.nav-sub [data-route]').forEach(a=> a.addEventListener('click', ()=>{ legOpen(false); a.blur(); }));
 document.querySelectorAll('.menu [data-nav]').forEach(a=>a.addEventListener('click', e=>{
   e.preventDefault(); e.stopPropagation(); legOpen(false); a.blur(); navTo(a.dataset.nav);
 }));
-// Legislativo opens Senado and Congresso: on hover with a mouse, on tap or Enter otherwise
-navLeg.addEventListener('click', e=>{ e.stopPropagation(); legOpen(!navGrp.classList.contains('open')); });
-navGrp.addEventListener('mouseleave', ()=> legOpen(false));
+NAV_GRPS.forEach(g=>{
+  grpBtn(g).addEventListener('click', e=>{ e.stopPropagation(); const on = !g.classList.contains('open'); legOpen(false); grpOpen(g, on); });
+  g.addEventListener('mouseleave', ()=> grpOpen(g, false));
+  g.addEventListener('focusout', e=>{ if (!g.contains(e.relatedTarget)) grpOpen(g, false); });
+  g.addEventListener('keydown', e=>{ if (e.key==='Escape' && g.classList.contains('open')){ e.stopPropagation(); grpOpen(g, false); grpBtn(g).focus(); } });
+});
 // the consultations list is fetched as soon as someone points at its menu item, so the page opens ready
 document.querySelector('.menu [data-nav="consultas"]').addEventListener('pointerenter', ()=>{ if (typeof loadCons==='function') loadCons(); }, {once:true});
-navGrp.addEventListener('focusout', e=>{ if (!navGrp.contains(e.relatedTarget)) legOpen(false); });
-navGrp.addEventListener('keydown', e=>{ if (e.key==='Escape' && navGrp.classList.contains('open')){ e.stopPropagation(); legOpen(false); navLeg.focus(); } });
-document.addEventListener('click', e=>{ if (!navGrp.contains(e.target)) legOpen(false); });
+document.addEventListener('click', e=>{ if (!e.target.closest('.nav-grp')) legOpen(false); });
 const NAV_LINKS = [...document.querySelectorAll('.menu [data-nav]:not(.brand)')];
 let navHere;
 setInterval(()=>{
   if (document.hidden) return;
-  const here = !vg.hidden ? 'visao' : !cons.hidden ? 'consultas' : !cal.hidden ? 'calendario' : openView() || openKey;
+  const here = !inst.hidden ? instKey : !vg.hidden ? 'visao' : !cons.hidden ? 'consultas' : !cal.hidden ? 'calendario' : openView() || openKey;
   if (here===navHere) return; navHere = here;
   NAV_LINKS.forEach(a=>{ if (a.dataset.nav===here) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
-  if (here==='senado'||here==='camara') navLeg.setAttribute('aria-current','page'); else navLeg.removeAttribute('aria-current');
+  document.querySelectorAll('.nav-sub [data-route]').forEach(a=>{ if (a.dataset.route===here) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  const grp = here==='senado'||here==='camara' ? 'leg' : here==='pres'||/^m:/.test(here||'') ? 'exec' : here==='stf'||/^t:/.test(here||'') ? 'jud' : '';
+  NAV_GRPS.forEach(g=>{ if (g.dataset.grp===grp) grpBtn(g).setAttribute('aria-current','page'); else grpBtn(g).removeAttribute('aria-current'); });
 }, 200);
 
 
@@ -2668,13 +2715,14 @@ function goBack(){
   else if (!cal.hidden) leaveCal();
   else if (!cons.hidden) leaveCal();
   else if (!vg.hidden) leaveCal();
+  else if (!inst.hidden) leaveCal();
   else if (personState) closePerson();
   else if (partyState) closeParty();
   else if (openView()) exitView(VIEWS[openView()]);
   else if (openKey) close();
   else if (landing.hidden) exitPlan();
 }
-function syncBack(){ if (document.hidden) return; const want = !((typeof VIEWS!=='undefined' && openView()) || (typeof landing!=='undefined' && landing.hidden) || openKey || partyState || personState || (typeof proj!=='undefined' && !proj.hidden) || (typeof cal!=='undefined' && !cal.hidden) || (typeof cons!=='undefined' && !cons.hidden) || (typeof vg!=='undefined' && !vg.hidden)); if (backBtn.hidden!==want) backBtn.hidden = want; }
+function syncBack(){ if (document.hidden) return; const want = !((typeof VIEWS!=='undefined' && openView()) || (typeof landing!=='undefined' && landing.hidden) || openKey || partyState || personState || (typeof proj!=='undefined' && !proj.hidden) || (typeof cal!=='undefined' && !cal.hidden) || (typeof cons!=='undefined' && !cons.hidden) || (typeof vg!=='undefined' && !vg.hidden) || (typeof inst!=='undefined' && !inst.hidden)); if (backBtn.hidden!==want) backBtn.hidden = want; }
 backBtn.addEventListener('click', e=>{ e.stopPropagation(); goBack(); setTimeout(syncBack, 0); });
 setInterval(syncBack, 200);
 
@@ -3117,7 +3165,7 @@ const TR_HOUSE = {camara:{name:'Câmara', src:'https://www.camara.leg.br/transpa
 const MONEY = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
 const MONEY0 = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
 const moneyShort = v => v>=1e6 ? 'R$ '+FMT_PCT.format(Math.round(v/1e5)/10)+' mi' : v>=1e3 ? 'R$ '+FMT_NUM.format(Math.round(v/1e3))+' mil' : MONEY0.format(v);
-const slugName = t => String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function slugName(t){ return String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
 function trFetch(path){
   const urls = /^https?:$/.test(location.protocol) && !FRAMED ? [path, TR_BASE+path] : [TR_BASE+path];
   const tryAt = i => i>=urls.length ? Promise.reject() : fetch(urls[i], {cache:'no-cache'}).then(r=> r.ok ? r.json() : Promise.reject()).catch(()=> tryAt(i+1));
@@ -3355,12 +3403,95 @@ function hideVg(){
   document.title = 'Quorum';
 }
 
+/* ---------- institution pages: superior courts (#tribunal-*) and ministries (#ministerio-*) ----------
+   Text only for now. Court data comes from the Constitution (composition) and from news of each court's
+   current leadership; ministries come from EXEC_MIN, the same list the Presidência view uses. */
+const CF = 'https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm';
+const COURTS = {
+  stj:{sigla:'STJ', nome:'Superior Tribunal de Justiça', site:'https://www.stj.jus.br',
+    what:'É a última palavra sobre as leis federais que não tocam na Constituição. Uniformiza como juízes e tribunais de todo o país aplicam essas leis em causas cíveis e criminais, e julga governadores e outras autoridades em crimes comuns.',
+    comp:'Pelo menos 33 ministros', compNote:'Indicados pelo presidente da República e aprovados pelo Senado (Constituição, art. 104).',
+    pres:'Luis Felipe Salomão', desde:'19 de agosto de 2026', mandato:'2026–2028', vice:'Mauro Campbell Marques',
+    sources:[{l:'SBT News: Salomão assume a presidência do STJ (19/8/2026)',u:'https://sbtnews.sbt.com.br/noticia/politica/luis-felipe-salomao-assume-presidencia-do-stj-nesta-quarta'},{l:'Poder360: Salomão é eleito presidente do STJ',u:'https://www.poder360.com.br/poder-justica/luis-felipe-salomao-e-eleito-novo-presidente-do-stj/'},{l:'Constituição Federal, art. 104',u:CF}]},
+  tst:{sigla:'TST', nome:'Tribunal Superior do Trabalho', site:'https://www.tst.jus.br',
+    what:'É a última instância da Justiça do Trabalho. Julga recursos em causas entre empregados e empregadores e uniformiza a forma como os tribunais regionais aplicam as leis trabalhistas.',
+    comp:'27 ministros', compNote:'Indicados pelo presidente da República e aprovados pelo Senado; parte das vagas é de advogados e de membros do Ministério Público do Trabalho (Constituição, art. 111-A).',
+    pres:'Luiz Philippe Vieira de Mello Filho', desde:'outubro de 2025', mandato:'2025–2027', vice:'Guilherme Caputo Bastos',
+    sources:[{l:'CSJT: Vieira de Mello Filho é eleito presidente do TST para 2025–2027',u:'https://www.csjt.jus.br/web/csjt/-/ministro-vieira-de-mello-filho-%C3%A9-eleito-presidente-do-tst-e-do-csjt-para-o-bi%C3%AAnio-2025/2027'},{l:'Lex Legal: Caputo Bastos será vice-presidente',u:'https://lexlegal.com.br/vieira-de-mello-filho-e-eleito-presidente-do-tst-caputo-bastos-sera-vice-e-freire-pimenta-assumira-a-corregedoria/'},{l:'Constituição Federal, art. 111-A',u:CF}]},
+  tse:{sigla:'TSE', nome:'Tribunal Superior Eleitoral', site:'https://www.tse.jus.br',
+    what:'Organiza e julga as eleições: registra candidaturas, fiscaliza as contas de campanha e dos partidos, julga pedidos de cassação e proclama os eleitos para presidente.',
+    comp:'7 ministros', compNote:'Três do STF, dois do STJ e dois advogados indicados pelo presidente da República, com mandato de dois anos (Constituição, art. 119).',
+    pres:'Nunes Marques', desde:'12 de maio de 2026', mandato:'conduz as eleições de 2026', vice:'André Mendonça',
+    sources:[{l:'Migalhas: Nunes Marques assume o comando do TSE; Mendonça será vice',u:'https://www.migalhas.com.br/quentes/455657/nunes-marques-assume-comando-do-tse-na-terca-feira-mendonca-sera-vice'},{l:'Migalhas: Nunes Marques é eleito presidente do TSE',u:'https://www.migalhas.com.br/quentes/453930/nunes-marques-e-eleito-presidente-do-tse-andre-mendonca-sera-vice'},{l:'Constituição Federal, art. 119',u:CF}]},
+  stm:{sigla:'STM', nome:'Superior Tribunal Militar', site:'https://www.stm.jus.br',
+    what:'Julga, em última instância, os crimes militares definidos em lei, cometidos em geral por integrantes do Exército, da Marinha e da Aeronáutica. É o tribunal superior mais antigo do país.',
+    comp:'15 ministros vitalícios', compNote:'Dez militares (três da Marinha, quatro do Exército e três da Aeronáutica) e cinco civis, indicados pelo presidente da República e aprovados pelo Senado (Constituição, art. 123).',
+    pres:'Maria Elizabeth Rocha', desde:'março de 2025', mandato:'2025–2027', presNote:'Primeira mulher a presidir o tribunal.',
+    sources:[{l:'Poder360: Maria Elizabeth toma posse como 1ª presidente mulher do STM',u:'https://www.poder360.com.br/poder-justica/maria-elizabeth-toma-posse-como-1a-presidente-mulher-do-stm'},{l:'CNN Brasil: quem é a primeira mulher a presidir o STM',u:'https://www.cnnbrasil.com.br/politica/quem-e-a-primeira-mulher-a-presidir-o-stm-em-217-anos/'},{l:'Constituição Federal, art. 123',u:CF}]}
+};
+const inst = document.getElementById('inst');
+let instKey = null;
+function courtHTML(id){
+  const C = COURTS[id]; if (!C) return null;
+  const others = `<ul class="inst-more" aria-label="Outros tribunais superiores"><li><a href="#" data-vnav="stf">STF</a></li>${Object.entries(COURTS).map(([k,c])=>`<li><a href="#tribunal-${k}"${k===id?' aria-current="page"':''}>${c.sigla}</a></li>`).join('')}</ul>`;
+  return `<div class="cw inst-w">
+    <header class="cw-head"><div><p class="inst-eye">Judiciário · tribunal superior</p><h1 id="inst-title">${esc(C.nome)}</h1></div>${infoBox(C.sources,'Fontes')}</header>
+    <p class="inst-lede">${esc(C.what)}</p>
+    <section class="inst-card" aria-labelledby="ic1"><h2 id="ic1">Quem comanda e quem compõe</h2>
+      <dl class="inst-dl">
+        <div><dt>Presidente</dt><dd>${esc(C.pres)}<small>desde ${esc(C.desde)} · ${esc(C.mandato)}${C.presNote ? ' · '+esc(C.presNote) : ''}</small></dd></div>
+        ${C.vice ? `<div><dt>Vice-presidente</dt><dd>${esc(C.vice)}</dd></div>` : ''}
+        <div><dt>Composição</dt><dd>${esc(C.comp)}<small>${esc(C.compNote)}</small></dd></div>
+        <div><dt>Sigla</dt><dd>${esc(C.sigla)}</dd></div>
+      </dl></section>
+    <section class="inst-card" aria-labelledby="ic2"><h2 id="ic2">Links oficiais</h2><ul class="inst-links"><li><a href="${C.site}" target="_blank" rel="noopener">Site do ${esc(C.sigla)}</a></li></ul></section>
+    <section aria-label="Tribunais superiores">${others}</section>
+  </div>`;
+}
+function ministryHTML(id){
+  const M = EXEC_MIN.find(m=> slugName(m.pasta)===id); if (!M) return null;
+  const party = M.p==='NC' ? 'Sem partido ou não informado' : (PARTY_NAME[M.p]||M.p);
+  const i = EXEC_MIN.indexOf(M), prev = EXEC_MIN[i-1], next = EXEC_MIN[i+1];
+  return `<div class="cw inst-w">
+    <header class="cw-head"><div><p class="inst-eye">Executivo · ministério</p><h1 id="inst-title">${esc(M.pasta)}</h1></div>${infoBox(EXEC_SOURCES,'Fontes')}</header>
+    <section class="inst-card" aria-labelledby="ic1"><h2 id="ic1">Quem comanda</h2>
+      <dl class="inst-dl">
+        <div><dt>Ministro(a)</dt><dd>${esc(M.n)}</dd></div>
+        <div><dt>Partido</dt><dd>${esc(party)}</dd></div>
+        <div><dt>No cargo desde</dt><dd>${M.since ? esc(M.since) : 'não informado'}${M.since ? '' : '<small>Já estava no cargo antes da reforma ministerial de abril de 2026.</small>'}</dd></div>
+        <div><dt>Antecessor(a)</dt><dd>${M.prev ? esc(M.prev) : 'não informado'}</dd></div>
+      </dl></section>
+    <section class="inst-card" aria-labelledby="ic2"><h2 id="ic2">Na Presidência</h2><ul class="inst-links"><li><a class="int" href="#" data-vnav="pres">Ver os 38 ministérios no desenho da Presidência</a></li></ul></section>
+    <section aria-label="Outros ministérios"><ul class="inst-more">${[prev,next].filter(Boolean).map(x=>`<li><a href="#ministerio-${slugName(x.pasta)}">${x===prev?'← ':''}${esc(x.pasta)}${x===next?' →':''}</a></li>`).join('')}</ul></section>
+  </div>`;
+}
+function showInst(kind, id){
+  const html = kind==='tribunal' ? courtHTML(id) : ministryHTML(id);
+  if (!html) return false;
+  inst.innerHTML = html;
+  instKey = (kind==='tribunal' ? 't:' : 'm:') + id;
+  inst.scrollTop = 0;
+  if (inst.hidden){ inst.hidden = false; requestAnimationFrame(()=>inst.classList.add('show')); }
+  document.title = inst.querySelector('#inst-title').textContent + ' · Quorum';
+  inst.querySelector('#inst-title').setAttribute('tabindex','-1');
+  inst.querySelector('#inst-title').focus({preventScroll:true});
+  return true;
+}
+function hideInst(){
+  if (inst.hidden) return;
+  inst.classList.remove('show'); inst.hidden = true; inst.innerHTML = ''; instKey = null;
+  document.title = 'Quorum';
+}
+inst.addEventListener('click', e=>{ const b = e.target.closest('[data-vnav]'); if (b){ e.preventDefault(); navTo(b.dataset.vnav); } });
+
 function showRoute(){
   // the calendar stays underneath while a project opened from it is on top
   if (location.hash === '#calendario') showCal();
   else if (!/^#p-/.test(location.hash)) hideCal();
   if (location.hash === '#consultas') showCons(); else hideCons();
   if (location.hash === '#visao-geral') showVg(); else if (!/^#p-/.test(location.hash)) hideVg();
+  const im = location.hash.match(/^#(tribunal|ministerio)-([a-z0-9-]+)$/);
+  if (im && showInst(im[1], im[2])) {} else if (!/^#p-/.test(location.hash)) hideInst();
   const m = location.hash.match(/^#p-([a-z0-9-]+)$/);
   if (m && renderProject(m[1])){
     if (proj.hidden){ projFocus = document.activeElement; proj.hidden = false; requestAnimationFrame(()=>proj.classList.add('show')); }
@@ -3390,7 +3521,7 @@ document.addEventListener('click', e=>{
 }, true);
 // click anywhere that isn't a seat closes the open view (person first, then house)
 document.addEventListener('click', e=>{
-  if (!proj.hidden || !cal.hidden || !cons.hidden || !vg.hidden || e.target.closest('.proj, .ov')) return;
+  if (!proj.hidden || !cal.hidden || !cons.hidden || !vg.hidden || !inst.hidden || e.target.closest('.proj, .ov')) return;
   if (personState || partyState) return;
   if (!openKey) return;
   if (e.target.closest('.seat, .pres, .panel')) return;
