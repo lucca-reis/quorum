@@ -25,6 +25,10 @@ jobs:
           python-version: '3.12'
       - name: Buscar sessões da Câmara e do Senado
         run: python scripts/atualizar.py
+      - name: Notícias oficiais de tribunais superiores e ministérios
+        run: python scripts/instituicoes.py
+        continue-on-error: true
+        timeout-minutes: 10
       - name: Buscar consultas públicas do e-Cidadania
         run: python scripts/consultas.py
         continue-on-error: true
