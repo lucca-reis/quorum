@@ -80,7 +80,9 @@ def camara():
                 if not no_periodo(d): continue
             linhas.append({'nome': r['txNomeParlamentar'].strip(), 'id': r['ideCadastro'], 'p': r.get('sgPartido', ''), 'uf': r.get('sgUF', ''),
                            'd': d.isoformat(), 'm': mes, 'c': cat(r.get('txtDescricao')), 'f': (r.get('txtFornecedor') or '').strip()[:80],
-                           'v': num(r.get('vlrLiquido')), 'u': r.get('urlDocumento') or ''})
+                           'v': num(r.get('vlrLiquido')),
+                           # só o fim do link da nota fiscal; o site completa com https://www.camara.leg.br/cota-parlamentar/documentos/publ/
+                           'u': (r.get('urlDocumento') or '').split('/documentos/publ/')[-1].removesuffix('.pdf') if 'documentos/publ/' in (r.get('urlDocumento') or '') else ''})
     return linhas
 
 def senado():
