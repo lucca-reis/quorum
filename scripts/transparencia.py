@@ -53,6 +53,10 @@ def cat(t):
         if re.search(re_, t): return nome
     return 'Outros'
 
+def titulo(t):
+    # ALAN RICK -> Alan Rick; MARCOS DO VAL -> Marcos do Val
+    return ' '.join(w.lower() if w.lower() in ('de', 'da', 'do', 'das', 'dos', 'e') and i else w.capitalize() for i, w in enumerate((t or '').strip().split()))
+
 def no_periodo(d):
     return d is not None and INICIO <= d <= HOJE
 
@@ -100,7 +104,7 @@ def senado():
             if d is None or not no_periodo(d):
                 d = datetime.date(int(mes[:4]), int(mes[5:]), 1)
                 if not no_periodo(d): continue
-            linhas.append({'nome': r['SENADOR'].strip().title(), 'id': '', 'p': '', 'uf': '',
+            linhas.append({'nome': titulo(r['SENADOR']), 'id': '', 'p': '', 'uf': '',
                            'd': d.isoformat(), 'm': mes, 'c': cat(r.get('TIPO_DESPESA')), 'f': (r.get('FORNECEDOR') or '').strip()[:80],
                            'v': num(r.get('VALOR_REEMBOLSADO')), 'u': ''})
     return linhas
@@ -112,6 +116,7 @@ while _d <= HOJE:
     _d = datetime.date(_d.year + (_d.month == 12), _d.month % 12 + 1, 1)
 
 def resumir(linhas, casa, fonte):
+    linhas = [x for x in linhas if round(x['v'], 2) != 0]   # documentos sem valor (glosados por inteiro) ficam de fora
     total = round(sum(x['v'] for x in linhas), 2)
     por_mes = {m: 0.0 for m in MESES}
     por_cat = {}
