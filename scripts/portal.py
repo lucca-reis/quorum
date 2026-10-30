@@ -1,5 +1,5 @@
-"""Dados do Executivo no Portal da Transparência (CGU): cartão de pagamento da Presidência e
-remuneração de presidente, vice e ministros, nos últimos 12 meses.
+"""Dados do Executivo no Portal da Transparência (CGU): cartão de pagamento da Presidência e da
+Vice-Presidência nos últimos 12 meses.
 
 Usa a API oficial (https://api.portaldatransparencia.gov.br/swagger-ui/index.html), que exige uma chave
 gratuita. A chave fica no segredo PORTAL_TRANSPARENCIA_KEY do GitHub e nunca vai para o repositório.
@@ -124,69 +124,29 @@ def cartao_de(orgao):
             for fmt in ('%d/%m/%Y', '%Y-%m-%d'):
                 try: iso = datetime.datetime.strptime(data[:10], fmt).date().isoformat(); break
                 except ValueError: pass
-            itens.append({'d': iso or m.isoformat(), 'm': m.strftime('%Y-%m'), 'v': round(valor(x.get('valorTransacao')), 2),
+            # sem data da transação (comum nos gastos sigilosos) fica só o mês do extrato
+            itens.append({'d': iso, 'm': m.strftime('%Y-%m'), 'v': round(valor(x.get('valorTransacao')), 2),
                           'e': (dig(x, 'estabelecimento', 'nome') or 'Não informado')[:80],
                           'ug': (dig(x, 'unidadeGestora', 'nome') or '')[:80]})
-    itens.sort(key=lambda i: i['d'], reverse=True)
+    itens.sort(key=lambda i: i['d'] or i['m'], reverse=True)
     por_mes = {m.strftime('%Y-%m'): 0.0 for m in MESES}
     for i in itens: por_mes[i['m']] = por_mes.get(i['m'], 0) + i['v']
     sig = sum(i['v'] for i in itens if norm(i['e']).startswith('SIGILOS'))
     return {'orgao': orgao, 'total': round(sum(i['v'] for i in itens), 2), 'sigiloso': round(sig, 2), 'transacoes': len(itens),
-            'meses': [[m, round(v, 2)] for m, v in por_mes.items()], 'itens': [i for i in itens if 'm' in i][:300],
+            'meses': [[m, round(v, 2)] for m, v in por_mes.items()], 'itens': [i for i in itens if not norm(i['e']).startswith('SIGILOS')][:300],
             'fonte': f"https://portaldatransparencia.gov.br/cartoes/consulta?ordenarPor=dataTransacao&direcao=desc&orgaos={orgao['codigo']}"}
 
 cartoes = {}
 if PRES: cartoes['presidencia'] = cartao_de(PRES)
 if VICE: cartoes['vice'] = cartao_de(VICE)
 
-# ---------- remuneração: o cadastro de servidores usa os códigos de órgão do SIAPE, não os do SIAFI ----------
-SIAPE = {}
-for desc in ('Presidência', 'Vice-Presidência', 'Ministério', 'Advocacia-Geral', 'Controladoria-Geral', 'Banco Central', 'Casa Civil', 'Secretaria'):
-    for o in paginas('orgaos-siape', 15, descricao=desc) or []:
-        SIAPE[str(o.get('codigo'))] = {'codigo': str(o.get('codigo')), 'nome': o.get('descricao') or o.get('nome') or ''}
-def siape_de(nome_orgao):
-    if not nome_orgao: return []
-    alvo = {w for w in norm(nome_orgao).split() if w not in STOP}
-    notas = []
-    for o in SIAPE.values():
-        ws = {w for w in norm(o['nome']).split() if w not in STOP}
-        sc = len(alvo & ws) / max(1, len(alvo | ws))
-        if sc >= 0.34: notas.append((sc, o))
-    return [o for _, o in sorted(notas, key=lambda x: -x[0])[:3]]
-
-remun = {}
-for p in pessoas:
-    if p['cargo'] == 'Presidente da República': nome_org = 'Presidência da República'
-    elif p['cargo'] == 'Vice-presidente': nome_org = 'Vice-Presidência da República'
-    else: nome_org = p.get('pasta', '')
-    org = None; achados = None
-    for o in siape_de(nome_org):
-        for campo in ('orgaoServidorExercicio', 'orgaoServidorLotacao'):
-            achados = get('servidores', pagina=1, nome=p['n'], **{campo: o['codigo']})
-            if achados: org = o; break
-        if achados: break
-    alvo = None
-    for a in achados or []:
-        nome = dig(a, 'servidor', 'pessoa', 'nome') or dig(a, 'pessoa', 'nome') or a.get('nome')
-        if nome and (norm(nome) == norm(p['n']) or set(norm(p['n']).split()) <= set(norm(nome).split())):
-            alvo = a; break
-    item = {'n': p['n'], 'cargo': p['cargo'], 'orgao': org, 'meses': [], 'achado': bool(alvo)}
-    if alvo:
-        sid = dig(alvo, 'servidor', 'id') or alvo.get('id') or dig(alvo, 'servidor', 'idServidorAposentadoPensionista')
-        for m in MESES[-6:]:
-            for r in get('servidores/remuneracao', id=sid, mesAno=m.strftime('%Y%m'), pagina=1) or []:
-                for dto in (r.get('remuneracoesDTO') or [r]):
-                    bruto = valor(dto.get('remuneracaoBasicaBruta'))
-                    liq = valor(dto.get('valorTotalRemuneracaoAposDeducoes'))
-                    if bruto or liq: item['meses'].append([m.strftime('%Y-%m'), round(bruto, 2), round(liq, 2)])
-        item['fonte'] = 'https://portaldatransparencia.gov.br/servidores'
-    remun[slug(p['n'])] = item
+# Remuneração de presidente, vice e ministros: testada e deixada de fora por enquanto. O endpoint de servidores
+# só aceita busca por órgão do SIAPE ou CPF, e presidente, vice e ministros não aparecem por nome nesses órgãos.
 
 OUT.mkdir(parents=True, exist_ok=True)
 res = {'atualizado': datetime.datetime.now(BR).isoformat(timespec='minutes'), 'periodo': [MESES[0].isoformat(), HOJE.isoformat()],
-       'cartoes': cartoes, 'pessoas': remun, 'orgaos': sorted(ORG.values(), key=lambda o: o['codigo']), 'siape': sorted(SIAPE.values(), key=lambda o: o['codigo']), 'chamadas': chamadas, 'erros': log[:60]}
+       'cartoes': cartoes, 'orgaos': sorted(ORG.values(), key=lambda o: o['codigo']), 'chamadas': chamadas, 'erros': log[:60]}
 (OUT / 'exec.json').write_text(json.dumps(res, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 (OUT / 'exec-amostra.json').write_text(json.dumps(amostra, ensure_ascii=False, indent=1)[:60000], encoding='utf-8')
 print(json.dumps({'pres': PRES, 'vice': VICE, 'cartoes': {k: v and v['transacoes'] for k, v in cartoes.items()},
-                  'achados': sum(r['achado'] for r in remun.values()), 'com_remuneracao': sum(bool(r['meses']) for r in remun.values()),
                   'chamadas': chamadas, 'erros': log[:10]}, ensure_ascii=False))
