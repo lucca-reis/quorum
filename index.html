@@ -706,6 +706,28 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .cs-card .c-pill{white-space:nowrap}
 .cs .feed{padding:0}
 @media (max-width:560px){ .cs-nums{font-size:12.5px} .cs-vote{padding:7px 13px} }
+
+/* sober cards: collapsed ones share a minimum height with even space above and below; open ones stay quiet */
+.c-head{min-height:132px;padding:18px 18px;justify-content:center}
+.c-main{position:static}
+/* the vote drawing sits in the bottom right corner, so the label, title and subtitle stay together */
+.c-head .c-vline{position:absolute;right:18px;bottom:18px;max-width:none;margin:0}
+.c-main:has(.c-vline) .c-text{padding-right:88px}
+.c-main:has(.xm) .c-text{padding-right:118px}
+@media (max-width:560px){ .c-head .c-vline{right:14px;bottom:16px} .c-main:has(.c-vline) .c-text{padding-right:64px} .c-main:has(.xm) .c-text{padding-right:86px} }
+.c-vline .mv-leg{flex-direction:row;column-gap:8px}
+.c-vline .mv-leg em,.c-vline .mv-x{display:none}
+.mv-leg em{font-style:normal}
+.c-body{gap:10px;padding:0 18px 18px}
+.c-desc{font-size:14px;line-height:1.5;color:color-mix(in srgb, var(--ink) 78%, var(--bg));max-width:62ch}
+.c-people,.c-facts{font-size:12.5px}
+.c-votes{padding-top:0;border-top:0;gap:2px}
+.c-vlab{font-size:12px}
+.c-body .c-vres{font-size:13.5px;font-weight:400}
+.c-who{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.c-full{padding:0;background:none;font-size:13px;color:var(--muted);margin-top:2px}
+.c-full:hover{color:var(--ink)}
+@media (max-width:560px){ .c-head{min-height:108px;padding:16px 14px} .c-body{padding:0 14px 16px} }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -1989,7 +2011,7 @@ function miniVote(P, big){
   }
   const table = body==='stf' ? '<path d="M18 4 V48 H58 V4 H52 V42 H24 V4 Z" fill="none" stroke="var(--rule)" stroke-width="1"/>' : '';
   const dots = pts.map(([x,y],i)=>`<circle class="mv-${kinds[i]||'o'}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}"/>`).join('');
-  const legend = all ? `<span><i class="mv-y"></i>${/simbólica/i.test(v.result) ? 'votação simbólica' : 'unanimidade'}</span><span>sem placar divulgado</span>` : `<span><i class="mv-y"></i>${yes} ${esc(ly)}</span><span><i class="mv-n"></i>${no} ${esc(ln)}</span>${rest ? `<span><i class="mv-o"></i>${rest} ${body==='stf'?'sem voto':'não votaram'}</span>` : ''}`;
+  const legend = all ? `<span><i class="mv-y"></i>${/simbólica/i.test(v.result) ? 'votação simbólica' : 'unanimidade'}</span><span class="mv-x">sem placar divulgado</span>` : `<span><i class="mv-y"></i>${yes}<em> ${esc(ly)}</em></span><span><i class="mv-n"></i>${no}<em> ${esc(ln)}</em></span>${rest ? `<span><i class="mv-o"></i>${rest}<em> ${body==='stf'?'sem voto':'não votaram'}</em></span>` : ''}`;
   const label = `${(v.tally||[]).length>1 ? esc(lab)+' · ' : ''}${body==='stf'?'STF':body==='senado'?'Senado':'Câmara'}`;
   return `<div class="mv${big?' big':''}" role="img" aria-label="${label}: ${all ? esc(v.result)+', sem placar divulgado' : `${yes} ${esc(ly)}, ${no} ${esc(ln)}${rest?', '+rest+' sem voto':''}`}"><svg viewBox="${vb}" aria-hidden="true">${table}${dots}</svg><p class="mv-leg"><b>${label}</b>${legend}</p></div>`;
 }
@@ -2032,9 +2054,8 @@ function cardHTML(c, key){
     </button>
     <div class="c-body" id="${id}" hidden>
       ${ok(P.summary) ? `<p class="c-desc">${esc(P.summary)}</p>` : ''}
-      ${people ? `<p class="c-people">${people}</p>` : ''}
-      ${facts ? `<p class="c-facts">${facts}</p>` : ''}
-      ${v ? `<div class="c-votes"><p class="c-vlab">${ex ? 'Votação no Congresso' : 'Votação'}${v.label ? ' · '+esc(v.label) : ''}</p><p class="c-vres">${esc(v.result)}</p>${who ? `<p class="c-who">${esc(who)}</p>` : ''}</div>` : ''}
+      ${people || facts ? `<p class="c-people">${[people, facts].filter(Boolean).join(' · ')}</p>` : ''}
+      ${v ? `<div class="c-votes"><p class="c-vlab">${ex ? 'Votação no Congresso' : 'Votação'}${v.label ? ' · '+esc(v.label) : ''}</p><p class="c-vres">${esc(v.result)}</p>${tallyTx(v) ? `<p class="c-who">${esc(tallyTx(v))}</p>` : ''}${who ? `<p class="c-who">${esc(who)}</p>` : ''}</div>` : ''}
       <a class="c-full" href="#p-${c.slug}" data-ref="${c.slug}">Ver página completa <span aria-hidden="true">→</span></a>
     </div></article></li>`;
 }
@@ -2064,6 +2085,12 @@ function execMark(P){
     return signed(/^MP|Medida Provis/i.test((P.code||'')+' '+(P.type||'')) ? 'assinou em' : 'enviou em', iso);
   }
   return '';
+}
+// the count of the last round in words, for the open card (the dots above only show the numbers)
+function tallyTx(v){
+  if (!v || !v.tally || !v.tally.length) return '';
+  const [, y, n] = v.tally[v.tally.length-1], [ly, ln] = v.labels || ['sim','não'];
+  return `${y} ${ly} · ${n} ${ln}`;
 }
 // a card opens in place; the link inside goes to the full page
 function cardClick(e){
