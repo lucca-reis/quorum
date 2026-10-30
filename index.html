@@ -479,12 +479,18 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .card.is-live .c-pill{color:#E0242B}
 .card.is-live .c-dot{background:#E0242B;animation:lvp 1.6s ease-in-out infinite}
 .c-since{font-size:12px;color:var(--muted);white-space:nowrap}
-.c-title{display:block;font-size:17px;line-height:1.25;font-weight:500;letter-spacing:-.01em;text-wrap:pretty;padding-right:22px}
+.c-title{display:block;font-size:17px;line-height:1.25;font-weight:500;letter-spacing:-.01em;text-wrap:pretty}
 .c-phase{display:block;font-size:13.5px;line-height:1.4;color:color-mix(in srgb, var(--ink) 78%, var(--bg))}
-.c-vline{display:flex;margin-top:2px}
-.c-vline .mv svg{width:44px}
+.c-main{display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
+.c-text{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.c-vline{display:flex;flex:0 1 auto;max-width:38%;margin-top:2px}
+.c-vline .mv-leg span{text-align:right;justify-content:flex-end}
+.c-vline .mv{flex-direction:column;align-items:flex-end;gap:5px}
+.c-vline .mv-leg{flex-direction:column;align-items:flex-end;flex-wrap:nowrap;font-size:11px;row-gap:1px}
+@media (max-width:560px){ .c-main{gap:10px} .c-vline .mv svg{width:40px} }
+.c-vline .mv svg{width:56px}
 .c-vres{font-size:13.5px;font-weight:500}
-.c-more{position:absolute;right:16px;bottom:16px;width:5px;height:5px;border-right:1.25px solid var(--muted);border-bottom:1.25px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+.c-more{position:absolute;right:20px;top:22px;width:5px;height:5px;border-right:1.25px solid var(--muted);border-bottom:1.25px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
 .card.open .c-more{transform:rotate(-135deg) translate(-2px,-2px)}
 .c-body{display:flex;flex-direction:column;gap:8px;padding:0 18px 16px}
 .c-body[hidden]{display:none}
@@ -1944,9 +1950,10 @@ function cardHTML(c, key){
   return `<li><article class="card${live?' is-live':''}">
     <button type="button" class="c-head" aria-expanded="false" aria-controls="${id}">
       <span class="c-top"><span class="c-pill"><span class="c-dot" aria-hidden="true"></span>${POWER_NAME[S.here]}${live ? ' · ao vivo' : ph ? ' · '+ph : ''}</span></span>
-      <span class="c-title">${esc(P.title)}</span>
+      <span class="c-main"><span class="c-text"><span class="c-title">${esc(P.title)}</span>
       ${ok(P.status) ? `<span class="c-phase">${esc(P.status)}</span>` : ''}
-      ${v ? `<span class="c-vline">${mv || `<span class="c-vres">${esc(v.result)}</span>`}</span>` : ''}
+      ${v && !mv ? `<span class="c-vres">${esc(v.result)}</span>` : ''}</span>
+      ${mv ? `<span class="c-vline">${mv}</span>` : ''}</span>
       <span class="c-more" aria-hidden="true"></span>
     </button>
     <div class="c-body" id="${id}" hidden>
