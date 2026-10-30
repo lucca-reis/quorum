@@ -482,8 +482,8 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 #cal-title:focus{outline:none}
 .cv-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
 .cv-chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;border:1.5px solid var(--ink);font-size:14px;cursor:pointer;color:var(--ink)}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--rule);font-size:14px;cursor:pointer;color:var(--muted);transition:background-color .2s, color .2s}
+.chip[aria-pressed="true"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));box-shadow:none;color:var(--ink)}
 .chip:focus-visible,.cv-seg button:focus-visible,.mb:focus-visible,.cv-step:focus-visible,.cv-d:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .cv-seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
 .cv-seg button{all:unset;box-sizing:border-box;padding:7px 14px;font-size:14px;cursor:pointer;color:var(--ink)}
@@ -532,8 +532,35 @@ button.cv-d:hover{background:var(--soft)}
 .cv-day.past .cv-date b{color:var(--muted)}
 .cv-items{display:flex;flex-direction:column;gap:14px;min-width:0}
 .cv-empty{padding:24px 0}
-.wait-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
-.wait-list li{border-bottom:1px solid var(--rule)}
+.cw.ag{max-width:880px}
+.ag-h{margin:0 0 14px;font-size:13px;font-weight:400;color:var(--muted)}
+.ag-days{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}
+.ag-day{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;align-items:start}
+.ag-date{margin:6px 0 0;display:flex;flex-direction:column;align-items:center;line-height:1;text-align:center}
+.ag-date span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.ag-date b{font-size:30px;font-weight:500;letter-spacing:-.02em;margin:4px 0}
+.ag-day.is-today .ag-date span:first-child{color:var(--ink);font-weight:600}
+.ag-day.is-today .ag-date b{background:var(--ink);color:var(--bg);border-radius:999px;min-width:46px;padding:6px 0}
+.ag-cards{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ag-card{display:flex;flex-direction:column;gap:4px;padding:13px 18px 14px;border-radius:18px;background:color-mix(in srgb, var(--ink) 5%, var(--bg));color:var(--ink);text-decoration:none;font-size:14px;line-height:1.4;transition:background-color .2s}
+a.ag-card:hover{background:color-mix(in srgb, var(--ink) 9%, var(--bg))}
+a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.ag-where{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.ag-where .pw{color:var(--ink);transform:scale(.85)}
+.ag-title{font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1.3}
+.ag-what{color:var(--muted)}
+.ag-res{font-size:13.5px}
+.ag-day.past .ag-title{color:color-mix(in srgb, var(--ink) 80%, var(--bg))}
+.ag-empty{margin:0;padding:13px 18px;border-radius:18px;box-shadow:inset 0 0 0 1px var(--rule);color:var(--muted);font-size:14px}
+.ag-more{all:unset;cursor:pointer;margin:16px 0 0 80px;padding:8px 14px;border-radius:999px;background:color-mix(in srgb, var(--ink) 6%, var(--bg));font-size:14px}
+.ag-more:hover{background:color-mix(in srgb, var(--ink) 10%, var(--bg))}
+.ag-more:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.cw.ag .wait h2{font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0;margin-bottom:4px}
+.cw.ag .wait > p{font-size:14px;margin-bottom:14px}
+@media (max-width:560px){ .ag-day{grid-template-columns:48px minmax(0,1fr);gap:10px} .ag-date b{font-size:24px} .ag-day.is-today .ag-date b{min-width:40px} .ag-more{margin-left:58px} .ag-card{padding:12px 14px} }
+.wait-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.wait-list .wi{margin:0;padding:13px 18px;border-radius:18px;background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
+.wait-list .wi:hover{background:color-mix(in srgb, var(--ink) 9%, var(--bg))}
 .wait-list .wi{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:16px;align-items:start}
 .wait-list .wi > .wi-main{grid-column:2}
 .wi-due{display:flex;flex-direction:column;gap:2px}
@@ -2208,13 +2235,13 @@ const EVENTS = (()=>{
   const map = new Map();
   const add = e => {
     const k = e.date+'|'+(e.ref||e.label)+'|'+e.house, old = map.get(k);
-    if (old){ if (!old.result && e.result) old.result = e.result; if (e.week) old.week = true; if (e.fromAgenda) old.fromAgenda = true; }
+    if (old){ if (!old.result && e.result) old.result = e.result; if (!old.time && e.time) old.time = e.time; if (!old.kind && e.kind) old.kind = e.kind; if (e.week) old.week = true; if (e.fromAgenda) old.fromAgenda = true; }
     else map.set(k, e);
   };
   Object.entries(PROJECTS).forEach(([ref,P])=> P.steps.forEach(([date,text])=> add({date, ref, house:stepHouse(text,P), text})));
   Object.entries(AGENDA).forEach(([key,A])=> A.days.forEach(d=>{
     const house = /Congresso/.test(d.kind) ? 'congresso' : key;
-    d.items.forEach(it=> add({date:d.date, ref:it.ref||null, label:it.id||null, house, text: it.t || 'Na pauta do Plenário', result: it.r||'', week:!!d.label, fromAgenda:true}));
+    d.items.forEach(it=> add({date:d.date, time:d.time||'', kind:d.kind||'', ref:it.ref||null, label:it.id||null, house, text: it.t || 'Na pauta do Plenário', result: it.r||'', week:!!d.label, fromAgenda:true}));
   }));
   return [...map.values()];
 })();
@@ -2341,37 +2368,49 @@ function pendingHTML(){
 }
 const ARROW_L = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ARROW_R = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+/* calendar as an agenda of cards: today and the days ahead first, then the days before */
+let calPast = 8;
+function agendaCard(e){
+  const P = e.ref && PROJECTS[e.ref];
+  const where = [SUB_LABEL[e.house] || POWER_LABEL[e.power], e.time, e.week ? 'previsão para a semana' : (e.kind && e.fromAgenda ? e.kind.toLowerCase() : '')].filter(Boolean).join(' · ');
+  const title = P ? `${esc(P.code)} · ${esc(P.title)}` : esc(e.label || e.text);
+  const what = e.text && e.text!=='Na pauta do Plenário' && (P || e.label) ? e.text : '';
+  const inner = `<span class="ag-where">${pw(e.power)}${esc(where)}</span><span class="ag-title">${title}</span>${what ? `<span class="ag-what">${esc(what)}</span>` : ''}${e.result ? `<span class="ag-res">→ ${esc(e.result)}</span>` : ''}`;
+  return `<li>${P ? `<a class="ag-card" href="#p-${e.ref}">${inner}</a>` : `<div class="ag-card">${inner}</div>`}</li>`;
+}
+function agendaDay(iso, list, today){
+  const [y,m,d] = iso.split('-').map(Number), wd = DIAS[new Date(y,m-1,d).getDay()].replace('-feira','');
+  const week = list.length && list.every(e=>e.week);
+  const top = iso===today ? 'hoje' : week ? 'semana' : wd;
+  const sorted = list.slice().sort((a,b)=> (hm(a.time)??99*60)-(hm(b.time)??99*60) || POWER_ORDER.indexOf(a.power)-POWER_ORDER.indexOf(b.power));
+  return `<li class="ag-day${iso===today?' is-today':''}${iso<today?' past':''}">
+    <p class="ag-date"><span>${top}</span><b>${d}</b><span>${MES_AB[m-1]}${y!==+today.slice(0,4)?' '+y:''}</span></p>
+    <ul class="ag-cards">${sorted.length ? sorted.map(agendaCard).join('') : '<li><p class="ag-empty">Nada marcado para hoje.</p></li>'}</ul></li>`;
+}
 function renderCal(keepScroll){
   const today = todayISO(), top = cal.scrollTop;
-  if (calYear==null){ calYear = +today.slice(0,4); calMonth = +today.slice(5,7)-1; }
-  if (!calView){ let v = null; try { v = localStorage.getItem('plenario-calview'); } catch(e){} calView = v || (matchMedia('(max-width:700px)').matches ? 'lista' : 'mes'); }
   const vis = visibleEvents();
-  const years = [...new Set([...vis.map(e=>+e.date.slice(0,4)), +today.slice(0,4)])].sort((a,b)=>a-b);
-  const yi = years.indexOf(calYear);
-  const counts = MESES.map((_,m)=>vis.filter(e=>e.date.startsWith(`${calYear}-${pad2(m+1)}-`)).length), max = Math.max(1,...counts);
-  const pre = `${calYear}-${pad2(calMonth+1)}-`;
-  if (!calSel || !calSel.startsWith(pre)){
-    const ds = [...new Set(vis.filter(e=>e.date.startsWith(pre)).map(e=>e.date))].sort();
-    calSel = today.startsWith(pre) ? today : (ds.find(d=>d>=today) || ds[0] || `${pre}01`);
-  }
-  cal.innerHTML = `<div class="cw">
+  const by = {}; vis.forEach(e=>{ (by[e.date] = by[e.date] || []).push(e); });
+  const dates = Object.keys(by).sort();
+  const ahead = dates.filter(d=>d>today), before = dates.filter(d=>d<today).reverse();
+  const shown = before.slice(0, calPast);
+  cal.innerHTML = `<div class="cw ag">
     <header class="cw-head">
       <h1 id="cal-title">Calendário</h1>
-      ${infoBox(CAL_SOURCES,'Fontes','As datas vêm das pautas do Plenário, das fichas de tramitação e dos atos publicados. Atualizado em 29 out 2026.')}
+      ${infoBox(CAL_SOURCES,'Fontes','As datas vêm das pautas do Plenário, das fichas de tramitação e dos atos publicados.')}
     </header>
     <div class="cv-bar">
       <div class="cv-chips" role="group" aria-label="Mostrar poderes">${POWER_ORDER.map(k=>`<button type="button" class="chip" data-pw="${k}" aria-pressed="${calFilter.has(k)}">${pw(k)}${POWER_LABEL[k]}</button>`).join('')}</div>
-      <div class="cv-seg" role="group" aria-label="Forma de ver"><button type="button" data-view="mes" aria-pressed="${calView==='mes'}">Mês</button><button type="button" data-view="lista" aria-pressed="${calView==='lista'}">Lista</button></div>
       <label class="cv-all"><input type="checkbox" id="cv-all" ${calAll?'checked':''}> Todas as etapas</label>
     </div>
-    <nav class="cv-year" aria-label="Ano e meses">
-      <div class="yr"><button type="button" data-year="${years[yi-1]||''}" ${yi>0?'':'disabled'} aria-label="Ano anterior">${ARROW_L}</button><b>${calYear}</b><button type="button" data-year="${years[yi+1]||''}" ${yi<years.length-1?'':'disabled'} aria-label="Próximo ano">${ARROW_R}</button></div>
-      <div class="cv-months">${MES_AB.map((n,m)=>`<button type="button" class="mb${m===calMonth?' on':''}${counts[m]?'':' zero'}" data-month="${m}" aria-pressed="${m===calMonth}" aria-label="${MESES[m]}: ${counts[m]} ${counts[m]===1?'item':'itens'}"><span class="bar"><i style="height:${Math.round(counts[m]/max*100)}%"></i></span><span class="mn">${n}</span><span class="mc">${counts[m]||''}</span></button>`).join('')}</div>
-    </nav>
-    <div class="cv-head"><button type="button" class="cv-step" data-mstep="-1" aria-label="Mês anterior">${ARROW_L}</button><h2>${MESES[calMonth]} <span>${calYear}</span></h2><button type="button" class="cv-step" data-mstep="1" aria-label="Próximo mês">${ARROW_R}</button></div>
-    ${calView==='mes'
-      ? `<div class="cv-body">${monthGridHTML(today)}<aside class="dd" id="cal-day" aria-live="polite">${dayHTML(calSel)}</aside></div>`
-      : monthListHTML()}
+    <section aria-labelledby="ag-next"><h2 class="ag-h" id="ag-next">Hoje e próximos dias</h2>
+      <ol class="ag-days">${agendaDay(today, by[today]||[], today)}${ahead.map(d=>agendaDay(d, by[d], today)).join('')}</ol>
+      ${ahead.length ? '' : '<p class="ag-empty">Nenhuma data marcada daqui para frente.</p>'}
+    </section>
+    ${before.length ? `<section aria-labelledby="ag-prev"><h2 class="ag-h" id="ag-prev">Dias anteriores</h2>
+      <ol class="ag-days">${shown.map(d=>agendaDay(d, by[d], today)).join('')}</ol>
+      ${before.length>shown.length ? `<button type="button" class="ag-more" data-more="1">Mostrar mais ${Math.min(8, before.length-shown.length)} dias</button>` : ''}
+    </section>` : ''}
     ${pendingHTML()}
   </div>`;
   if (keepScroll) cal.scrollTop = top;
@@ -2393,13 +2432,14 @@ cal.addEventListener('click', e=>{
   const ms = t.closest('[data-mstep]'); if (ms){ let m = calMonth + +ms.dataset.mstep, y = calYear; if (m<0){ m=11; y--; } if (m>11){ m=0; y++; } calMonth = m; calYear = y; calSel = null; renderCal(true); return; }
   const ch = t.closest('[data-pw]'); if (ch){ const k = ch.dataset.pw; if (calFilter.has(k) && calFilter.size>1) calFilter.delete(k); else calFilter.add(k); renderCal(true); return; }
   const vb = t.closest('[data-view]'); if (vb){ calView = vb.dataset.view; try { localStorage.setItem('plenario-calview', calView); } catch(err){} renderCal(true); return; }
+  const mo = t.closest('[data-more]'); if (mo){ calPast += 8; renderCal(true); return; }
   const db = t.closest('[data-day]'); if (db){ selectDay(db.dataset.day); return; }
   if (t.closest('a[href^="#p-"]')) projFrom = true;
 });
 cal.addEventListener('change', e=>{ if (e.target.id==='cv-all'){ calAll = e.target.checked; renderCal(true); } });
 function showCal(){
   if (!cal.hidden) return;
-  calYear = null; calMonth = null; calSel = null;
+  calYear = null; calMonth = null; calSel = null; calPast = 8;
   renderCal(false);
   cal.scrollTop = 0;
   cal.hidden = false; requestAnimationFrame(()=>cal.classList.add('show'));
