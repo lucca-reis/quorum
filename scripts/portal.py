@@ -139,13 +139,31 @@ cartoes = {}
 if PRES: cartoes['presidencia'] = cartao_de(PRES)
 if VICE: cartoes['vice'] = cartao_de(VICE)
 
-# ---------- remuneração: procura cada pessoa no cadastro de servidores e agentes do órgão dela ----------
+# ---------- remuneração: o cadastro de servidores usa os códigos de órgão do SIAPE, não os do SIAFI ----------
+SIAPE = {}
+for desc in ('Presidência', 'Vice-Presidência', 'Ministério', 'Advocacia-Geral', 'Controladoria-Geral', 'Banco Central', 'Casa Civil', 'Secretaria'):
+    for o in paginas('orgaos-siape', 15, descricao=desc) or []:
+        SIAPE[str(o.get('codigo'))] = {'codigo': str(o.get('codigo')), 'nome': o.get('descricao') or o.get('nome') or ''}
+def siape_de(nome_orgao):
+    if not nome_orgao: return []
+    alvo = {w for w in norm(nome_orgao).split() if w not in STOP}
+    notas = []
+    for o in SIAPE.values():
+        ws = {w for w in norm(o['nome']).split() if w not in STOP}
+        sc = len(alvo & ws) / max(1, len(alvo | ws))
+        if sc >= 0.34: notas.append((sc, o))
+    return [o for _, o in sorted(notas, key=lambda x: -x[0])[:3]]
+
 remun = {}
 for p in pessoas:
-    org = PRES if p['cargo'] == 'Presidente da República' else VICE if p['cargo'] == 'Vice-presidente' else orgao_da_pasta(p.get('pasta', ''))
-    achados = None
-    for q in ([{'nome': p['n'], 'orgaoServidorExercicio': org['codigo']}, {'nome': p['n'], 'orgaoServidorLotacao': org['codigo']}] if org else []) + [{'nome': p['n'], 'situacaoServidor': 1}]:
-        achados = get('servidores', pagina=1, **q)
+    if p['cargo'] == 'Presidente da República': nome_org = 'Presidência da República'
+    elif p['cargo'] == 'Vice-presidente': nome_org = 'Vice-Presidência da República'
+    else: nome_org = p.get('pasta', '')
+    org = None; achados = None
+    for o in siape_de(nome_org):
+        for campo in ('orgaoServidorExercicio', 'orgaoServidorLotacao'):
+            achados = get('servidores', pagina=1, nome=p['n'], **{campo: o['codigo']})
+            if achados: org = o; break
         if achados: break
     alvo = None
     for a in achados or []:
@@ -166,7 +184,7 @@ for p in pessoas:
 
 OUT.mkdir(parents=True, exist_ok=True)
 res = {'atualizado': datetime.datetime.now(BR).isoformat(timespec='minutes'), 'periodo': [MESES[0].isoformat(), HOJE.isoformat()],
-       'cartoes': cartoes, 'pessoas': remun, 'orgaos': sorted(ORG.values(), key=lambda o: o['codigo']), 'chamadas': chamadas, 'erros': log[:60]}
+       'cartoes': cartoes, 'pessoas': remun, 'orgaos': sorted(ORG.values(), key=lambda o: o['codigo']), 'siape': sorted(SIAPE.values(), key=lambda o: o['codigo']), 'chamadas': chamadas, 'erros': log[:60]}
 (OUT / 'exec.json').write_text(json.dumps(res, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 (OUT / 'exec-amostra.json').write_text(json.dumps(amostra, ensure_ascii=False, indent=1)[:60000], encoding='utf-8')
 print(json.dumps({'pres': PRES, 'vice': VICE, 'cartoes': {k: v and v['transacoes'] for k, v in cartoes.items()},
