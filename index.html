@@ -475,6 +475,10 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .c-code{font-variant-numeric:tabular-nums}
 .c-what{font-size:14px;line-height:1.4}
 .mv{display:flex;align-items:center;gap:10px;margin:2px 0 0;align-self:flex-start;max-width:100%}
+.c-meta dd:has(.mv){display:block;overflow:visible}
+.c-meta .mv{align-items:flex-start;gap:8px}
+.c-meta .mv svg{width:44px;margin-top:2px}
+.c-meta .mv-leg{flex-direction:column;flex-wrap:nowrap;font-size:11.5px}
 .mv svg{display:block;width:52px;height:auto;flex:none}
 .mv.big{gap:14px;padding:10px 14px;border-radius:14px;background:var(--bg)}
 .mv.big svg{width:150px}
@@ -1898,11 +1902,10 @@ function cardHTML(c, key){
     <h3 class="c-title">${esc(P.title)}</h3>
     <p class="c-sub"><span class="c-code" title="${esc(P.type)}">${esc(P.code)}</span> · ${when}</p>
     <p class="c-what">${esc(what)}</p>
-    ${miniVote(P)}
     <dl class="c-meta">
       ${cell(P.house==='stf' ? 'Autor' : 'Autoria', ok(P.author) ? esc(P.author) : 'não informado')}
       ${cell(P.house==='stf' ? 'Relator(a)' : 'Relatoria', ok(P.rapporteur) ? esc(P.rapporteur) : 'não informado')}
-      ${cell('Votação', P.votes ? esc(P.votes.result) : 'ainda não houve')}
+      ${cell('Votação', miniVote(P) || (P.votes ? esc(P.votes.result) : 'ainda não houve'))}
       ${cell('Criado em', S.created ? cardDate(S.created) : 'não informado')}
       ${cell('Próximo passo', nextTx)}
       ${S.path.length>1 ? cell('Passou por', S.path.map(k=>POWER_NAME[k]).join(' → ')) : ''}
