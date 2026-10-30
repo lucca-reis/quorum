@@ -298,7 +298,8 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .menu .cal-link:hover{background:color-mix(in srgb, var(--ink) 6%, var(--bg))}
 .menu .cal-link[aria-current="page"]{background:var(--ink);color:var(--bg)}
 .menu a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-.menu .brand:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.menu .brand{padding:6px 10px;margin:0 -6px 0 -10px;border-radius:999px;transition:background-color .2s}
+.menu .brand:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
 @media (max-width:1180px){ .menu nav .long{display:none} }
 @media (max-width:1000px){ .menu nav > a,.nav-leg{padding:7px 4px;font-size:13px} .menu nav{margin-right:46px} }
 @media (max-width:760px){
