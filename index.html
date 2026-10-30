@@ -918,6 +918,9 @@ h1[tabindex="-1"]:focus{outline:none}
 .inst-links a::after{content:"↗";color:var(--muted)}
 .inst-links a.int::after{content:"→"}
 .inst-links a:hover{text-decoration:underline;text-underline-offset:3px}
+.inst-news li{grid-template-columns:5.2em minmax(0,1fr) 0}
+.inst-news a{color:var(--ink);text-decoration:none}
+.inst-news a:hover{text-decoration:underline;text-underline-offset:3px}
 .inst-more{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .inst-more a{display:inline-block;padding:7px 13px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--rule);color:var(--ink);text-decoration:none;font-size:13.5px}
 .inst-more a:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
@@ -2246,6 +2249,15 @@ const PHASE = [[/sancionad|virou lei|promulgad/i,'virou lei'],[/vetad/i,'vetado'
   [/vista/i,'pedido de vista'],[/suspens/i,'suspenso'],[/julgad[ao] em|decidid/i,'julgado'],[/retirad/i,'fora de pauta'],
   [/urgência aprovada/i,'urgência aprovada'],[/aprovad/i,'aprovado'],[/em vigor/i,'em vigor'],[/pauta/i,'em pauta'],[/comiss/i,'em comissão']];
 const phaseOf = st => (PHASE.find(([re])=> re.test(st||'')) || [,''])[1];
+// the label next to the power is always one of four phases: proposto, em andamento, suspenso or em vigor
+function stageOf(P){
+  const st = P.status||'';
+  if (/sancionad|virou lei|promulgad|em vigor|julgad[ao] em|decidid|transitad/i.test(st)) return 'em vigor';
+  if (/suspens|vista|adiad|retirad|vetad|arquivad|rejeitad|sem nova data/i.test(st)) return 'suspenso';
+  const moved = (P.steps||[]).length > 1 || P.votes;
+  if (/^(enviad[ao] ao congresso|apresentad|protocolad|aguarda(ndo)? despacho)/i.test(st) || (!moved && !/pauta|adiad|suspens|vista|aprovad|urgência|retirad/i.test(st))) return 'proposto';
+  return 'em andamento';
+}
 function cardHTML(c, key){
   const P = c.P, S = cardState(c, key), L = S.last;
   const live = S.here && liveState(S.here)?.s==='live' && L && L.date===todayISO() && L.key===S.here;
@@ -2262,7 +2274,7 @@ function cardHTML(c, key){
   const id = 'cx-'+c.slug+(key?'-'+key:'');
   return `<li><article class="card${live?' is-live':''}">
     <button type="button" class="c-head" aria-expanded="false" aria-controls="${id}">
-      <span class="c-top"><span class="c-pill">${POWER_NAME[S.here]}${live ? ' · ao vivo' : ph ? ' · '+ph : ''}</span></span>
+      <span class="c-top"><span class="c-pill">${POWER_NAME[S.here]} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</span></span>
       <span class="c-main"><span class="c-text"><span class="c-title">${esc(P.title)}</span>
       ${ok(P.status) ? `<span class="c-phase">${esc(P.status)}</span>` : ''}
       ${v && !mv && !ex ? `<span class="c-vres">${esc(v.result)}</span>` : ''}</span>
@@ -2749,7 +2761,7 @@ function renderProject(slug){
   proj.innerHTML = `<div class="pj">
     <article class="pj-card${live?' is-live':''}">
     <header class="pj-head">
-      <div class="pj-top"><p class="c-pill">${here}${live ? ' · ao vivo' : ''}</p>${infoBox(P.sources,'Fontes')}</div>
+      <div class="pj-top"><p class="c-pill">${here} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</p>${infoBox(P.sources,'Fontes')}</div>
       <h1 class="pj-title">${esc(P.title)}</h1>
       <p class="pj-code">${esc(P.type)} · ${esc(P.code)}${lastTx ? ' · '+lastTx : ''}</p>
       <p class="pj-what">${esc(P.status)}</p>
@@ -3444,6 +3456,7 @@ function courtHTML(id){
         <div><dt>Composição</dt><dd>${esc(C.comp)}<small>${esc(C.compNote)}</small></dd></div>
         <div><dt>Sigla</dt><dd>${esc(C.sigla)}</dd></div>
       </dl></section>
+    <section class="inst-card" aria-labelledby="ic3"><h2 id="ic3">Últimas notícias do ${esc(C.sigla)}</h2><div id="inst-news" aria-live="polite"><p class="vd-none">Carregando…</p></div></section>
     <section class="inst-card" aria-labelledby="ic2"><h2 id="ic2">Links oficiais</h2><ul class="inst-links"><li><a href="${C.site}" target="_blank" rel="noopener">Site do ${esc(C.sigla)}</a></li></ul></section>
     <section aria-label="Tribunais superiores">${others}</section>
   </div>`;
@@ -3461,9 +3474,24 @@ function ministryHTML(id){
         <div><dt>No cargo desde</dt><dd>${M.since ? esc(M.since) : 'não informado'}${M.since ? '' : '<small>Já estava no cargo antes da reforma ministerial de abril de 2026.</small>'}</dd></div>
         <div><dt>Antecessor(a)</dt><dd>${M.prev ? esc(M.prev) : 'não informado'}</dd></div>
       </dl></section>
+    <section class="inst-card" aria-labelledby="ic3"><h2 id="ic3">Últimas notícias do ministério</h2><div id="inst-news" aria-live="polite"><p class="vd-none">Carregando…</p></div></section>
     <section class="inst-card" aria-labelledby="ic2"><h2 id="ic2">Na Presidência</h2><ul class="inst-links"><li><a class="int" href="#" data-vnav="pres">Ver os 38 ministérios no desenho da Presidência</a></li></ul></section>
     <section aria-label="Outros ministérios"><ul class="inst-more">${[prev,next].filter(Boolean).map(x=>`<li><a href="#ministerio-${slugName(x.pasta)}">${x===prev?'← ':''}${esc(x.pasta)}${x===next?' →':''}</a></li>`).join('')}</ul></section>
   </div>`;
+}
+// latest official news of each court and ministry, from data/instituicoes.json (robot, every hour)
+let instData = null;
+const loadInstData = ()=> instData ? Promise.resolve(instData) : trFetch('data/instituicoes.json').then(js=> (instData = js));
+function instNews(kind, id){
+  const want = (kind==='tribunal' ? 't:' : 'm:') + id;
+  loadInstData().then(D=>{
+    const box = document.getElementById('inst-news'); if (!box || instKey!==want) return;
+    const X = kind==='tribunal' ? D.tribunais && D.tribunais[id] : D.ministerios && D.ministerios[id];
+    if (!X || !X.itens || !X.itens.length){ box.innerHTML = `<p class="vd-none">Nenhuma notícia encontrada agora.${X && X.fonte ? ` <a href="${X.fonte}" target="_blank" rel="noopener" style="color:inherit">Ver no site oficial ↗</a>` : ''}</p>`; return; }
+    const day = d=>{ if (!d) return ''; const iso = d.slice(0,10), [y,m,dd] = iso.split('-'); return `${+dd} ${MO[+m-1]}${y!==todayISO().slice(0,4)?' '+y.slice(2):''}`; };
+    box.innerHTML = `<ul class="tr-list inst-news">${X.itens.map(n=>`<li><time${n.d?` datetime="${n.d}"`:''}>${day(n.d)}</time><span class="w"><a href="${esc(n.u)}" target="_blank" rel="noopener">${esc(n.t)}</a></span><span></span></li>`).join('')}</ul>
+      <p class="vb-note">${X.via ? `Notícias publicadas no site oficial${X.fonte ? ` (<a href="${X.fonte}" target="_blank" rel="noopener" style="color:inherit">${esc(X.fonte.replace(/^https:\/\/(www\.)?/,''))}</a>)` : ''}, reunidas pelo ${esc(X.via)}.` : `Do feed de notícias do ministério no <a href="${X.rss||X.fonte}" target="_blank" rel="noopener" style="color:inherit">gov.br</a>.`} Atualizado de hora em hora.</p>`;
+  }).catch(()=>{ const b = document.getElementById('inst-news'); if (b) b.innerHTML = '<p class="vd-none">Não deu para carregar as notícias agora.</p>'; });
 }
 function showInst(kind, id){
   const html = kind==='tribunal' ? courtHTML(id) : ministryHTML(id);
@@ -3475,6 +3503,7 @@ function showInst(kind, id){
   document.title = inst.querySelector('#inst-title').textContent + ' · Quorum';
   inst.querySelector('#inst-title').setAttribute('tabindex','-1');
   inst.querySelector('#inst-title').focus({preventScroll:true});
+  instNews(kind, id);
   return true;
 }
 function hideInst(){

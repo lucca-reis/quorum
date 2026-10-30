@@ -46,9 +46,17 @@ def itens_rss(xml, corta=None):
         link = (re.search(r'<link>(.*?)</link>', bloco, re.S) or re.search(r'<link[^>]*href="([^"]+)"', bloco) or re.search(r'rdf:about="([^"]+)"', bloco) or [None, ''])[1].strip()
         data = (re.search(r'<(?:pubDate|dc:date|updated|published)>(.*?)</', bloco, re.S) or [None, ''])[1]
         if corta: tit = re.sub(corta, '', tit).strip()
+        # sufixos que o Google Notícias acrescenta ao título ("— Ministério da Fazenda - www.gov.br")
+        tit = re.sub(r'\s+[-—–]\s+(www\.)?gov\.br$', '', tit, flags=re.I)
+        tit = re.sub(r'\s+[—–]\s+(Minist[ée]rio|Secretaria|Advocacia|Controladoria|Gabinete|Casa Civil)[^—–]*$', '', tit).strip()
         if tit and link: out.append({'t': tit[:220], 'u': html.unescape(link), 'd': iso(data)})
     out.sort(key=lambda x: x['d'] or '', reverse=True)
-    return out[:MAX]
+    vistos, unicos = set(), []
+    for x in out:
+        k = slug(x['t'])
+        if k in vistos: continue
+        vistos.add(k); unicos.append(x)
+    return unicos[:MAX]
 
 # ---------- tribunais superiores ----------
 TRIB = {'stj': ('stj.jus.br', 'Superior Tribunal de Justiça'), 'tst': ('tst.jus.br', 'Tribunal Superior do Trabalho'),
