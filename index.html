@@ -730,6 +730,17 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .c-full{padding:0;background:none;font-size:13px;color:var(--muted);margin-top:2px}
 .c-full:hover{color:var(--ink)}
 @media (max-width:560px){ .c-head{min-height:108px;padding:16px 14px} .c-body{padding:0 14px 16px} }
+/* power symbols (family A: dots) */
+.gl{display:inline-block;flex:none;height:.85em;width:auto;fill:currentColor;vertical-align:-.05em;overflow:visible}
+.gl circle{fill:currentColor}
+.c-pill .gl{height:11px}
+.card.is-live .c-pill .gl,.pj-card.is-live .c-pill .gl{animation:lvp 1.6s ease-in-out infinite}
+.menu nav > a,.nav-leg{display:inline-flex;align-items:center;justify-content:center;gap:0}
+.menu .gl{height:11px;opacity:.85;margin-right:7px}
+.nav-car{margin-left:7px}
+.pw{display:inline-flex;align-items:center;border:0;width:auto;height:auto;background:none;transform:none}
+.pw .gl{height:11px}
+@media (max-width:420px){ .menu nav .gl{display:none} }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -740,13 +751,14 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 <header class="menu">
   <div class="brand-wrap"><a class="brand" href="#" data-nav="home" aria-label="Quorum"><span aria-hidden="true">Qu<i class="brand-o"></i>rum</span></a><span class="today-date" id="today-date"></span></div>
   <nav aria-label="Poderes">
-    <a href="#" data-nav="pres">Executivo</a>
+    <a href="#" data-nav="pres"><svg class="gl" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="3.7"/></svg>Executivo</a>
     <div class="nav-grp">
-      <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub">Legislativo<span class="nav-car" aria-hidden="true"></span></button>
+      <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub">
+<svg class="gl" viewBox="0 0 20 12" aria-hidden="true"><circle cx="5.40" cy="10.20" r="1.5"/><circle cx="7.70" cy="6.22" r="1.5"/><circle cx="12.30" cy="6.22" r="1.5"/><circle cx="14.60" cy="10.20" r="1.5"/><circle cx="1.40" cy="10.20" r="1.5"/><circle cx="2.55" cy="5.90" r="1.5"/><circle cx="5.70" cy="2.75" r="1.5"/><circle cx="10.00" cy="1.60" r="1.5"/><circle cx="14.30" cy="2.75" r="1.5"/><circle cx="17.45" cy="5.90" r="1.5"/><circle cx="18.60" cy="10.20" r="1.5"/></svg>Legislativo<span class="nav-car" aria-hidden="true"></span></button>
       <div class="nav-sub" id="nav-sub"><a href="#" data-nav="senado">Senado</a><a href="#" data-nav="camara">Congresso</a></div>
     </div>
-    <a href="#" data-nav="stf">Judiciário</a>
-    <a href="#consultas" data-nav="consultas">Consultas<span class="long"> públicas</span></a>
+    <a href="#" data-nav="stf"><svg class="gl" viewBox="0 0 12 12" aria-hidden="true"><circle cx="1.3" cy="1.30" r="1.15"/><circle cx="1.3" cy="4.05" r="1.15"/><circle cx="1.3" cy="6.80" r="1.15"/><circle cx="1.3" cy="9.55" r="1.15"/><circle cx="10.7" cy="1.30" r="1.15"/><circle cx="10.7" cy="4.05" r="1.15"/><circle cx="10.7" cy="6.80" r="1.15"/><circle cx="10.7" cy="9.55" r="1.15"/><circle cx="3.65" cy="10.70" r="1.15"/><circle cx="6" cy="10.70" r="1.15"/><circle cx="8.35" cy="10.70" r="1.15"/></svg>Judiciário</a>
+    <a href="#consultas" data-nav="consultas">Consultas<span class="long">&nbsp;públicas</span></a>
   </nav>
   <a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a>
 </header>
@@ -1929,6 +1941,10 @@ function resetLayers(){
    (PROJECTS[x].steps). The feed shows the cards that were dealt with most recently first. */
 const POWER_NAME = {camara:'Câmara', senado:'Senado', exec:'Presidência', stf:'STF'};
 const POWER_GLYPH = {camara:'cong', senado:'cong', exec:'exec', stf:'stf'};
+// symbols of the three powers, all made of dots: many in a half circle (Legislativo), one (Executivo), eleven in a U (Judiciário)
+const GLYPHS = {leg:'<svg class="gl" viewBox="0 0 20 12" aria-hidden="true"><circle cx="5.40" cy="10.20" r="1.5"/><circle cx="7.70" cy="6.22" r="1.5"/><circle cx="12.30" cy="6.22" r="1.5"/><circle cx="14.60" cy="10.20" r="1.5"/><circle cx="1.40" cy="10.20" r="1.5"/><circle cx="2.55" cy="5.90" r="1.5"/><circle cx="5.70" cy="2.75" r="1.5"/><circle cx="10.00" cy="1.60" r="1.5"/><circle cx="14.30" cy="2.75" r="1.5"/><circle cx="17.45" cy="5.90" r="1.5"/><circle cx="18.60" cy="10.20" r="1.5"/></svg>',exec:'<svg class="gl" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="3.7"/></svg>',jud:'<svg class="gl" viewBox="0 0 12 12" aria-hidden="true"><circle cx="1.3" cy="1.30" r="1.15"/><circle cx="1.3" cy="4.05" r="1.15"/><circle cx="1.3" cy="6.80" r="1.15"/><circle cx="1.3" cy="9.55" r="1.15"/><circle cx="10.7" cy="1.30" r="1.15"/><circle cx="10.7" cy="4.05" r="1.15"/><circle cx="10.7" cy="6.80" r="1.15"/><circle cx="10.7" cy="9.55" r="1.15"/><circle cx="3.65" cy="10.70" r="1.15"/><circle cx="6" cy="10.70" r="1.15"/><circle cx="8.35" cy="10.70" r="1.15"/></svg>'};
+const GLYPH_OF = {camara:'leg', senado:'leg', cong:'leg', congresso:'leg', exec:'exec', pres:'exec', stf:'jud'};
+const glyph = k => GLYPHS[GLYPH_OF[k]||k] || '';
 function stepPower(text, P){
   if (P.house==='stf') return 'stf';
   // the power named first in the step is where it happened ("Câmara aprova; segue ao Senado" is the Câmara)
@@ -2047,7 +2063,7 @@ function cardHTML(c, key){
   const id = 'cx-'+c.slug+(key?'-'+key:'');
   return `<li><article class="card${live?' is-live':''}">
     <button type="button" class="c-head" aria-expanded="false" aria-controls="${id}">
-      <span class="c-top"><span class="c-pill"><span class="c-dot" aria-hidden="true"></span>${POWER_NAME[S.here]}${live ? ' · ao vivo' : ph ? ' · '+ph : ''}</span></span>
+      <span class="c-top"><span class="c-pill">${glyph(S.here)}${POWER_NAME[S.here]}${live ? ' · ao vivo' : ph ? ' · '+ph : ''}</span></span>
       <span class="c-main"><span class="c-text"><span class="c-title">${esc(P.title)}</span>
       ${ok(P.status) ? `<span class="c-phase">${esc(P.status)}</span>` : ''}
       ${v && !mv && !ex ? `<span class="c-vres">${esc(v.result)}</span>` : ''}</span>
@@ -2520,7 +2536,7 @@ function renderProject(slug){
   proj.innerHTML = `<div class="pj">
     <article class="pj-card${live?' is-live':''}">
     <header class="pj-head">
-      <div class="pj-top"><p class="c-pill"><span class="c-dot" aria-hidden="true"></span>${here}${live ? ' · ao vivo' : ''}</p>${infoBox(P.sources,'Fontes')}</div>
+      <div class="pj-top"><p class="c-pill">${glyph(S ? S.here : P.house)}${here}${live ? ' · ao vivo' : ''}</p>${infoBox(P.sources,'Fontes')}</div>
       <h1 class="pj-title">${esc(P.title)}</h1>
       <p class="pj-code">${esc(P.type)} · ${esc(P.code)}${lastTx ? ' · '+lastTx : ''}</p>
       <p class="pj-what">${esc(P.status)}</p>
@@ -2640,7 +2656,7 @@ const MES_AB = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov
 let calYear = null, calMonth = null, calSel = null, calView = null, calAll = false;
 const calFilter = new Set(POWER_ORDER);
 const pad2 = n => String(n).padStart(2,'0');
-const pw = k => `<span class="pw ${k}" aria-hidden="true"></span>`;
+const pw = k => `<span class="pw">${glyph(k)}</span>`;
 const visibleEvents = () => EVENTS.filter(e=>(calAll || e.major) && calFilter.has(e.power));
 function eventsOn(iso){ return visibleEvents().filter(e=>e.date===iso).sort((a,b)=>POWER_ORDER.indexOf(a.power)-POWER_ORDER.indexOf(b.power)); }
 function evHTML(e){
@@ -2828,7 +2844,7 @@ function consCard(x){
   const title = x.a || x.e, url = CONS_ITEM(x.i);
   const people = [x.au && 'Autoria: '+esc(x.au), x.st && esc(x.st)].filter(Boolean).join(' · ');
   return `<li><article class="card cs-card"><div class="c-head">
-    <span class="c-top"><span class="c-pill"><span class="c-dot" aria-hidden="true"></span>Senado · consulta aberta</span><span class="cs-code">${esc(x.s)}</span></span>
+    <span class="c-top"><span class="c-pill">${glyph('senado')}Senado · consulta aberta</span><span class="cs-code">${esc(x.s)}</span></span>
     <a class="c-title" href="${url}" target="_blank" rel="noopener">${esc(title)}</a>
     ${x.a && x.e ? `<p class="c-desc">${esc(x.e)}</p>` : ''}
     ${people ? `<p class="c-people">${people}</p>` : ''}
