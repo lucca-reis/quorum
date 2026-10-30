@@ -1,0 +1,23 @@
+name: Sondar e-Cidadania (temporário)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/sondar.yml']
+jobs:
+  sondar:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir out; cd out
+          B=https://www12.senado.leg.br/ecidadania
+          UA='Mozilla/5.0 (X11; Linux x86_64) quorum'
+          curl -sSL -A "$UA" "$B/principalmateria" -o principal.html -w '%{http_code} %{url_effective}\n' || true
+          curl -sSL -A "$UA" "$B/pesquisamateria?tipo=consulta" -o pesquisa.html -w '%{http_code}\n' || true
+          curl -sSL -A "$UA" "https://www12.senado.leg.br/robots.txt" -o robots.txt || true
+          ID=$(grep -o 'visualizacaomateria?id=[0-9]*' principal.html | head -1 | cut -d= -f2)
+          echo "id=$ID"
+          [ -n "$ID" ] && curl -sSL -A "$UA" "$B/visualizacaomateria?id=$ID" -o materia.html -w '%{http_code}\n'
+          ls -la; grep -o 'href="[^"]*"' principal.html | sort -u | head -200
+      - uses: actions/upload-artifact@v4
+        with: {name: sonda, path: out}
