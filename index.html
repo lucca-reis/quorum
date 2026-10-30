@@ -272,7 +272,9 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .brand-wrap{justify-self:start;display:flex;align-items:baseline;gap:10px;min-width:0}
 .menu .brand{font-size:18px;font-weight:400;letter-spacing:-.01em}
 /* the o of Quorum is a solid dot, the size of a lowercase letter */
-.brand-o{display:inline-block;width:.54em;height:.54em;margin:0 .045em;border-radius:50%;background:currentColor;vertical-align:baseline}
+.brand-o{display:inline-block;width:.54em;height:.54em;margin:0 .045em;border-radius:50%;background:#009C3B;animation:brand-o 30s infinite;vertical-align:baseline}
+/* green, yellow and blue, ten seconds each */
+@keyframes brand-o{0%,30%{background:#009C3B}33.3%,63.3%{background:#F2C200}66.6%,96.6%{background:#1F4FB5}100%{background:#009C3B}}
 .today-date{font-size:14px;color:var(--muted);white-space:nowrap}
 .menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:150px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;max-width:100%}
 .nav-grp{flex:1 1 0;position:relative;display:flex}
@@ -933,6 +935,13 @@ h1[tabindex="-1"]:focus{outline:none}
 .p-cards .card{--card:var(--bg)}
 .p-cards .card:hover{--card:color-mix(in srgb, var(--ink) 3%, var(--bg))}
 .p-cards .c-pill{background:color-mix(in srgb, var(--ink) 6%, var(--bg))}
+.vl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.vl li{display:grid;grid-template-columns:minmax(110px,190px) minmax(0,1fr) 3em;gap:12px;align-items:center;font-size:13px}
+.vl-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vl-b{height:12px;border-radius:999px;background:color-mix(in srgb, var(--ink) 7%, var(--bg));overflow:hidden}
+.vl-b i{display:block;height:100%;border-radius:999px}
+.vl-n{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+@media (max-width:560px){ .vl li{grid-template-columns:96px minmax(0,1fr) 2.4em;gap:8px;font-size:12.5px} }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -3295,6 +3304,21 @@ function execTr(which){
       <div class="tr-foot"><span>Gastos do órgão (${esc(C.orgao.nome)}), não da pessoa. Valores como publicados pela CGU.</span><a href="${C.fonte}" target="_blank" rel="noopener">Fonte ↗</a></div>`;
   }).catch(()=>{ const b = document.getElementById('p-tr'); if (b) b.innerHTML = '<h3>Transparência · cartão de pagamento</h3><p class="tr-empty">Não deu para carregar agora. <a href="https://portaldatransparencia.gov.br/cartoes" target="_blank" rel="noopener" style="color:inherit">Ver no Portal ↗</a></p>'; });
 }
+// laws and other norms approved in the last 12 months, by the party of whoever proposed them (data/leis.json, robot)
+let trLeis = null;
+const loadLeis = ()=> trLeis ? Promise.resolve(trLeis) : trFetch('data/leis.json').then(js=> (trLeis = js));
+const SIGLA_PARTY = {'UNIÃO':'União','UNIAO':'União','REPUBLICANOS':'Republicanos','PODE':'Podemos','PODEMOS':'Podemos','NOVO':'Novo','AVANTE':'Avante','SOLIDARIEDADE':'Solidariedade','REDE':'Rede','PCDOB':'PCdoB','MISSÃO':'Missão','MISSAO':'Missão','PSD':'PSD','PL':'PL','PT':'PT','PP':'PP','MDB':'MDB','PSB':'PSB','PDT':'PDT','PSDB':'PSDB','PSOL':'PSOL','PV':'PV','PRD':'PRD'};
+function vgLeis(){
+  if (!trLeis) return '<p class="vd-none">Carregando…</p>';
+  const L = trLeis, G = L.grupos || [];
+  if (!G.length) return '<p class="vd-none">Nenhuma norma encontrada no período.</p>';
+  const max = G[0][1];
+  const color = g => { const k = SIGLA_PARTY[String(g).toUpperCase()]; return k ? PARTY[k] : /Executivo/.test(g) ? 'var(--ink)' : 'var(--nc)'; };
+  const label = g => { const k = SIGLA_PARTY[String(g).toUpperCase()]; return k ? (PARTY_NAME[k]||k) : g; };
+  const [y1,m1] = L.periodo[0].split('-'), [y2,m2] = L.periodo[1].split('-');
+  return `<ul class="vl" aria-label="Normas aprovadas por partido do autor">${G.slice(0,14).map(([g,n])=>`<li><span class="vl-l">${esc(label(g))}</span><span class="vl-b"><i style="width:${(n/max*100).toFixed(1)}%;background:${color(g)}"></i></span><span class="vl-n">${n}</span></li>`).join('')}</ul>
+    <p class="vb-note">${FMT_NUM.format(L.total)} proposições viraram lei, emenda constitucional ou decreto legislativo entre ${MO[+m1-1]} ${y1} e ${MO[+m2-1]} ${y2}, contadas pelo partido atual de quem as apresentou (o primeiro autor). Propostas do governo aparecem como Poder Executivo. <a href="https://dadosabertos.camara.leg.br" target="_blank" rel="noopener" style="color:inherit">Dados abertos da Câmara ↗</a></p>`;
+}
 function vgTransp(){
   if (!trResumo) return '<p class="vd-none">Carregando os gastos da cota parlamentar…</p>';
   const R = trResumo;
@@ -3439,6 +3463,7 @@ function renderVg(keep){
       <section class="vb w7" aria-labelledby="vb4"><div class="vb-h"><h2 id="vb4">Últimas votações</h2></div>${vgVotes(all)}</section>
       <section class="vb w5" aria-labelledby="vb5"><div class="vb-h"><h2 id="vb5">${consData && !consData.alta.length ? 'Enquetes mais votadas' : 'Enquetes em alta'}</h2><a href="#consultas">Ver todas →</a></div><div id="vg-enq">${vgEnquetes()}</div></section>
       <section class="vb w12" aria-labelledby="vb6"><div class="vb-h"><h2 id="vb6">Quem ocupa as cadeiras</h2></div>${vgCadeiras()}</section>
+      <section class="vb w12" aria-labelledby="vb8"><div class="vb-h"><h2 id="vb8">Partidos que mais aprovaram projetos no último ano</h2></div>${vgLeis()}</section>
       <section class="vb w12" aria-labelledby="vb7"><div class="vb-h"><h2 id="vb7">Transparência · últimos 12 meses</h2></div><div id="vg-tr">${vgTransp()}</div></section>
     </div>
   </div>`;
@@ -3453,6 +3478,7 @@ function showVg(){
   renderVg(false);
   if (!consData) Promise.resolve(loadCons()).then(()=>{ if (!vg.hidden) renderVg(true); });
   if (!trExec) loadExec().then(()=>{ if (!vg.hidden) renderVg(true); }).catch(()=>{});
+  if (!trLeis) loadLeis().then(()=>{ if (!vg.hidden) renderVg(true); }).catch(()=>{ trLeis = {grupos:[], total:0, periodo:['',''] }; if (!vg.hidden) renderVg(true); });
   if (!trResumo) loadTr().then(()=>{ if (!vg.hidden) renderVg(true); }).catch(()=>{ const b = document.getElementById('vg-tr'); if (b) b.innerHTML = '<p class="vd-none">Não deu para carregar os gastos agora.</p>'; });
   vg.scrollTop = 0;
   vg.hidden = false; requestAnimationFrame(()=>vg.classList.add('show'));
