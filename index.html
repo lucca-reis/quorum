@@ -38,10 +38,10 @@ body{box-sizing:border-box;display:grid;place-items:center;
   padding-block:calc(var(--menu-h) + 8px) 16px}
 .stage{width:100%;max-width:1400px;position:relative;font-family:var(--display)}
 #plan{display:block;backface-visibility:hidden;width:100%;height:auto;max-height:calc(100vh - var(--menu-h) - 40px);overflow:visible}
-#frame{fill:none;stroke:var(--ink);transition:opacity .45s}
+#frame{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));stroke:none;transition:opacity .45s}
 
 .house{cursor:pointer;outline:none;transition:opacity .45s}
-.shell{fill:transparent;stroke:var(--ink);stroke-width:1.6;transition:opacity .45s, transform .35s cubic-bezier(.3,.7,.3,1)}
+.shell{fill:var(--bg);stroke:none;transition:opacity .45s, transform .35s cubic-bezier(.3,.7,.3,1)}
 .stage:not(.is-open) .house:hover .shell,
 .house:focus-visible .shell{transform:scale(1.03)}
 .arc{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round}
@@ -421,7 +421,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .stfv[hidden]{display:none!important}
 .stf-grid{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:start}
 #stf-svg{display:block;width:100%;height:auto;max-height:calc(100vh - var(--menu-h) - 130px);overflow:visible}
-#stf-frame{fill:none;stroke:var(--ink);stroke-width:1.6}
+#stf-frame{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));stroke:none}
 .u-table{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:miter;transition:opacity .45s}
 .jz{fill:var(--ink);cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center;transition:transform .18s ease, opacity .45s ease}
 .jz.vacant{fill:var(--bg);stroke:var(--ink);stroke-width:1.6px;vector-effect:non-scaling-stroke}
@@ -443,7 +443,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .legend .d.j::before{display:none}
 @media (min-width:901px){ #stfv .stf-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)} #stfv .stf-panel{order:1} #stfv #stf-svg{order:2} }
 #pres-svg{display:block;width:100%;height:auto;max-height:calc(100vh - var(--menu-h) - 130px);overflow:visible}
-#pres-frame{fill:none;stroke:var(--ink);stroke-width:1.6}
+#pres-frame{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));stroke:none}
 .jz.ex{fill:var(--c)}
 .pres-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:0;list-style:none;font-size:13px;color:var(--muted)}
 .pres-legend li{display:flex;align-items:center;gap:6px}
@@ -649,7 +649,7 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 <section class="stfv" id="stfv" hidden aria-label="Supremo Tribunal Federal">
   <div class="stf-grid">
     <svg id="stf-svg" viewBox="0 0 690 500" role="img" aria-label="Plenário do STF: mesa em U com os onze lugares dos ministros">
-      <rect id="stf-frame" x="10" y="10" width="670" height="485" vector-effect="non-scaling-stroke"/>
+      <rect id="stf-frame" x="10" y="10" width="670" height="485" rx="30" vector-effect="non-scaling-stroke"/>
       <g id="stf-bench"><path class="u-table" d="M195 96 L195 412 L495 412 L495 96 L449 96 L449 366 L241 366 L241 96 Z" vector-effect="non-scaling-stroke"/>
       <circle class="jz" data-i="0" cx="345.0" cy="450.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="1" cx="450.0" cy="450.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="2" cx="240.0" cy="450.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="3" cx="533.0" cy="360.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="4" cx="157.0" cy="360.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="5" cx="533.0" cy="285.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="6" cx="157.0" cy="285.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="7" cx="533.0" cy="210.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="8" cx="157.0" cy="210.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="9" cx="533.0" cy="135.0" r="15" tabindex="0" role="button"/><circle class="jz" data-i="10" cx="157.0" cy="135.0" r="15" tabindex="0" role="button"/></g>
     </svg>
@@ -659,7 +659,7 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 <section class="stfv presv" id="presv" hidden aria-label="Presidência da República">
   <div class="stf-grid pres-grid">
     <svg id="pres-svg" viewBox="0 0 549 260" role="img" aria-label="Presidência: presidente, vice e os 38 ministérios">
-      <rect id="pres-frame" x="6" y="6" width="536.5" height="248" vector-effect="non-scaling-stroke"/>
+      <rect id="pres-frame" x="6" y="6" width="536.5" height="248" rx="24" vector-effect="non-scaling-stroke"/>
       <g id="pres-bench"></g>
     </svg>
     <section class="stf-panel" id="pres-panel"></section>
@@ -667,7 +667,7 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 </section>
 <main class="stage" id="stage">
   <svg id="plan" viewBox="0 0 1400 640" role="img" aria-label="Senado Federal à esquerda e Câmara dos Deputados à direita. Clique em um círculo para abrir; Esc ou clique fora volta.">
-    <rect id="frame" x="16" y="13" width="1368" height="614" vector-effect="non-scaling-stroke" stroke-width="1.6"/>
+    <rect id="frame" x="16" y="13" width="1368" height="614" rx="30" vector-effect="non-scaling-stroke" stroke-width="1.6"/>
     <g class="house" id="g-senado" data-house="senado" tabindex="0" role="button" aria-label="Abrir Senado Federal"></g>
     <g class="house" id="g-camara" data-house="camara" tabindex="0" role="button" aria-label="Abrir Câmara dos Deputados"></g>
   </svg>
