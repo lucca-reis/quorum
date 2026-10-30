@@ -377,13 +377,14 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   transition:background-color .45s}
 .landing[hidden]{display:none!important}
 .landing{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:stretch;column-gap:clamp(24px,4vw,64px)}
-.landing > .lx{place-self:center stretch;--u:clamp(.42px, .055vw, .66px)}
+.landing > .lx{place-self:center stretch;--u:min(.62px, calc((50vw - 140px) / 1050))}
 /* left half: an index of the three powers, each shape beside what is going on there */
-.lx{display:flex;flex-direction:column;max-width:560px;width:100%;margin:0 auto;font-family:var(--display)}
-.lx-row{display:grid;grid-template-columns:calc(330 * var(--u)) minmax(0,1fr);align-items:center;column-gap:clamp(18px,2.4vw,36px);padding:clamp(18px,3vh,30px) 0}
-.lx-shape{display:flex;justify-content:center}
+/* the three powers side by side: shape on top, number and state below */
+.lx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(14px,2vw,32px);align-items:start;width:100%;margin:0 auto;font-family:var(--display)}
+.lx-row{display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2vh,22px);min-width:0}
+.lx-shape{display:flex;justify-content:center;align-items:flex-end;height:calc(152 * var(--u));width:100%}
 .lx-shape svg{display:block;width:calc(var(--vw) * var(--u));height:auto;overflow:visible}
-.lx-text{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0;border-radius:10px;transition:opacity .3s}
+.lx-text{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-width:0;max-width:100%;border-radius:10px;transition:opacity .3s}
 .landing.leaving .lx-text{opacity:0}
 .landing.instant .lx-text{transition:none}
 .lx-text:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
@@ -485,7 +486,10 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 @media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 16px 16px;border-radius:18px} }
 @media (max-width:700px){
   .landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;align-content:start;justify-items:center;gap:32px;overflow:auto;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 24px)}
-  .landing > .lx{--u:.5px}
+  .landing > .lx{--u:.5px;grid-template-columns:minmax(0,1fr);row-gap:28px}
+  .lx-row{display:grid;grid-template-columns:calc(330 * var(--u)) minmax(0,1fr);align-items:center;column-gap:18px}
+  .lx-shape{height:auto}
+  .lx-text{align-items:flex-start;text-align:left}
   .today{max-width:640px;height:auto;padding-bottom:56px}
   .today > .feed{overflow:visible;padding-right:0}
 }
