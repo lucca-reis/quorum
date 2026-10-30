@@ -10,6 +10,7 @@ Endereço: https://lucca-reis.github.io/quorum/
   - `PROJECTS`: uma página por proposta ou processo (`#p-slug`), com resumo, etapas, votação, links e fontes.
   - `PANEL_SOURCES`, `STF_SOURCES`, `EXEC_SOURCES`: fontes mostradas no ícone "i".
 - Cartões: cada item de `PROJECTS` vira um cartão no feed da página inicial e das seções. O histórico do cartão vem dos dias de `AGENDA` que citam o item (`ref`) e de `steps` do próprio projeto. O cartão sobe no feed pela data (e `time`) mais recente em que foi tratado. Para um cartão mostrar a data de criação, o primeiro item de `steps` deve ser a apresentação ou publicação (ex.: "Apresentado na Câmara", "MP publicada"). Escreva cada passo de `steps` começando pelo poder onde aconteceu ("Câmara aprova…", "Senado aprova…", "Presidente sanciona…"), porque é isso que define por onde o cartão passou. Resultado de sessão em `r` com "vai à sanção" ou "segue ao Senado" move o cartão para o próximo poder.
+- Placar: quando a fonte informar os números de uma votação, preencha `votes.tally` (`[['Votação', sim, não]]`, um item por turno) e, se os lados não forem sim/não, `votes.labels`. É isso que desenha o mini plenário de bolinhas no cartão. Sem números na fonte, não preencha `tally`.
 - `data/live.json`: gerado de hora em hora pelo robô (`scripts/atualizar.py`, `.github/workflows/atualizar.yml`) a partir das APIs de dados abertos da Câmara e do Senado. Não editar à mão.
 
 ## Regras para atualizar o conteúdo
