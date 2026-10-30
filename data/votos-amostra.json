@@ -70,13 +70,13 @@
   }
  },
  "camara-votos": {
-  "url": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2486451-27/votos",
+  "url": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2619828-7/votos",
   "resposta": {
    "dados": [],
    "links": [
     {
      "rel": "self",
-     "href": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2486451-27/votos"
+     "href": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2619828-7/votos"
     }
    ]
   }
