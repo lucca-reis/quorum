@@ -35,7 +35,10 @@ def get(path, **q):
             return js
         except urllib.error.HTTPError as ex:
             if ex.code == 429: time.sleep(30); continue
-            log.append(f'{path} {q}: HTTP {ex.code}'); return None
+            corpo = ''
+            try: corpo = ex.read().decode('utf-8', 'replace')[:300]
+            except Exception: pass
+            log.append(f'{path} {q}: HTTP {ex.code} {corpo}'); return None
         except Exception as ex:
             if n == 2: log.append(f'{path} {q}: {ex}'); return None
             time.sleep(5)
@@ -78,24 +81,40 @@ MESES.reverse()
 
 # ---------- quem é quem: presidente, vice e ministros, lidos do próprio site ----------
 html = (ROOT / 'index.html').read_text(encoding='utf-8')
-pessoas = [{'n': n, 'cargo': c} for n, c in re.findall(r"\{n:'([^']+)', role:'(Presidente da República|Vice-presidente)'", html)]
+topo = html[html.index('const EXEC_TOP = ['):]
+topo = topo[:topo.index('];')]
+pessoas = [{'n': n, 'cargo': c} for n, c in re.findall(r"\{n:'([^']+)', role:'([^']+)'", topo)]
 bloco = html[html.index('const EXEC_MIN = ['):]
 bloco = bloco[:bloco.index('];')]
-pessoas += [{'n': n, 'cargo': 'Ministro(a): ' + pasta} for pasta, n in re.findall(r"\['([^']+)','([^']+)'", bloco)]
+pessoas += [{'n': n, 'cargo': 'Ministro(a): ' + pasta, 'pasta': pasta} for pasta, n in re.findall(r"\['([^']+)','([^']+)'", bloco)]
 
-# ---------- órgão da Presidência (para o cartão de pagamento) ----------
-orgaos = paginas('orgaos-siafi', 5, descricao='Presidência da República') or []
-cands = [o for o in orgaos if 'PRESIDENCIA DA REPUBLICA' in norm(o.get('descricao') or o.get('nome'))]
-orgao = None
-for o in cands:
-    cod = o.get('codigo') or o.get('codigoSIAFI')
-    teste = get('cartoes', mesExtratoInicio=HOJE.strftime('%m/%Y'), mesExtratoFim=HOJE.strftime('%m/%Y'), codigoOrgao=cod, pagina=1)
-    if teste is None: continue
-    orgao = {'codigo': cod, 'nome': o.get('descricao') or o.get('nome')}
-    if teste: break
+# ---------- órgãos: Presidência (20101), Vice-Presidência e ministérios ----------
+def lista_orgaos(desc):
+    return [{'codigo': str(o.get('codigo')), 'nome': o.get('descricao') or o.get('nome') or ''} for o in (paginas('orgaos-siafi', 15, descricao=desc) or [])]
+ORG = {o['codigo']: o for o in lista_orgaos('Presidência') + lista_orgaos('Vice-Presidência') + lista_orgaos('Ministério')}
+def acha_orgao(chave, *excluir):
+    k = norm(chave)
+    for o in ORG.values():
+        n = norm(o['nome'])
+        if k in n and not any(norm(e) in n for e in excluir): return o
+    return None
+PRES = ORG.get('20101') or acha_orgao('PRESIDENCIA DA REPUBLICA', 'VICE', 'VINCULO')
+VICE = acha_orgao('VICE-PRESIDENCIA')
+# pasta do site -> órgão SIAFI do ministério (pelo nome; o que não casar fica sem órgão)
+STOP = {'E', 'DA', 'DE', 'DO', 'DAS', 'DOS', 'MINISTERIO'}
+def orgao_da_pasta(pasta):
+    alvo = {w for w in norm(pasta).split() if w not in STOP}
+    melhor, nota = None, 0
+    for o in ORG.values():
+        n = norm(o['nome'])
+        if not n.startswith('MINISTERIO'): continue
+        ws = {w for w in n.split() if w not in STOP}
+        sc = len(alvo & ws) / max(1, len(alvo | ws))
+        if sc > nota: melhor, nota = o, sc
+    return melhor if nota >= 0.4 else None
 
-cartao = None
-if orgao:
+def cartao_de(orgao):
+    if not orgao: return None
     itens = []
     for m in MESES:
         mm = m.strftime('%m/%Y')
@@ -106,44 +125,50 @@ if orgao:
                 try: iso = datetime.datetime.strptime(data[:10], fmt).date().isoformat(); break
                 except ValueError: pass
             itens.append({'d': iso or m.isoformat(), 'm': m.strftime('%Y-%m'), 'v': round(valor(x.get('valorTransacao')), 2),
-                          'e': (dig(x, 'estabelecimento', 'nome') or dig(x, 'estabelecimento', 'razaoSocialReceita') or 'Sigiloso ou não informado')[:80],
-                          't': dig(x, 'tipoCartao', 'descricao') or '',
+                          'e': (dig(x, 'estabelecimento', 'nome') or 'Não informado')[:80],
                           'ug': (dig(x, 'unidadeGestora', 'nome') or '')[:80]})
     itens.sort(key=lambda i: i['d'], reverse=True)
     por_mes = {m.strftime('%Y-%m'): 0.0 for m in MESES}
     for i in itens: por_mes[i['m']] = por_mes.get(i['m'], 0) + i['v']
-    cartao = {'orgao': orgao, 'total': round(sum(i['v'] for i in itens), 2), 'transacoes': len(itens),
-              'meses': [[m, round(v, 2)] for m, v in por_mes.items()], 'itens': itens[:400],
-              'fonte': 'https://portaldatransparencia.gov.br/cartoes'}
+    sig = sum(i['v'] for i in itens if norm(i['e']).startswith('SIGILOS'))
+    return {'orgao': orgao, 'total': round(sum(i['v'] for i in itens), 2), 'sigiloso': round(sig, 2), 'transacoes': len(itens),
+            'meses': [[m, round(v, 2)] for m, v in por_mes.items()], 'itens': [i for i in itens if 'm' in i][:300],
+            'fonte': f"https://portaldatransparencia.gov.br/cartoes/consulta?ordenarPor=dataTransacao&direcao=desc&orgaos={orgao['codigo']}"}
 
-# ---------- remuneração de cada pessoa (quando ela aparece no cadastro de servidores e agentes) ----------
+cartoes = {}
+if PRES: cartoes['presidencia'] = cartao_de(PRES)
+if VICE: cartoes['vice'] = cartao_de(VICE)
+
+# ---------- remuneração: procura cada pessoa no cadastro de servidores e agentes do órgão dela ----------
 remun = {}
 for p in pessoas:
-    achados = get('servidores', nome=p['n'], pagina=1) or []
+    org = PRES if p['cargo'] == 'Presidente da República' else VICE if p['cargo'] == 'Vice-presidente' else orgao_da_pasta(p.get('pasta', ''))
+    achados = None
+    for q in ([{'nome': p['n'], 'orgaoServidorExercicio': org['codigo']}, {'nome': p['n'], 'orgaoServidorLotacao': org['codigo']}] if org else []) + [{'nome': p['n'], 'situacaoServidor': 1}]:
+        achados = get('servidores', pagina=1, **q)
+        if achados: break
     alvo = None
-    for a in achados:
+    for a in achados or []:
         nome = dig(a, 'servidor', 'pessoa', 'nome') or dig(a, 'pessoa', 'nome') or a.get('nome')
-        if norm(nome) == norm(p['n']) or norm(p['n']) in norm(nome):
+        if nome and (norm(nome) == norm(p['n']) or set(norm(p['n']).split()) <= set(norm(nome).split())):
             alvo = a; break
-    if not alvo:
-        remun[slug(p['n'])] = {'n': p['n'], 'cargo': p['cargo'], 'meses': [], 'achado': False}
-        continue
-    sid = dig(alvo, 'servidor', 'id') or alvo.get('id') or dig(alvo, 'servidor', 'idServidorAposentadoPensionista')
-    meses = []
-    for m in MESES[-6:]:
-        js = get('servidores/remuneracao', id=sid, mesAno=m.strftime('%Y%m'), pagina=1) or []
-        for r in js:
-            for dto in (r.get('remuneracoesDTO') or [r]):
-                bruto = valor(dto.get('remuneracaoBasicaBruta') or dto.get('valorTotalRemuneracaoAposDeducoes'))
-                liq = valor(dto.get('valorTotalRemuneracaoAposDeducoes'))
-                if bruto or liq: meses.append([m.strftime('%Y-%m'), round(bruto, 2), round(liq, 2)])
-    remun[slug(p['n'])] = {'n': p['n'], 'cargo': p['cargo'], 'meses': meses, 'achado': True,
-                           'fonte': 'https://portaldatransparencia.gov.br/servidores'}
+    item = {'n': p['n'], 'cargo': p['cargo'], 'orgao': org, 'meses': [], 'achado': bool(alvo)}
+    if alvo:
+        sid = dig(alvo, 'servidor', 'id') or alvo.get('id') or dig(alvo, 'servidor', 'idServidorAposentadoPensionista')
+        for m in MESES[-6:]:
+            for r in get('servidores/remuneracao', id=sid, mesAno=m.strftime('%Y%m'), pagina=1) or []:
+                for dto in (r.get('remuneracoesDTO') or [r]):
+                    bruto = valor(dto.get('remuneracaoBasicaBruta'))
+                    liq = valor(dto.get('valorTotalRemuneracaoAposDeducoes'))
+                    if bruto or liq: item['meses'].append([m.strftime('%Y-%m'), round(bruto, 2), round(liq, 2)])
+        item['fonte'] = 'https://portaldatransparencia.gov.br/servidores'
+    remun[slug(p['n'])] = item
 
 OUT.mkdir(parents=True, exist_ok=True)
 res = {'atualizado': datetime.datetime.now(BR).isoformat(timespec='minutes'), 'periodo': [MESES[0].isoformat(), HOJE.isoformat()],
-       'cartao': cartao, 'pessoas': remun, 'chamadas': chamadas, 'erros': log[:50]}
+       'cartoes': cartoes, 'pessoas': remun, 'orgaos': sorted(ORG.values(), key=lambda o: o['codigo']), 'chamadas': chamadas, 'erros': log[:60]}
 (OUT / 'exec.json').write_text(json.dumps(res, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
 (OUT / 'exec-amostra.json').write_text(json.dumps(amostra, ensure_ascii=False, indent=1)[:60000], encoding='utf-8')
-print(json.dumps({'orgao': orgao, 'cartao': cartao and cartao['transacoes'], 'achados': sum(r['achado'] for r in remun.values()),
-                  'com_remuneracao': sum(bool(r['meses']) for r in remun.values()), 'chamadas': chamadas, 'erros': log[:10]}, ensure_ascii=False))
+print(json.dumps({'pres': PRES, 'vice': VICE, 'cartoes': {k: v and v['transacoes'] for k, v in cartoes.items()},
+                  'achados': sum(r['achado'] for r in remun.values()), 'com_remuneracao': sum(bool(r['meses']) for r in remun.values()),
+                  'chamadas': chamadas, 'erros': log[:10]}, ensure_ascii=False))
