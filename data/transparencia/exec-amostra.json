@@ -2,7 +2,7 @@
  "orgaos-siafi": {
   "params": {
    "pagina": 1,
-   "descricao": "Presidência da República"
+   "descricao": "Presidência"
   },
   "resposta": [
    {
@@ -17,10 +17,103 @@
  },
  "cartoes": {
   "params": {
-   "mesExtratoInicio": "10/2026",
-   "mesExtratoFim": "10/2026",
-   "codigoOrgao": "20000",
-   "pagina": 1
+   "pagina": 1,
+   "mesExtratoInicio": "11/2025",
+   "mesExtratoFim": "11/2025",
+   "codigoOrgao": "20101"
+  },
+  "resposta": [
+   {
+    "id": 506830949,
+    "mesExtrato": "11/2025",
+    "dataTransacao": "Sem informação",
+    "valorTransacao": "52,32",
+    "tipoCartao": {
+     "id": 1,
+     "codigo": "1",
+     "descricao": "Cartão de Pagamento do Governo Federal - CPGF"
+    },
+    "estabelecimento": {
+     "id": -11,
+     "cpfFormatado": "",
+     "cnpjFormatado": "",
+     "numeroInscricaoSocial": "",
+     "nome": "Sigiloso",
+     "razaoSocialReceita": "SIGILO",
+     "nomeFantasiaReceita": "SIGILO",
+     "tipo": "Sem Informação"
+    },
+    "unidadeGestora": {
+     "codigo": "110809",
+     "nome": "SECRETARIA DE ADMINISTRACAO - PECULIARIDADES",
+     "descricaoPoder": "EXECUTIVO",
+     "orgaoVinculado": {
+      "codigoSIAFI": "20101",
+      "cnpj": "00394411000109",
+      "sigla": "PR",
+      "nome": "Presidência da República"
+     },
+     "orgaoMaximo": {
+      "codigo": "20000",
+      "sigla": "PR\t",
+      "nome": "Presidência da República"
+     }
+    },
+    "portador": {
+     "cpfFormatado": "",
+     "nis": "",
+     "nome": "Sigiloso"
+    }
+   },
+   {
+    "id": 506831013,
+    "mesExtrato": "11/2025",
+    "dataTransacao": "Sem informação",
+    "valorTransacao": "279,85",
+    "tipoCartao": {
+     "id": 1,
+     "codigo": "1",
+     "descricao": "Cartão de Pagamento do Governo Federal - CPGF"
+    },
+    "estabelecimento": {
+     "id": -11,
+     "cpfFormatado": "",
+     "cnpjFormatado": "",
+     "numeroInscricaoSocial": "",
+     "nome": "Sigiloso",
+     "razaoSocialReceita": "SIGILO",
+     "nomeFantasiaReceita": "SIGILO",
+     "tipo": "Sem Informação"
+    },
+    "unidadeGestora": {
+     "codigo": "110809",
+     "nome": "SECRETARIA DE ADMINISTRACAO - PECULIARIDADES",
+     "descricaoPoder": "EXECUTIVO",
+     "orgaoVinculado": {
+      "codigoSIAFI": "20101",
+      "cnpj": "00394411000109",
+      "sigla": "PR",
+      "nome": "Presidência da República"
+     },
+     "orgaoMaximo": {
+      "codigo": "20000",
+      "sigla": "PR\t",
+      "nome": "Presidência da República"
+     }
+    },
+    "portador": {
+     "cpfFormatado": "",
+     "nis": "",
+     "nome": "Sigiloso"
+    }
+   }
+  ]
+ },
+ "servidores": {
+  "params": {
+   "pagina": 1,
+   "nome": "Luiz Inácio Lula da Silva",
+   "orgaoServidorExercicio": "20101"
   },
   "resposta": []
  }
