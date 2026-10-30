@@ -73,6 +73,7 @@ for ref, house, code in projetos:
     if pid:
         vs = (get(f'https://dadosabertos.camara.leg.br/api/v2/proposicoes/{pid}/votacoes', 'camara-votacoes') or {}).get('dados', [])
         for v in vs:
+            if v.get('siglaOrgao') != 'PLEN': continue   # só o Plenário; votações de comissão só valem para os membros dela
             votos = (get(f"https://dadosabertos.camara.leg.br/api/v2/votacoes/{v['id']}/votos", 'camara-votos') or {}).get('dados', [])
             if not votos: continue   # votação simbólica: sem voto individual
             vots.append({'casa': 'camara', 'id': v['id'], 'data': (v.get('dataHoraRegistro') or v.get('data') or '')[:16],

@@ -926,6 +926,13 @@ h1[tabindex="-1"]:focus{outline:none}
 .inst-more a:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
 .inst-more a[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));box-shadow:none}
 @media (max-width:560px){ .inst-dl{grid-template-columns:minmax(0,1fr)} .inst-card{padding:16px;border-radius:18px} .nav-sub-wide,.nav-sub-courts{min-width:260px} }
+.p-cards .rel-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.p-cards .rel-list > li{display:flex;flex-direction:column;gap:6px}
+.rel-tags{margin:0;display:flex;flex-wrap:wrap;gap:6px}
+.rel-tags span{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--bg);color:var(--ink)}
+.p-cards .card{--card:var(--bg)}
+.p-cards .card:hover{--card:color-mix(in srgb, var(--ink) 3%, var(--bg))}
+.p-cards .c-pill{background:color-mix(in srgb, var(--ink) 6%, var(--bg))}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -2081,6 +2088,7 @@ function openPerson(src, key, P){
           ? 'O histórico do mandato atual está no portal do Senado. Ainda não foi carregado nesta página.'
           : 'Começam a ser registradas após a posse, em fevereiro de 2027.'}</p></section>
       </div>
+      ${relatedHTML(P.n, key)}
       <section class="p-tr" id="p-tr" aria-live="polite"><h3>Transparência · cota parlamentar</h3><p class="tr-empty">Carregando os gastos…</p></section>
       ${note ? `<p class="p-note">${esc(note)}</p>` : ''}
       <div class="p-src">${infoBox(src2,'Fontes')}</div>`;
@@ -2602,6 +2610,7 @@ function openMinister(el){
         <section><h3>Relatorias nesta página</h3>${rel.length ? `<ul class="p-rel">${rel.map(([k,P])=>`<li><a href="#p-${k}">${esc(P.title)}</a><span>${esc(P.code)}</span></li>`).join('')}</ul>` : '<p class="empty">Nenhum dos processos da linha do tempo tem esta relatoria.</p>'}</section>
       </div>${M.note ? `<p class="p-note">${esc(M.note)}</p>` : ''}`;
   }
+  if (M && M.n) html += relatedHTML(M.n, 'stf');
   html += `<div class="p-src">${infoBox(STF_SOURCES,'Fontes')}</div>`;
   layer.style.setProperty('--c', 'var(--ink)');
   layer.style.setProperty('--on', 'var(--bg)');
@@ -2650,6 +2659,7 @@ function openExec(el, i){
         <section><h3>Antecessor(a)</h3>${M.prev ? `<span class="big" style="font-size:24px;line-height:1.15">${esc(M.prev)}</span>` : '<p class="empty">Não levantado.</p>'}</section>
       </div>`;
   }
+  html += relatedHTML(M.n, 'exec', M.role);
   if (M.role==='Presidente da República' || M.role==='Vice-presidente') html += `<section class="p-tr" id="p-tr" aria-live="polite"><h3>Transparência · cartão de pagamento</h3><p class="tr-empty">Carregando…</p></section>`;
   html += `<div class="p-src">${infoBox(EXEC_SOURCES,'Fontes')}</div>`;
   layer.style.setProperty('--c', color);
@@ -3167,6 +3177,47 @@ function hideCons(){
 }
 // refresh the numbers when the page has been open for a while
 setInterval(()=>{ if (!cons.hidden && consData && Date.now() - Date.parse(consData.atualizado) > 70*60e3){ consData = null; loadCons(); } }, 10*60e3);
+
+/* ---------- related cards in each person's profile ----------
+   A card is related to a person when the name appears as author or rapporteur, in the vote, in the steps or in
+   the summary; for deputies and senators, data/votos.json (robot) adds how each one voted in roll-call votes. */
+let VOTOS = null;
+setTimeout(()=> trFetch('data/votos.json').then(js=>{ VOTOS = js; const box = document.querySelector('#person .p-cards[data-n]'); if (box) box.outerHTML = relatedHTML(box.dataset.n, box.dataset.k, box.dataset.r||''); }).catch(()=>{}), 0);
+const VOTE_TX = {'Sim':'votou Sim','Não':'votou Não','Nao':'votou Não','Abstenção':'absteve-se','Obstrução':'obstruiu','Artigo 17':'não vota (preside)','SIM':'votou Sim','NAO':'votou Não','NÃO':'votou Não','ABST':'absteve-se','P-NRV':'presente, sem voto','AP':'ausente','LS':'de licença','MIS':'em missão'};
+function nameRe(n){
+  const w = fold(n).replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(x=> x.length>1 && !['de','da','do','dos','das','e'].includes(x));
+  const full = w.join(' '), short = w.length>2 ? w[0]+' '+w[w.length-1] : full;
+  return t=>{ const f = ' '+fold(t).replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ')+' '; return f.includes(' '+full+' ') || f.includes(' '+short+' '); };
+}
+function relatedHTML(name, key, role){
+  const has = nameRe(name), sl = slugName(name), pres = role==='Presidente da República';
+  const rows = [];
+  CARDS.forEach(c=>{
+    const P = c.P, tags = [];
+    if (has(P.author||'') || (pres && /Presidência da República|Poder Executivo|Governo federal/i.test(P.author||''))) tags.push('autoria');
+    if (has(P.rapporteur||'')) tags.push('relatoria');
+    if (P.votes && has([P.votes.note, P.votes.result, P.votes.label].join(' '))) tags.push(key==='stf' ? 'citado(a) no julgamento' : 'citado(a) na votação');
+    if (!tags.length && has([P.summary, (P.points||[]).join(' '), P.steps.map(x=>x[1]).join(' '), P.status].join(' '))) tags.push('citado(a) no andamento');
+    // roll-call votes from the robot (Câmara and Senado)
+    const V = VOTOS && VOTOS.projetos && VOTOS.projetos[c.slug];
+    if (V && (key==='camara' || key==='senado')){
+      const inHouse = V.filter(v=> v.casa===key);
+      const served = VOTOS.projetos && Object.values(VOTOS.projetos).some(vs=> vs.some(v=> v.casa===key && v.votos[sl]));
+      inHouse.forEach(v=>{
+        const x = v.votos[sl];
+        if (x) tags.push(`${VOTE_TX[x[2]] || 'voto: '+String(x[2]||'').toLowerCase()}${inHouse.length>1 && v.data ? ' ('+cardDate(v.data.slice(0,10))+')' : ''}`);
+        else if (served) tags.push(`sem voto registrado${inHouse.length>1 && v.data ? ' ('+cardDate(v.data.slice(0,10))+')' : ''}`);
+      });
+    }
+    if (tags.length) rows.push({c, tags});
+  });
+  const body = rows.length
+    ? `<ul class="rel-list">${rows.map(r=>`<li><p class="rel-tags">${r.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</p>${cardHTML(r.c, null).replace(/^<li>|<\/li>$/g,'')}</li>`).join('')}</ul>`
+    : `<p class="tr-empty">Nenhum projeto ou processo acompanhado pelo site cita ${esc(name)}${(key==='camara'||key==='senado') ? ', e não há voto nominal dele(a) nas votações registradas' : ''}.</p>`;
+  return `<section class="p-tr p-cards" data-n="${esc(name)}" data-k="${key}" data-r="${esc(role||'')}"><h3>Projetos e processos relacionados</h3>${body}
+    ${(key==='camara'||key==='senado') ? `<p class="vb-note">Votos nominais registrados pela ${key==='camara'?'Câmara':'Senado'}. Votações simbólicas não têm voto individual.</p>` : ''}</section>`;
+}
+document.getElementById('person').addEventListener('click', e=>{ if (e.target.closest('.p-cards')) cardClick(e); });
 
 /* ---------- transparency: parliamentary allowance (cota) ----------
    data/transparencia/ is written once a day by scripts/transparencia.py from the official files of the Câmara (CEAP)
