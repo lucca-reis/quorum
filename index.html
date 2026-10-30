@@ -2092,12 +2092,12 @@ Object.values(VIEWS).forEach(V=>{
     dots(g, HOUSES[key].g.querySelectorAll('.pres, .seat'));
   });
   // STF: the U table and the eleven seats
-  const gs = pv(lgStf, fit(stfFrame, document.getElementById('stf-mini')) + ' translate(345 252.5) scale(.95) translate(-345 -273)');
+  const gs = pv(lgStf, fit(stfFrame, document.getElementById('stf-mini')) + ' translate(345 252.5) scale(.426) translate(-345 -273)');
   const u = document.querySelector('#stf-bench .u-table').cloneNode(false); u.setAttribute('class','u'); u.removeAttribute('vector-effect'); gs.appendChild(u);
   dots(gs, document.querySelectorAll('#stf-bench .jz'));
   // Presidência: president, vice and ministries
   const fx = +presFrame.getAttribute('x') + +presFrame.getAttribute('width')/2, fy = +presFrame.getAttribute('y') + +presFrame.getAttribute('height')/2;
-  const gp = pv(lgPres, fit(presFrame, document.getElementById('pres-mini')) + ` translate(${fx} ${fy}) scale(1.1) translate(${-PRES_BENCH.cx} ${-PRES_BENCH.cy})`);
+  const gp = pv(lgPres, fit(presFrame, document.getElementById('pres-mini')) + ` translate(${fx} ${fy}) scale(.804) translate(${-PRES_BENCH.cx} ${-PRES_BENCH.cy})`);
   dots(gp, document.querySelectorAll('#pres-bench .jz'));
 })();
 
