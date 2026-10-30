@@ -495,6 +495,18 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .mv-leg span{display:inline-flex;align-items:center;gap:6px}
 .mv-leg i{width:7px;height:7px;border-radius:50%;flex:none}
 .mv-leg i.mv-y{background:var(--ink)}.mv-leg i.mv-n{background:#E24B4A}.mv-leg i.mv-o{background:color-mix(in srgb, var(--ink) 14%, var(--bg))}
+.c-desc{margin:0;font-size:14px;line-height:1.45;color:color-mix(in srgb, var(--ink) 80%, var(--bg));display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.c-phase{margin:2px 0 0;font-size:13.5px;line-height:1.4}
+.c-phase b{font-weight:500}
+.c-phase span{color:var(--muted)}
+.c-votes{margin-top:10px;padding-top:12px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
+.c-votes p{margin:0}
+.c-vlab{font-size:11.5px;color:var(--muted)}
+.c-vlab span{color:var(--muted)}
+.c-vres{font-size:14px;font-weight:500}
+.c-who{font-size:12.5px;line-height:1.45;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.c-votes .mv{margin:2px 0}
+.c-votes .mv svg{width:56px}
 .c-meta{margin:8px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px;font-size:12.5px;line-height:1.35}
 .c-meta div{min-width:0}
 .c-meta dt{font-size:11.5px;color:var(--muted);margin-bottom:1px}
@@ -1896,28 +1908,43 @@ function miniVote(P, big){
   const label = `${(v.tally||[]).length>1 ? esc(lab)+' · ' : ''}${body==='stf'?'STF':body==='senado'?'Senado':'Câmara'}`;
   return `<div class="mv${big?' big':''}" role="img" aria-label="${label}: ${all ? esc(v.result)+', sem placar divulgado' : `${yes} ${esc(ly)}, ${no} ${esc(ln)}${rest?', '+rest+' sem voto':''}`}"><svg viewBox="${vb}" aria-hidden="true">${table}${dots}</svg><p class="mv-leg"><b>${label}</b>${legend}</p></div>`;
 }
+// how long ago, in plain words
+function agoTx(iso){
+  if (!iso) return '';
+  const d = Math.round((Date.parse(todayISO()+'T12:00:00Z') - Date.parse(iso+'T12:00:00Z'))/864e5);
+  if (d<=0) return 'hoje'; if (d===1) return 'ontem'; if (d<30) return `há ${d} dias`;
+  const m = Math.round(d/30.4); if (m<12) return `há ${m} ${m===1?'mês':'meses'}`;
+  const y = Math.floor(d/365); return `há ${y} ${y===1?'ano':'anos'}`;
+}
+// who voted how, from the vote note, keeping only sentences that say something
+function whoVoted(v){
+  if (!v || !v.note) return '';
+  return v.note.split(/(?<=\.)\s+/).filter(x=> x && !/não (foi )?informad|não divulg|não localizad|não teve placar|sem placar|ainda não foi/i.test(x)).join(' ');
+}
+const EMPTY_RE = /^n[ãa]o informad|^sem data|^ainda não/i;
 function cardHTML(c, key){
   const P = c.P, S = cardState(c, key), L = S.last;
-  const when = L ? `${POWER_NAME[L.key]} · ${cardDate(L.date, L.time)}` : 'ainda não foi a plenário';
-  const what = L && L.r ? L.r : P.status;
   const live = S.here && liveState(S.here)?.s==='live' && L && L.date===todayISO() && L.key===S.here;
-  const ok = v => v && !NI.test(v);
-  const nextTx = S.next ? `${S.next.week ? 'semana de '+cardDate(S.next.date) : cardDate(S.next.date, S.next.time)}, ${POWER_NAME[S.next.key]}` : 'sem data marcada';
-  const cell = (k,v,cls='') => `<div${cls?` class="${cls}"`:''}><dt>${k}</dt><dd>${v}</dd></div>`;
-  const mv = miniVote(P);
+  const ok = v => v && !EMPTY_RE.test(v) && !NI.test(v);
+  const cell = (k,v) => ok(v) ? `<div><dt>${k}</dt><dd>${v}</dd></div>` : '';
+  const since = L ? agoTx(L.date) : '';
+  const stf = P.house==='stf';
+  const meta = [
+    cell('Criado em', S.created ? `${cardDate(S.created)} · ${agoTx(S.created)}` : ''),
+    cell(stf ? 'Autor' : 'Autoria', ok(P.author) ? esc(P.author) : ''),
+    cell(stf ? 'Relator(a)' : 'Relatoria', ok(P.rapporteur) ? esc(P.rapporteur) : ''),
+    cell('Próximo passo', S.next ? `${S.next.week ? 'semana de '+cardDate(S.next.date) : cardDate(S.next.date, S.next.time)}, ${POWER_NAME[S.next.key]}` : '')
+  ].join('');
+  const v = P.votes, mv = miniVote(P), who = whoVoted(v);
+  const vote = v ? `<div class="c-votes"><p class="c-vlab">Votação${v.label ? ` · <span>${esc(v.label)}</span>` : ''}</p>
+      <p class="c-vres">${esc(v.result)}</p>${mv}${who ? `<p class="c-who">${esc(who)}</p>` : ''}</div>` : '';
   return `<li><a class="card${live?' is-live':''}" href="#p-${c.slug}" data-ref="${c.slug}">
     <p class="c-pill"><span class="c-dot" aria-hidden="true"></span>${POWER_NAME[S.here]}${live ? ' · ao vivo' : ''}</p>
     <h3 class="c-title">${esc(P.title)}</h3>
-    <p class="c-sub"><span class="c-code" title="${esc(P.type)}">${esc(P.code)}</span> · ${when}</p>
-    <p class="c-what">${esc(what)}</p>
-    <dl class="c-meta">
-      ${cell(P.house==='stf' ? 'Autor' : 'Autoria', ok(P.author) ? esc(P.author) : 'não informado')}
-      ${cell(P.house==='stf' ? 'Relator(a)' : 'Relatoria', ok(P.rapporteur) ? esc(P.rapporteur) : 'não informado')}
-      ${cell('Votação', mv || (P.votes ? esc(P.votes.result) : 'ainda não houve'), mv ? (S.path.length>1 ? 'c-vote tall' : 'c-vote') : '')}
-      ${cell('Criado em', S.created ? cardDate(S.created) : 'não informado')}
-      ${cell('Próximo passo', nextTx)}
-      ${S.path.length>1 ? cell('Passou por', S.path.map(k=>POWER_NAME[k]).join(' → ')) : ''}
-    </dl></a></li>`;
+    ${ok(P.summary) ? `<p class="c-desc">${esc(P.summary)}</p>` : ''}
+    ${ok(P.status) ? `<p class="c-phase"><b>${esc(P.status)}</b>${since ? `<span> · ${since}</span>` : ''}</p>` : ''}
+    ${meta ? `<dl class="c-meta">${meta}</dl>` : ''}
+    ${vote}</a></li>`;
 }
 function feedHTML(key){
   const list = CARDS.filter(c=> !key || c.P.house===key || c.ev.some(e=> e.key===key))
