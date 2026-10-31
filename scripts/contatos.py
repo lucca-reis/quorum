@@ -94,9 +94,10 @@ def entrada(pid, **campos):
             for f in v:
                 if f not in e['fontes']: e['fontes'].append(f)
         elif k == 'links':
+            # guarda todas as contas de cada rede; no fim fica a que tem o nome da pessoa (campanhas declaram também perfis de comitê)
             for u in v:
                 r = rede(u)
-                if r and r[0] not in e['redes']: e['redes'][r[0]] = {'u': r[1], 'h': r[2]}
+                if r: e.setdefault('cands', {}).setdefault(r[0], []).append({'u': r[1], 'h': r[2]})
         elif not e.get(k):
             e[k] = v
     return e
@@ -198,10 +199,21 @@ for pid, e in sorted(pessoas.items(), key=lambda kv: (kv[0].startswith('tse'), k
         for k in ('nomes', 'emails', 'tels', 'fontes'):
             for x in e.get(k, []):
                 if x not in f[k]: f[k].append(x)
-        for r, v in e['redes'].items(): f['redes'].setdefault(r, v)
+        for r, v in e.get('cands', {}).items(): f.setdefault('cands', {}).setdefault(r, []).extend(v)
         for k, v in e.items():
             if k not in f or f[k] in (None, '', []): f[k] = v
     for k in chaves: por_nome.setdefault(k, alvo)
+
+def melhor(nomes, contas):
+    partes = {p for n in nomes for p in slug(n).split('-') if len(p) >= 4}
+    junto = {slug(n).replace('-', '') for n in nomes}
+    def nota(c):
+        h = norm(c['h']).lower().replace('_', '').replace('.', '')
+        return (sum(p in h for p in partes) + 3 * any(j and j in h for j in junto), -len(h))
+    return max(contas, key=nota) if contas else None
+for f in final.values():
+    for r, contas in f.pop('cands', {}).items():
+        f['redes'][r] = melhor(f['nomes'], contas)
 
 OUT.mkdir(exist_ok=True)
 res = {'atualizado': datetime.datetime.now(BR).isoformat(timespec='minutes'), 'pessoas': final, 'nomes': por_nome, 'erros': log[:60]}

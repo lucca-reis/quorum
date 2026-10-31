@@ -6,6 +6,7 @@
 <meta name="description" content="Quorum: pautas, votações e composição do Congresso, do Supremo e da Presidência.">
 <style>html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Quorum</title>
+<link rel="icon" id="favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23009C3B'/%3E%3C/svg%3E">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout: one drawing board centered in the viewport. Opening a house moves it to its own edge. */
@@ -2057,6 +2058,21 @@ HOUSES.senado.open.s = HOUSES.camara.r * HOUSES.camara.open.s / HOUSES.senado.r;
 /* ---------- interaction ---------- */
 const stage = document.getElementById('stage'), panel = document.getElementById('panel');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// the favicon is the dot of Quorum, green, yellow and blue, three seconds each, in step with the dot in the menu
+(function(){
+  const ic = document.getElementById('favicon'); if (!ic) return;
+  const C = ['#009C3B', '#F2C200', '#1F4FB5'];
+  const svg = c => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='13' fill='${c}'/></svg>`);
+  const dot = document.querySelector('.brand-o');
+  let last = -1;
+  const tick = ()=>{
+    const a = dot && dot.getAnimations && dot.getAnimations()[0], t = a && a.currentTime != null ? a.currentTime : performance.now();
+    const i = Math.floor(((t + 150) % 9000) / 3000);   // the dot changes colour between 2.7 s and 3 s of each third
+    if (i !== last){ last = i; ic.href = svg(C[i]); }
+  };
+  tick();
+  if (!reduce) setInterval(tick, 250);
+})();
 let openKey = null, anim = null, colorTimer = null;
 const ease = t => t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
 
