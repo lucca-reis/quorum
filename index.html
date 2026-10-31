@@ -349,7 +349,7 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
   .nav-scrim{display:block;position:fixed;inset:0;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));z-index:1;background:rgba(0,0,0,.28);opacity:0;visibility:hidden;transition:opacity .18s, visibility 0s .18s}
   .menu:has(.nav-grp.open) .nav-scrim{opacity:1;visibility:visible;transition:opacity .18s}
   /* full-screen layers stop above the bar, so nothing hides behind it */
-  .ov,.proj,.landing,.stfv{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px))}
+  html .ov,html .proj,html .landing,html .stfv{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px))}
   body{padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 16px)}
 }
 @media (max-width:380px){
@@ -528,6 +528,16 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .fd-date{margin:0;align-self:flex-start;padding:2px 4px 0;font-size:12px;line-height:1.2;color:var(--muted)}
 .fd.is-today .fd-date{color:var(--ink);font-weight:500}
 .fd-cards{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+/* opening view: the most recent day stands out; older days open with "Ver mais" */
+.fd-first .fd-date{font-size:13px;color:var(--ink)}
+.fd-new{font-weight:600}
+.fd-first .card{--card:color-mix(in srgb, var(--ink) 7%, var(--bg));box-shadow:inset 0 0 0 1.5px var(--ink)}
+.fd-first .card:hover{--card:color-mix(in srgb, var(--ink) 10%, var(--bg))}
+.fd-morewrap{display:flex;justify-content:center}
+@media (min-width:701px){ .today:not(.more){justify-content:center} .today:not(.more) > .feed{flex:none;overflow:visible;padding-bottom:0} .fd-first .c-title{font-size:20px} }
+.fd-more{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 20px;border-radius:999px;border:1.5px solid var(--ink);font-size:14px;display:inline-flex;align-items:center;transition:background-color .2s, color .2s}
+.fd-more:hover{background:var(--ink);color:var(--bg)}
+.fd-more:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .card{--card:color-mix(in srgb, var(--ink) 5%, var(--bg));border-radius:20px;background:var(--card);color:var(--ink);font-family:var(--display);transition:background-color .2s}
 .card:hover{--card:color-mix(in srgb, var(--ink) 8%, var(--bg))}
 .card p{margin:0}
@@ -598,7 +608,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   .lx{grid-template-columns:calc(330 * var(--u)) minmax(0,1fr);width:100%;row-gap:22px}
   .lx-shape{padding:0}
   .today{max-width:640px;height:auto;padding-bottom:56px}
-  .today > .feed{overflow:visible;padding-right:0}
+  .today > .feed{overflow:visible;padding-right:0;flex:none}
 }
 
 /* calendar v2 */
@@ -2447,7 +2457,7 @@ function cardClick(e){
   h.setAttribute('aria-expanded', String(open)); body.hidden = !open; card.classList.toggle('open', open);
   return true;
 }
-function feedHTML(key){
+function feedHTML(key, home){
   const list = CARDS.filter(c=> !key || c.P.house===key || c.ev.some(e=> e.key===key))
     .map(c=> ({c, L: cardState(c, key).last}))
     .sort((a,b)=> (b.L ? b.L.date+String(evMin(b.L)+10).padStart(5,'0') : '0') .localeCompare(a.L ? a.L.date+String(evMin(a.L)+10).padStart(5,'0') : '0'));
@@ -2455,13 +2465,17 @@ function feedHTML(key){
   const t = todayISO(), groups = [];
   list.forEach(x=>{ const d = x.L ? x.L.date : ''; const g = groups[groups.length-1];
     if (g && g.d===d) g.items.push(x); else groups.push({d, items:[x]}); });
-  return groups.map(g=>{
+  return groups.map((g, i)=>{
     let date = '';
     if (g.d){ const [y,m,dd] = g.d.split('-').map(Number), wd = ['dom','seg','ter','qua','qui','sex','sáb'][new Date(y,m-1,dd).getDay()];
       date = g.d===t ? 'hoje' : `${wd}, ${dd} ${MO[m-1]}${y!==+t.slice(0,4)?' '+y:''}`; }
-    return `<li class="fd${g.d===t?' is-today':''}">${date ? `<p class="fd-date">${date}</p>` : ''}<ol class="fd-cards">${g.items.map(x=> cardHTML(x.c, key)).join('')}</ol></li>`;
+    // on the opening view only the most recent day shows; the others wait behind "Ver mais"
+    const first = home && i===0, rest = home && i>0;
+    const li = `<li class="fd${g.d===t?' is-today':''}${first?' fd-first':''}${rest?' fd-old':''}"${rest && !feedMore?' hidden':''}>${date ? `<p class="fd-date">${first?`<span class="fd-new">Mais recente</span> · `:''}${date}</p>` : ''}<ol class="fd-cards">${g.items.map(x=> cardHTML(x.c, key)).join('')}</ol></li>`;
+    return li + (home && i===groups.length-1 && groups.length>1 ? `<li class="fd-morewrap"><button type="button" class="fd-more" aria-expanded="${feedMore}">${feedMore?'Ver menos':`Ver mais · ${groups.length-1} ${groups.length-1===1?'dia anterior':'dias anteriores'}`}</button></li>` : '');
   }).join('');
 }
+let feedMore = false;
 
 /* the feed on the opening view */
 const todayEl = document.getElementById('today');
@@ -2469,11 +2483,19 @@ function renderToday(){
   const t = todayISO(), [y,m,d] = t.split('-').map(Number), wd = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'][new Date(y,m-1,d).getDay()];
   document.getElementById('today-date').textContent = `${wd}, ${d} ${MO[m-1]}`;
   todayEl.innerHTML = `<div class="feed-h"><div class="feed-live" id="feed-live"></div></div>
-    <ol class="feed" aria-label="Propostas e julgamentos, do mais recente ao mais antigo">${feedHTML(null)}</ol>`;
+    <ol class="feed" aria-label="Propostas e julgamentos, do mais recente ao mais antigo">${feedHTML(null, true)}</ol>`;
 }
 function placeToday(){ /* the feed sits in the landing grid, beside the drawing */ }
 renderToday(); refreshLive();
 todayEl.addEventListener('click', e=>{
+  const more = e.target.closest('.fd-more');
+  if (more){ e.stopPropagation(); feedMore = !feedMore; todayEl.classList.toggle('more', feedMore);
+    todayEl.querySelectorAll('.fd-old').forEach(li=> li.hidden = !feedMore);
+    more.setAttribute('aria-expanded', String(feedMore));
+    const n = todayEl.querySelectorAll('.fd-old').length;
+    more.textContent = feedMore ? 'Ver menos' : `Ver mais · ${n} ${n===1?'dia anterior':'dias anteriores'}`;
+    if (feedMore) todayEl.querySelector('.fd-old')?.querySelector('.c-head')?.focus({preventScroll:true});
+    return; }
   const b = e.target.closest('.lv-tag[data-go]');
   if (b){ e.stopPropagation(); const k = b.dataset.go; if (k==='camara'||k==='senado') enterPlan(()=>open(k, true)); else enterView(VIEWS[k==='exec'?'pres':'stf']); return; }
   cardClick(e);
