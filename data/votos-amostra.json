@@ -1,89 +1,76 @@
 {
+ "senado-processo": {
+  "url": "https://legis.senado.leg.br/dadosabertos/processo?sigla=PL&numero=888&ano=2025",
+  "resposta": []
+ },
  "camara-proposicoes": {
-  "url": "https://dadosabertos.camara.leg.br/api/v2/proposicoes?siglaTipo=PL&numero=888&ano=2025",
+  "url": "https://dadosabertos.camara.leg.br/api/v2/proposicoes?siglaTipo=PL&numero=252&ano=2024",
   "resposta": {
    "dados": [
     {
-     "id": 2486451,
-     "uri": "https://dadosabertos.camara.leg.br/api/v2/proposicoes/2486451",
+     "id": 2417899,
+     "uri": "https://dadosabertos.camara.leg.br/api/v2/proposicoes/2417899",
      "siglaTipo": "PL",
      "codTipo": 139,
-     "numero": 888,
-     "ano": 2025,
-     "ementa": "Altera a Lei nº 9.610, de 19 de fevereiro de 1998, para estabelecer critérios transparentes e proporcionais para a cobrança das taxas pelo Escritório Central de Arrecadação e Distribuição – ECAD.",
-     "dataApresentacao": "2025-03-11T18:36"
+     "numero": 252,
+     "ano": 2024,
+     "ementa": "Dispõe sobre a imposição de cláusula de barreira nos concursos públicos para provimento de cargos efetivos da Administração Pública Direta, Autárquica e Fundacional da União, dos Estados, do Distrito Federal e dos Municípios.",
+     "dataApresentacao": "2024-02-14T17:22"
     }
    ],
    "links": [
     {
      "rel": "self",
-     "href": "https://dadosabertos.camara.leg.br/api/v2/proposicoes?siglaTipo=PL&numero=888&ano=2025"
+     "href": "https://dadosabertos.camara.leg.br/api/v2/proposicoes?siglaTipo=PL&numero=252&ano=2024"
     },
     {
      "rel": "first",
-     "href": "https://dadosabertos.camara.leg.br/api/v2/proposicoes?siglaTipo=PL&numero=888&ano=2025&pagina=1&itens=15"
+     "href": "https://dadosabertos.camara.leg.br/api/v2/proposicoes?siglaTipo=PL&numero=252&ano=2024&pagina=1&itens=15"
     },
     {
      "rel": "last",
-     "href": "https://dadosabertos.camara.leg.br/api/v2/proposicoes?siglaTipo=PL&numero=888&ano=2025&pagina=1&itens=15"
+     "href": "https://dadosabertos.camara.leg.br/api/v2/proposicoes?siglaTipo=PL&numero=252&ano=2024&pagina=1&itens=15"
     }
    ]
   }
  },
  "camara-votacoes": {
-  "url": "https://dadosabertos.camara.leg.br/api/v2/proposicoes/2486451/votacoes",
+  "url": "https://dadosabertos.camara.leg.br/api/v2/proposicoes/2417899/votacoes",
   "resposta": {
    "dados": [
     {
-     "id": "2486451-27",
-     "uri": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2486451-27",
+     "id": "2622172-7",
+     "uri": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2622172-7",
      "data": "2026-10-13",
-     "dataHoraRegistro": "2026-10-13T17:30:25",
-     "siglaOrgao": "CCP",
-     "uriOrgao": "https://dadosabertos.camara.leg.br/api/v2/orgaos/186",
-     "uriEvento": null,
-     "proposicaoObjeto": null,
-     "uriProposicaoObjeto": null,
-     "descricao": "Realizar o encaminhamento do PL-888/2025 à CCJC (tramitação simultânea), em razão da aprovação de requerimento de urgência.",
-     "aprovacao": 1
-    },
-    {
-     "id": "2619828-7",
-     "uri": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2619828-7",
-     "data": "2026-10-13",
-     "dataHoraRegistro": "2026-10-13T17:30:23",
+     "dataHoraRegistro": "2026-10-13T17:31:36",
      "siglaOrgao": "PLEN",
      "uriOrgao": "https://dadosabertos.camara.leg.br/api/v2/orgaos/180",
      "uriEvento": "https://dadosabertos.camara.leg.br/api/v2/eventos/83047",
-     "proposicaoObjeto": "REQ 2510/2026",
-     "uriProposicaoObjeto": "https://dadosabertos.camara.leg.br/api/v2/proposicoes/2619828",
-     "descricao": "Aprovado, por unanimidade, o Requerimento de Urgência (Art. 155 do RICD).",
+     "proposicaoObjeto": "REQ 2659/2026",
+     "uriProposicaoObjeto": "https://dadosabertos.camara.leg.br/api/v2/proposicoes/2622172",
+     "descricao": "Aprovado o Requerimento de Urgência (Art. 155 do RICD).",
      "aprovacao": 1
     }
    ],
    "links": [
     {
      "rel": "self",
-     "href": "https://dadosabertos.camara.leg.br/api/v2/proposicoes/2486451/votacoes"
+     "href": "https://dadosabertos.camara.leg.br/api/v2/proposicoes/2417899/votacoes"
     }
    ]
   }
  },
  "camara-votos": {
-  "url": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2619828-7/votos",
+  "url": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2622172-7/votos",
   "resposta": {
    "dados": [],
    "links": [
     {
      "rel": "self",
-     "href": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2619828-7/votos"
+     "href": "https://dadosabertos.camara.leg.br/api/v2/votacoes/2622172-7/votos"
     }
    ]
   }
- },
- "senado-processo": {
-  "url": "https://legis.senado.leg.br/dadosabertos/processo?sigla=PL&numero=888&ano=2025",
-  "resposta": []
  },
  "senado-votacao": {
   "url": "https://legis.senado.leg.br/dadosabertos/votacao?codigoMateria=174944",
