@@ -2297,7 +2297,10 @@ function miniVote(P, big){
   const all = !(v.tally && v.tally.length);
   const [lab, yes, no] = all ? ['Votação', total, 0] : v.tally[v.tally.length-1], [ly, ln] = v.labels || ['sim','não'];
   const rest = Math.max(0, total - yes - no);
-  const kinds = [...Array(yes).fill('y'), ...Array(no).fill('n'), ...Array(rest).fill('o')];
+  // unanimous (no count, or one side at zero): every seat takes the colour of the side that won, yes or no
+  const unan = all || (yes>0 && no===0) || (no>0 && yes===0);
+  const side = (all ? /rejeitad/i.test(v.result||'') : yes===0) ? 'n' : 'y';
+  const kinds = unan ? Array(total).fill(side) : [...Array(yes).fill('y'), ...Array(no).fill('n'), ...Array(rest).fill('o')];
   let pts = [], vb, r;
   if (body==='stf'){
     // the U table: four seats up each arm and three across the bottom, filled left arm → bottom → right arm
@@ -2315,7 +2318,8 @@ function miniVote(P, big){
   }
   const table = body==='stf' ? '<path d="M18 4 V48 H58 V4 H52 V42 H24 V4 Z" fill="none" stroke="var(--rule)" stroke-width="1"/>' : '';
   const dots = pts.map(([x,y],i)=>`<circle class="mv-${kinds[i]||'o'}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}"/>`).join('');
-  const legend = all ? `<span><i class="mv-y"></i>${/simbólica/i.test(v.result) ? 'votação simbólica' : 'unanimidade'}</span><span class="mv-x">sem placar divulgado</span>` : `<span><i class="mv-y"></i>${yes}<em> ${esc(ly)}</em></span><span><i class="mv-n"></i>${no}<em> ${esc(ln)}</em></span>${rest ? `<span><i class="mv-o"></i>${rest}<em> ${body==='stf'?'sem voto':'não votaram'}</em></span>` : ''}`;
+  const legend = all ? `<span><i class="mv-${side}"></i>${/simbólica/i.test(v.result) ? 'votação simbólica' : 'unanimidade'}</span><span class="mv-x">sem placar divulgado</span>`
+    : unan ? `<span><i class="mv-${side}"></i>${side==='y' ? yes : no}<em> ${esc(side==='y' ? ly : ln)}</em></span><span class="mv-x">unanimidade</span>` : `<span><i class="mv-y"></i>${yes}<em> ${esc(ly)}</em></span><span><i class="mv-n"></i>${no}<em> ${esc(ln)}</em></span>${rest ? `<span><i class="mv-o"></i>${rest}<em> ${body==='stf'?'sem voto':'não votaram'}</em></span>` : ''}`;
   const label = `${(v.tally||[]).length>1 ? esc(lab)+' · ' : ''}${body==='stf'?'STF':body==='senado'?'Senado':'Câmara'}`;
   return `<div class="mv${big?' big':''}" role="img" aria-label="${label}: ${all ? esc(v.result)+', sem placar divulgado' : `${yes} ${esc(ly)}, ${no} ${esc(ln)}${rest?', '+rest+' sem voto':''}`}"><svg viewBox="${vb}" aria-hidden="true">${table}${dots}</svg><p class="mv-leg"><b>${label}</b>${legend}</p></div>`;
 }
