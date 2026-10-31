@@ -436,15 +436,15 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   padding:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 8px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 24px) max(16px, env(safe-area-inset-left, 0px));
   transition:background-color .45s}
 .landing[hidden]{display:none!important}
-.landing{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:stretch;column-gap:clamp(24px,4vw,64px)}
-.landing > .lx{place-self:center;--u:clamp(.36px, min(calc((50vw - 310px) / 420), calc((100vh - var(--menu-h) - 230px) / 680)), .76px)}
-/* left half: an index of the three powers, each shape beside what is going on there */
-/* the three powers stacked, the whole block centred in the left half */
-.lx{display:grid;grid-template-columns:calc(330 * var(--u)) fit-content(270px);column-gap:clamp(18px,2.4vw,36px);width:max-content;max-width:100%;margin:0 auto;font-family:var(--display)}
-.lx-row{display:contents}
-.lx-shape{display:flex;justify-content:center;align-items:center;padding:clamp(18px,3vh,30px) 0}
+.landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;place-items:start center;align-content:start;row-gap:clamp(32px,5vw,56px);overflow:auto;
+  padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + clamp(20px,4vh,40px))}
+/* the three powers as spheres above the timeline: Legislativo, Executivo, Judiciário */
+.landing > .lx{--u:.5px}
+.lx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(12px,4vw,56px);width:100%;max-width:980px;margin:0 auto;font-family:var(--display)}
+.lx-row{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0}
+.lx-shape{display:flex;justify-content:center;align-items:center;padding:0}
 .lx-shape svg{display:block;width:calc(var(--vw) * var(--u));height:auto;overflow:visible}
-.lx-text{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0;align-self:center;max-width:300px;border-radius:10px;transition:opacity .3s}
+.lx-text{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-width:0;max-width:300px;border-radius:10px;transition:opacity .3s}
 .landing.leaving .lx-text{opacity:0}
 .landing.instant .lx-text{transition:none}
 .lx-text:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
@@ -456,11 +456,14 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .lx-s .lv-dot{width:7px;height:7px}
 .lx-text:hover .lx-l{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .lg{cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center;transition:transform .35s cubic-bezier(.3,.7,.3,1), opacity .4s}
-.lg > rect{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));stroke:none;transition:fill .2s}
-.lg > circle{fill:var(--bg);stroke:none}
-.lg:hover > rect{fill:color-mix(in srgb, var(--ink) 10%, var(--bg))}
+.lg > rect{fill:none;stroke:none}
+.lg > .sph{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));stroke:none;transition:fill .2s}
+.lg > circle:not(.sph){fill:var(--bg);stroke:none}
+.lg:hover > .sph{fill:color-mix(in srgb, var(--ink) 10%, var(--bg))}
 .lg:hover,.lg:focus-visible{transform:scale(1.03)}
-.lg:focus-visible > rect{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:5 4}
+.lg:focus-visible > .sph{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:5 4}
+/* the sphere that grows into a section (and shrinks back into its place on the way home) */
+.sph-fx{position:fixed;z-index:26;border-radius:50%;background:color-mix(in srgb, var(--ink) 6%, var(--bg));pointer-events:none;will-change:transform,opacity}
 .lg.soon{cursor:default}
 /* faint preview of each section inside its shape on the opening view */
 .lg .pv{pointer-events:none}
@@ -512,7 +515,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 @media (max-width:900px){ .stf-grid{grid-template-columns:minmax(0,1fr)} .stf-panel .tl{max-height:none;overflow:visible} #stf-svg{max-height:none} }
 
 /* feed of cards on the opening view (right half) */
-.today{position:relative;width:100%;height:100%;min-height:0;display:flex;flex-direction:column;gap:12px;font-family:var(--display);color:var(--ink);transition:opacity .35s}
+.today{position:relative;width:100%;max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:12px;font-family:var(--display);color:var(--ink);transition:opacity .35s}
 .landing.leaving .today{opacity:0}
 .feed-h:not(:has(.lv-tag)){display:none}
 .feed-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-right:10px}
@@ -520,7 +523,7 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .feed-live{display:flex;gap:8px;flex-wrap:wrap}
 .feed-live .lv-tag{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;margin:0;font-size:12px;line-height:1;color:#E0242B;padding:6px 11px 6px 9px;border-radius:999px;background:color-mix(in srgb, #E0242B 10%, var(--bg))}
 .feed-live .lv-tag:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.today > .feed{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 10px 32px 0;scrollbar-width:thin}
+.today > .feed{padding:0 0 48px}
 
 /* cards: the same piece on the opening view and in every section. Compact by default, they open in place */
 .feed{list-style:none;margin:0;display:flex;flex-direction:column;gap:22px}
@@ -528,18 +531,6 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .fd-date{margin:0;align-self:flex-start;padding:2px 4px 0;font-size:12px;line-height:1.2;color:var(--muted)}
 .fd.is-today .fd-date{color:var(--ink);font-weight:500}
 .fd-cards{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}
-/* opening view: the most recent day stands out; older days open with "Ver mais" */
-.fd-first .fd-date{font-size:13px;color:var(--ink)}
-.fd-new{font-weight:600}
-.fd-morewrap{display:flex;justify-content:center}
-@media (min-width:701px){ .today:not(.more){justify-content:center} .today:not(.more) > .feed{flex:none;overflow:visible;padding-bottom:0} }
-.fd-more{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 8px;font-size:14px;color:var(--muted);display:inline-flex;align-items:center;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px;transition:color .2s, text-decoration-color .2s}
-.fd-more:hover{color:var(--ink);text-decoration-color:currentColor}
-.fd-more:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
-/* "Ver mais": the most recent day glides up and the older days fade in one after the other */
-@keyframes fd-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-.fd-old.fd-enter{animation:fd-in .55s cubic-bezier(.2,.7,.3,1) both}
-@media (prefers-reduced-motion:reduce){ .fd-old.fd-enter{animation:none} }
 .card{--card:color-mix(in srgb, var(--ink) 5%, var(--bg));border-radius:20px;background:var(--card);color:var(--ink);font-family:var(--display);transition:background-color .2s}
 .card:hover{--card:color-mix(in srgb, var(--ink) 8%, var(--bg))}
 .card p{margin:0}
@@ -605,12 +596,12 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .tl.feed{padding-right:8px}
 @media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 16px 16px;border-radius:18px} }
 @media (max-width:700px){
-  .landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;align-content:start;justify-items:center;gap:32px;overflow:auto;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 24px)}
-  .landing > .lx{--u:.42px}
-  .lx{grid-template-columns:calc(330 * var(--u)) minmax(0,1fr);width:100%;row-gap:22px}
-  .lx-shape{padding:0}
-  .today{max-width:640px;height:auto;padding-bottom:56px}
-  .today > .feed{overflow:visible;padding-right:0;flex:none}
+  .landing{row-gap:28px;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 20px)}
+  .landing > .lx{--u:.3px}
+  .lx-row{gap:10px}
+  .lx-n{font-size:20px}
+  .lx-l{font-size:12.5px}
+  .lx-b,.lx-s{display:none}
 }
 
 /* calendar v2 */
@@ -1041,18 +1032,19 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
 </header>
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
   <div class="lx" aria-label="Os três poderes">
-    <div class="lx-row" data-k="stf">
-      <div class="lx-shape"><svg viewBox="1251 315 320 235.2" style="--vw:320" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Supremo Tribunal Federal"><rect id="stf-mini" x="1257" y="321" width="308" height="223.2" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
-      <button type="button" class="lx-text" data-open="stf"><span class="lx-n" id="lx-n-stf"></span><span class="lx-l" id="lx-l-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
-    </div>
-    <div class="lx-row" data-k="pres">
-      <div class="lx-shape"><svg viewBox="598 247 320 154.4" style="--vw:320" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir a Presidência da República"><rect id="pres-mini" x="604" y="253" width="308" height="142.4" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
-      <button type="button" class="lx-text" data-open="pres"><span class="lx-n" id="lx-n-pres"></span><span class="lx-l" id="lx-l-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
-    </div>
     <div class="lx-row" data-k="cong">
-      <div class="lx-shape"><svg viewBox="837 868 320 150" style="--vw:320" role="img" aria-label="Congresso Nacional"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Congresso Nacional"><rect x="843" y="873.9" width="308" height="138.2" id="mini-frame" rx="20" vector-effect="non-scaling-stroke"/><circle cx="921.6" cy="942.8" r="32.2" vector-effect="non-scaling-stroke"/><circle cx="1063.9" cy="942.8" r="42.6" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <div class="lx-shape"><svg viewBox="837 868 320 320" style="--vw:320" role="img" aria-label="Congresso Nacional"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Legislativo: Senado e Câmara"><circle class="sph" cx="997" cy="1028" r="154"/><rect x="857" y="965.2" width="280" height="125.65" id="mini-frame" rx="8" vector-effect="non-scaling-stroke"/><circle cx="928.4" cy="1027.6" r="29.3" vector-effect="non-scaling-stroke"/><circle cx="1057.8" cy="1027.6" r="38.7" vector-effect="non-scaling-stroke"/></g></svg></div>
       <button type="button" class="lx-text" data-open="cong"><span class="lx-n" id="lx-n-cong"></span><span class="lx-l" id="lx-l-cong"></span><span class="lx-b" id="lx-b-cong"></span><span class="lx-s" id="lx-s-cong"></span></button>
     </div>
+    <div class="lx-row" data-k="pres">
+      <div class="lx-shape"><svg viewBox="598 247 320 320" style="--vw:320" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir o Executivo: Presidência da República"><circle class="sph" cx="758" cy="407" r="154"/><rect id="pres-mini" x="613" y="340" width="290" height="134" rx="8" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <button type="button" class="lx-text" data-open="pres"><span class="lx-n" id="lx-n-pres"></span><span class="lx-l" id="lx-l-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
+    </div>
+    <div class="lx-row" data-k="stf">
+      <div class="lx-shape"><svg viewBox="1251 315 320 320" style="--vw:320" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Judiciário: Supremo Tribunal Federal"><circle class="sph" cx="1411" cy="475" r="154"/><rect id="stf-mini" x="1261" y="366.3" width="300" height="217.4" rx="8" vector-effect="non-scaling-stroke"/></g></svg></div>
+      <button type="button" class="lx-text" data-open="stf"><span class="lx-n" id="lx-n-stf"></span><span class="lx-l" id="lx-l-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
+    </div>
+  </div>
   </div>
   <div class="today" id="today" aria-live="polite"></div>
 </section>
@@ -2459,7 +2451,7 @@ function cardClick(e){
   h.setAttribute('aria-expanded', String(open)); body.hidden = !open; card.classList.toggle('open', open);
   return true;
 }
-function feedHTML(key, home){
+function feedHTML(key){
   const list = CARDS.filter(c=> !key || c.P.house===key || c.ev.some(e=> e.key===key))
     .map(c=> ({c, L: cardState(c, key).last}))
     .sort((a,b)=> (b.L ? b.L.date+String(evMin(b.L)+10).padStart(5,'0') : '0') .localeCompare(a.L ? a.L.date+String(evMin(a.L)+10).padStart(5,'0') : '0'));
@@ -2467,17 +2459,13 @@ function feedHTML(key, home){
   const t = todayISO(), groups = [];
   list.forEach(x=>{ const d = x.L ? x.L.date : ''; const g = groups[groups.length-1];
     if (g && g.d===d) g.items.push(x); else groups.push({d, items:[x]}); });
-  return groups.map((g, i)=>{
+  return groups.map(g=>{
     let date = '';
     if (g.d){ const [y,m,dd] = g.d.split('-').map(Number), wd = ['dom','seg','ter','qua','qui','sex','sáb'][new Date(y,m-1,dd).getDay()];
       date = g.d===t ? 'hoje' : `${wd}, ${dd} ${MO[m-1]}${y!==+t.slice(0,4)?' '+y:''}`; }
-    // on the opening view only the most recent day shows; the others wait behind "Ver mais"
-    const first = home && i===0, rest = home && i>0;
-    const li = `<li class="fd${g.d===t?' is-today':''}${first?' fd-first':''}${rest?' fd-old':''}"${rest && !feedMore?' hidden':''}>${date ? `<p class="fd-date">${first?`<span class="fd-new">Mais recente</span> · `:''}${date}</p>` : ''}<ol class="fd-cards">${g.items.map(x=> cardHTML(x.c, key)).join('')}</ol></li>`;
-    return li + (home && i===groups.length-1 && groups.length>1 ? `<li class="fd-morewrap"><button type="button" class="fd-more" aria-expanded="${feedMore}">${feedMore?'Ver menos':`Ver mais · ${groups.length-1} ${groups.length-1===1?'dia anterior':'dias anteriores'}`}</button></li>` : '');
+    return `<li class="fd${g.d===t?' is-today':''}">${date ? `<p class="fd-date">${date}</p>` : ''}<ol class="fd-cards">${g.items.map(x=> cardHTML(x.c, key)).join('')}</ol></li>`;
   }).join('');
 }
-let feedMore = false;
 
 /* the feed on the opening view */
 const todayEl = document.getElementById('today');
@@ -2485,33 +2473,11 @@ function renderToday(){
   const t = todayISO(), [y,m,d] = t.split('-').map(Number), wd = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'][new Date(y,m-1,d).getDay()];
   document.getElementById('today-date').textContent = `${wd}, ${d} ${MO[m-1]}`;
   todayEl.innerHTML = `<div class="feed-h"><div class="feed-live" id="feed-live"></div></div>
-    <ol class="feed" aria-label="Propostas e julgamentos, do mais recente ao mais antigo">${feedHTML(null, true)}</ol>`;
+    <ol class="feed" aria-label="Propostas e julgamentos, do mais recente ao mais antigo">${feedHTML(null)}</ol>`;
 }
 function placeToday(){ /* the feed sits in the landing grid, beside the drawing */ }
 renderToday(); refreshLive();
 todayEl.addEventListener('click', e=>{
-  const more = e.target.closest('.fd-more');
-  if (more){ e.stopPropagation(); feedMore = !feedMore;
-    // FLIP: note where the most recent day is, change the layout, then slide it from there to its new place
-    const first = todayEl.querySelector('.feed'), y0 = todayEl.querySelector('.fd-first')?.getBoundingClientRect().top ?? 0;
-    todayEl.classList.toggle('more', feedMore);
-    const olds = [...todayEl.querySelectorAll('.fd-old')];
-    olds.forEach((li, i)=>{ li.hidden = !feedMore; li.classList.remove('fd-enter');
-      if (feedMore && !reduce){ li.style.animationDelay = `${260 + Math.min(i, 8) * 80}ms`; void li.offsetWidth; li.classList.add('fd-enter'); } });
-    if (first && !reduce){
-      const dy = y0 - todayEl.querySelector('.fd-first').getBoundingClientRect().top;
-      if (Math.abs(dy) > 1){
-        first.style.transition = 'none'; first.style.transform = `translateY(${dy}px)`; void first.offsetWidth;
-        first.style.transition = 'transform .6s cubic-bezier(.65,0,.35,1)'; first.style.transform = '';
-        first.addEventListener('transitionend', ()=>{ first.style.transition = ''; }, {once:true});
-      }
-    }
-    if (!feedMore) olds.forEach(li=> li.style.animationDelay = '');
-    more.setAttribute('aria-expanded', String(feedMore));
-    const n = todayEl.querySelectorAll('.fd-old').length;
-    more.textContent = feedMore ? 'Ver menos' : `Ver mais · ${n} ${n===1?'dia anterior':'dias anteriores'}`;
-    if (feedMore) todayEl.querySelector('.fd-old')?.querySelector('.c-head')?.focus({preventScroll:true});
-    return; }
   const b = e.target.closest('.lv-tag[data-go]');
   if (b){ e.stopPropagation(); const k = b.dataset.go; if (k==='camara'||k==='senado') enterPlan(()=>open(k, true)); else enterView(VIEWS[k==='exec'?'pres':'stf']); return; }
   cardClick(e);
@@ -2526,9 +2492,23 @@ function planTransformToMini(){
   const P = planSvg.getBoundingClientRect(), F = frameEl.getBoundingClientRect(), k = mini.width / F.width;
   return `translate(${mini.left - P.left - (F.left-P.left)*k}px, ${mini.top - P.top - (F.top-P.top)*k}px) scale(${k})`;
 }
+// a sphere on the opening view grows over the screen and dissolves into its section; on the way back it shrinks into its place
+function sphereFx(lg, back){
+  const c = lg && lg.querySelector('.sph'); if (reduce || !c) return;
+  const r = c.getBoundingClientRect(); if (!r.width) return;
+  const R = r.width/2, cx = r.left+R, cy = r.top+R, k = Math.hypot(Math.max(cx, innerWidth-cx), Math.max(cy, innerHeight-cy)) / R + .05;
+  const fx = document.createElement('div'); fx.className = 'sph-fx';
+  fx.style.cssText = `left:${cx-R}px;top:${cy-R}px;width:${2*R}px;height:${2*R}px`;
+  document.body.appendChild(fx);
+  const ease = 'cubic-bezier(.65,0,.35,1)';
+  const a = back
+    ? fx.animate([{transform:`scale(${k})`, opacity:0}, {transform:`scale(${k})`, opacity:.55, offset:.25}, {transform:'scale(1)', opacity:1, offset:.88}, {transform:'scale(1)', opacity:0}], {duration:1000, easing:ease, fill:'forwards'})
+    : fx.animate([{transform:'scale(1)', opacity:1}, {transform:`scale(${k*.5})`, opacity:.7, offset:.35}, {transform:`scale(${k})`, opacity:.25, offset:.65}, {transform:`scale(${k})`, opacity:0}], {duration:1000, easing:ease, fill:'forwards'});
+  a.onfinish = ()=> fx.remove();
+}
 function enterPlan(after){
   if (landing.hidden || zoomBusy) { after && after(); return; }
-  zoomBusy = true;
+  zoomBusy = true; sphereFx(mini);
   planSvg.style.transition = 'none'; planSvg.style.transformOrigin = '0 0';
   planSvg.style.transform = planTransformToMini();
   stage.classList.add('zooming');
@@ -2545,7 +2525,7 @@ function exitPlan(){
   zoomBusy = true;
   landing.classList.add('instant','leaving'); landing.hidden = false;
   landing.getBoundingClientRect();
-  landing.classList.remove('instant');
+  landing.classList.remove('instant'); sphereFx(mini, true);
   planSvg.style.transformOrigin = '0 0';
   const target = planTransformToMini();
   planSvg.style.transform = 'none'; planSvg.getBoundingClientRect();
@@ -2656,7 +2636,7 @@ function enterView(V){
   V.svg.style.transform = svgToRect(V.svg, V.frame, document.getElementById(V.mini));
   V.svg.getBoundingClientRect();
   if (landing.hidden){ landing.hidden = false; }
-  V.lg.classList.add('zoomsrc');
+  V.lg.classList.add('zoomsrc'); sphereFx(V.lg);
   landing.classList.add('instant'); landing.style.backgroundColor = 'transparent'; landing.getBoundingClientRect();
   landing.classList.remove('instant'); landing.classList.add('leaving');
   requestAnimationFrame(()=>{ V.svg.style.willChange = 'transform'; V.svg.style.transition = reduce ? 'none' : 'transform .9s cubic-bezier(.65,0,.35,1)'; V.svg.style.transform = 'none'; });
@@ -2674,6 +2654,7 @@ function exitView(V){
   V.el.scrollTop = 0;
   landing.classList.add('instant','leaving'); V.lg.classList.add('zoomsrc'); landing.hidden = false;
   landing.getBoundingClientRect(); landing.classList.remove('instant');
+  V.lg.classList.remove('zoomsrc'); sphereFx(V.lg, true); V.lg.classList.add('zoomsrc');
   V.svg.style.transformOrigin = '0 0';
   const target = svgToRect(V.svg, V.frame, document.getElementById(V.mini));
   V.svg.style.transform = 'none'; V.svg.getBoundingClientRect();
@@ -2721,7 +2702,7 @@ Object.values(VIEWS).forEach(V=>{
   const fit = (fr, mini) => { const k = +mini.getAttribute('width') / +fr.getAttribute('width');
     return `translate(${+mini.getAttribute('x')} ${+mini.getAttribute('y')}) scale(${k.toFixed(5)}) translate(${-fr.getAttribute('x')} ${-fr.getAttribute('y')})`; };
   // Congresso: both houses in their unit circles
-  const circ = document.querySelectorAll('#mini > circle');
+  const circ = document.querySelectorAll('#mini > circle:not(.sph)');
   [['senado',circ[0]],['camara',circ[1]]].forEach(([key,c])=>{
     const g = pv(document.getElementById('mini'), `translate(${c.getAttribute('cx')} ${c.getAttribute('cy')}) scale(${c.getAttribute('r')})`);
     dots(g, HOUSES[key].g.querySelectorAll('.pres, .seat'));
