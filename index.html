@@ -454,18 +454,17 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-gap) + 22px)}
 /* the three powers as spheres above the timeline: Legislativo, Executivo, Judiciário */
 .landing > .lx{--u:.7px}
-/* computer: the three spheres stacked on the left (they stay put while the page scrolls), the timeline on the right */
+/* computer: the timeline takes the right half of the page, from the exact middle; the left half is for the three spheres,
+   stacked and sharing the height of the screen (they stay put while the page scrolls), each with its name and phase bar below */
 @media (min-width:701px){
-  .landing{grid-template-columns:minmax(250px,400px) minmax(0,780px);grid-template-rows:auto auto;justify-content:center;justify-items:stretch;align-items:start;column-gap:clamp(32px,5vw,80px);
-    padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 32px)}
-  .landing > .lx{--u:clamp(.3px, calc((100vh - var(--menu-h) - 300px) / 960), .62px);grid-column:1;grid-row:1;position:sticky;top:0;align-self:start}
+  .landing{--lx-top:28px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto;justify-items:stretch;align-items:start;column-gap:0;
+    padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-top))}
+  /* each block is the sphere plus about 72px of text; three blocks and two small gaps fill the height below the menu */
+  .landing > .lx{--u:clamp(.22px, calc((100vh - var(--menu-h) - var(--lx-top) - 24px - 3 * 72px - 2 * 10px) / 960), .8px);grid-column:1;grid-row:1;position:sticky;top:0;align-self:start;
+    height:calc(100vh - var(--menu-h) - var(--lx-top) - 24px);display:flex;flex-direction:column;justify-content:space-between;align-items:center;max-width:none;margin:0;padding-right:clamp(24px,4vw,64px);box-sizing:border-box}
   .landing > .today{grid-column:2;grid-row:1;max-width:none}
   .landing > .site-foot{grid-column:1 / -1;grid-row:2;max-width:none}
-  .landing > .lx{grid-template-columns:minmax(0,1fr);row-gap:clamp(14px,3vh,32px);max-width:none;margin:0}
-  .landing .lx-row{flex-direction:row;align-items:center;gap:clamp(14px,1.6vw,24px)}
-  .landing .lx-shape{flex:none}
-  .landing .lx-text{align-items:flex-start;text-align:left}
-  .landing .lx-ph{justify-content:flex-start}
+  .landing .lx-row{flex-direction:column;align-items:center;gap:8px}
 }
 .lx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(12px,4vw,56px);width:100%;max-width:980px;margin:0 auto;font-family:var(--display)}
 .lx-row{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0}
