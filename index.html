@@ -531,10 +531,8 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 /* opening view: the most recent day stands out; older days open with "Ver mais" */
 .fd-first .fd-date{font-size:13px;color:var(--ink)}
 .fd-new{font-weight:600}
-.fd-first .card{--card:color-mix(in srgb, var(--ink) 7%, var(--bg));box-shadow:inset 0 0 0 1.5px var(--ink)}
-.fd-first .card:hover{--card:color-mix(in srgb, var(--ink) 10%, var(--bg))}
 .fd-morewrap{display:flex;justify-content:center}
-@media (min-width:701px){ .today:not(.more){justify-content:center} .today:not(.more) > .feed{flex:none;overflow:visible;padding-bottom:0} .fd-first .c-title{font-size:20px} }
+@media (min-width:701px){ .today:not(.more){justify-content:center} .today:not(.more) > .feed{flex:none;overflow:visible;padding-bottom:0} }
 .fd-more{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 20px;border-radius:999px;border:1.5px solid var(--ink);font-size:14px;display:inline-flex;align-items:center;transition:background-color .2s, color .2s}
 .fd-more:hover{background:var(--ink);color:var(--bg)}
 .fd-more:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
