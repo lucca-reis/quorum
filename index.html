@@ -453,18 +453,21 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   /* menu → spheres is the same distance as subtitles → first card (gap + the day label above the card, minus the sphere's inset in its drawing) */
   padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-gap) + 22px)}
 /* the three powers as spheres above the timeline: Legislativo, Executivo, Judiciário */
-.landing > .lx{--u:.7px}
+.landing .lx{--u:.7px}
+.lx-wrap{display:contents}
 /* computer: the timeline takes the right half of the page, from the exact middle. The left half is the square: Legislativo on top,
    Executivo below left and Judiciário below right, facing each other as in the Praça dos Três Poderes. Text sits below each circle. */
 @media (min-width:701px){
   .landing{--lx-top:28px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto;justify-items:stretch;align-items:start;column-gap:0;
     padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-top))}
   /* --u scales the drawings (a sphere box is 320u wide): two rows of spheres with their text fit the height, two spheres side by side fit the width */
-  .landing > .lx{--tx:76px;--gy:18px;--gx:28px;--u:clamp(.2px, min(calc((100vh - var(--menu-h) - var(--lx-top) - 40px - 2 * var(--tx) - var(--gy)) / 640), calc((50vw - 100px - var(--gx)) / 640)), .9px);
+  .landing .lx{--tx:76px;--gy:18px;--gx:28px;--u:clamp(.2px, min(calc((100vh - var(--menu-h) - var(--lx-top) - 40px - 2 * var(--tx) - var(--gy)) / 640), calc((50vw - 100px - var(--gx)) / 640)) * .72, .62px);
     --S:calc(320 * var(--u));--s:calc(var(--S) + var(--gx));
-    grid-column:1;grid-row:1;position:sticky;top:0;align-self:start;display:block;max-width:none;margin:0 clamp(24px,4vw,64px) 0 0;
-    height:calc(2 * var(--S) + 2 * var(--tx) + var(--gy));
-    margin-top:max(0px, calc((100vh - var(--menu-h) - var(--lx-top) - 24px - (2 * var(--S) + 2 * var(--tx) + var(--gy))) / 2))}
+    --lx-mt:max(0px, calc((100vh - var(--menu-h) - var(--lx-top) - 24px - (2 * var(--S) + 2 * var(--tx) + var(--gy))) / 2));
+    position:sticky;top:var(--lx-mt);display:block;max-width:none;margin:var(--lx-mt) clamp(24px,4vw,64px) 0 0;
+    height:calc(2 * var(--S) + 2 * var(--tx) + var(--gy))}
+  /* the circles stay put until the "Ver mais" line (end of the wrapper's row) reaches them, then rise with the timeline */
+  .landing > .lx-wrap{display:block;grid-column:1;grid-row:1;align-self:stretch}
   .landing > .today{grid-column:2;grid-row:1;max-width:none}
   .landing > .site-foot{grid-column:1 / -1;grid-row:2;max-width:none}
   .landing .lx-row{position:absolute;flex-direction:column;align-items:center;gap:8px;width:calc(var(--S) + var(--gx) - 12px);transform:translateX(-50%)}
@@ -667,7 +670,7 @@ body.morphing #frame,body.morphing #stf-frame,body.morphing #pres-frame{visibili
 @media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 16px 16px;border-radius:18px} }
 @media (max-width:700px){
   .landing{--lx-gap:28px;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-gap) + 24px)}
-  .landing > .lx{--u:.35px}
+  .landing .lx{--u:.35px}
   .lx-row{gap:10px}
   .lx-name{font-size:14px;gap:5px}
   .lx-name::before{width:7px;height:7px}
@@ -1135,7 +1138,7 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
   <div class="menu-tools"><a class="vg-link" href="#visao-geral" data-nav="visao" aria-label="Visão geral" title="Visão geral"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><circle cx="8.3" cy="8.3" r="1.25" fill="currentColor" stroke="none"/><circle cx="15.7" cy="8.3" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="8.3" cy="15.7" r="1.25" fill="currentColor" stroke="none"/><circle cx="15.7" cy="15.7" r="1.25" fill="currentColor" stroke="none"/></svg></a><a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a></div>
 </header>
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
-  <div class="lx" aria-label="Os três poderes">
+  <div class="lx-wrap"><div class="lx" aria-label="Os três poderes">
     <div class="lx-row" data-k="cong">
       <div class="lx-shape"><svg viewBox="837 868 320 320" style="--vw:320" role="img" aria-label="Congresso Nacional"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Legislativo: Senado e Câmara"><circle class="sph" cx="997" cy="1028" r="154"/><rect x="857" y="965.2" width="280" height="125.65" id="mini-frame" rx="8" vector-effect="non-scaling-stroke"/><circle cx="928.4" cy="1027.6" r="29.3" vector-effect="non-scaling-stroke"/><circle cx="1057.8" cy="1027.6" r="38.7" vector-effect="non-scaling-stroke"/></g></svg></div>
       <button type="button" class="lx-text" data-open="cong"><span class="lx-name pw-leg">Legislativo</span><span class="lx-bar" id="lx-bar-cong" aria-hidden="true"></span><span class="lx-ph" id="lx-ph-cong"></span><span class="lx-s" id="lx-s-cong"></span></button>
@@ -1148,8 +1151,7 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
       <div class="lx-shape"><svg viewBox="1251 315 320 320" style="--vw:320" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Judiciário: Supremo Tribunal Federal"><circle class="sph" cx="1411" cy="475" r="154"/><rect id="stf-mini" x="1261" y="366.3" width="300" height="217.4" rx="8" vector-effect="non-scaling-stroke"/></g></svg></div>
       <button type="button" class="lx-text" data-open="stf"><span class="lx-name pw-jud">Judiciário</span><span class="lx-bar" id="lx-bar-stf" aria-hidden="true"></span><span class="lx-ph" id="lx-ph-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
     </div>
-  </div>
-  </div>
+  </div></div>
   <div class="today" id="today" aria-live="polite"></div>
 </section>
 <section class="stfv" id="stfv" hidden aria-label="Supremo Tribunal Federal">
