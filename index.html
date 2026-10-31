@@ -976,6 +976,10 @@ h1[tabindex="-1"]:focus{outline:none}
 .p-cards .card{--card:var(--bg)}
 .p-cards .card:hover{--card:color-mix(in srgb, var(--ink) 3%, var(--bg))}
 .p-cards .c-pill{background:color-mix(in srgb, var(--ink) 6%, var(--bg))}
+/* the power tag carries its colour: green Executivo, yellow Legislativo, blue Judiciário (the colours of the dot in Quorum) */
+.c-pill.pw-exec{background:color-mix(in srgb, #009C3B 16%, var(--bg));color:color-mix(in srgb, #009C3B 72%, var(--ink))}
+.c-pill.pw-leg{background:color-mix(in srgb, #F2C200 30%, var(--bg));color:color-mix(in srgb, #F2C200 30%, var(--ink))}
+.c-pill.pw-jud{background:color-mix(in srgb, #1F4FB5 14%, var(--bg));color:color-mix(in srgb, #1F4FB5 66%, var(--ink))}
 .vl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
 .vl li{display:grid;grid-template-columns:minmax(110px,190px) minmax(0,1fr) 3em;gap:12px;align-items:center;font-size:13px}
 .vl-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -2343,6 +2347,8 @@ function stageOf(P){
   if (/^(enviad[ao] ao congresso|apresentad|protocolad|aguarda(ndo)? despacho)/i.test(st) || (!moved && !/pauta|adiad|suspens|vista|aprovad|urgência|retirad/i.test(st))) return 'proposto';
   return 'em andamento';
 }
+// colour class of a power tag
+function pwClass(k){ return k==='exec' ? 'pw-exec' : k==='stf' ? 'pw-jud' : (k==='camara'||k==='senado') ? 'pw-leg' : ''; }
 function cardHTML(c, key){
   const P = c.P, S = cardState(c, key), L = S.last;
   const live = S.here && liveState(S.here)?.s==='live' && L && L.date===todayISO() && L.key===S.here;
@@ -2359,7 +2365,7 @@ function cardHTML(c, key){
   const id = 'cx-'+c.slug+(key?'-'+key:'');
   return `<li><article class="card${live?' is-live':''}">
     <button type="button" class="c-head" aria-expanded="false" aria-controls="${id}">
-      <span class="c-top"><span class="c-pill">${POWER_NAME[S.here]} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</span></span>
+      <span class="c-top"><span class="c-pill ${pwClass(S.here)}">${POWER_NAME[S.here]} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</span></span>
       <span class="c-main"><span class="c-text"><span class="c-title">${esc(P.title)}</span>
       ${ok(P.status) ? `<span class="c-phase">${esc(P.status)}</span>` : ''}
       ${v && !mv && !ex ? `<span class="c-vres">${esc(v.result)}</span>` : ''}</span>
@@ -2926,7 +2932,7 @@ function renderProject(slug){
   proj.innerHTML = `<div class="pj">
     <article class="pj-card${live?' is-live':''}">
     <header class="pj-head">
-      <div class="pj-top"><p class="c-pill">${here} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</p>${infoBox(P.sources,'Fontes')}</div>
+      <div class="pj-top"><p class="c-pill ${pwClass(S ? S.here : P.house)}">${here} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</p>${infoBox(P.sources,'Fontes')}</div>
       <h1 class="pj-title">${esc(P.title)}</h1>
       <p class="pj-code">${esc(P.type)} · ${esc(P.code)}${lastTx ? ' · '+lastTx : ''}</p>
       <p class="pj-what">${esc(P.status)}</p>
@@ -3236,7 +3242,7 @@ function consCard(x){
   const title = x.a || x.e, url = CONS_ITEM(x.i);
   const people = [x.au && 'Autoria: '+esc(x.au), x.st && esc(x.st)].filter(Boolean).join(' · ');
   return `<li><article class="card cs-card"><div class="c-head">
-    <span class="c-top"><span class="c-pill">Senado · consulta aberta</span><span class="cs-code">${esc(x.s)}</span></span>
+    <span class="c-top"><span class="c-pill pw-leg">Senado · consulta aberta</span><span class="cs-code">${esc(x.s)}</span></span>
     <a class="c-title" href="${url}" target="_blank" rel="noopener">${esc(title)}</a>
     ${x.a && x.e ? `<p class="c-desc">${esc(x.e)}</p>` : ''}
     ${people ? `<p class="c-people">${people}</p>` : ''}
