@@ -4,11 +4,11 @@ Fontes (todas oficiais):
   - Câmara (dados abertos): /deputados e /deputados/{id} → e-mail, telefone e endereço do gabinete, redes sociais cadastradas
   - Senado (dados abertos): /senador/lista/atual → e-mail, telefones e página; a página de perfil no site do Senado
     lista as redes sociais do senador (lida quando o site responde)
-  - TSE (DivulgaCandContas, eleição de 2026): sites e redes sociais que cada candidato eleito declarou na candidatura;
-    cobre quem toma posse em 2027 e ainda não está no cargo
+  - TSE (dados abertos, arquivos de candidatos de 2026 e 2022): sites e redes sociais que cada eleito declarou na candidatura;
+    cobre quem toma posse em 2027 e ainda não está no cargo, e os senadores eleitos em 2022
 Grava data/contatos.json, com uma entrada por pessoa, indexada pelo nome (vários nomes da mesma pessoa apontam para ela).
 Também grava data/contatos-amostra.json com exemplos das respostas, para conferir o formato. Só usa a biblioteca padrão."""
-import json, re, time, datetime, zoneinfo, pathlib, unicodedata, urllib.request, urllib.parse, traceback
+import json, re, io, csv, time, zipfile, datetime, zoneinfo, pathlib, unicodedata, urllib.request, urllib.parse, traceback
 from concurrent.futures import ThreadPoolExecutor
 
 BR = zoneinfo.ZoneInfo('America/Sao_Paulo')
@@ -17,16 +17,20 @@ UA = {'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0 (compatible; quor
 log, amostra = [], {}
 UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split()
 
-def get(url, chave=None, texto=False, timeout=30):
-    try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout) as r:
-            raw = r.read().decode('utf-8', 'replace')
-        js = raw if texto else json.loads(raw or 'null')
-        if chave and chave not in amostra:
-            amostra[chave] = {'url': url, 'resposta': (raw[:3000] if texto else js)}
-        return js
-    except Exception as ex:
-        log.append(f'{url}: {ex}'); return None
+def get(url, chave=None, texto=False, timeout=30, tentativas=3):
+    for t in range(tentativas):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout) as r:
+                raw = r.read().decode('utf-8', 'replace')
+            js = raw if texto else json.loads(raw or 'null')
+            if chave and chave not in amostra:
+                amostra[chave] = {'url': url, 'resposta': (raw[:3000] if texto else js)}
+            return js
+        except urllib.error.HTTPError as ex:
+            if ex.code in (403, 404) or t == tentativas-1: log.append(f'{url}: {ex}'); return None
+        except Exception as ex:
+            if t == tentativas-1: log.append(f'{url}: {ex}'); return None
+        time.sleep(2 + 3*t)   # a API da Câmara às vezes devolve 504; tenta de novo
 
 def norm(t):
     t = unicodedata.normalize('NFD', str(t or ''))
@@ -132,7 +136,7 @@ def senado():
             tels = achar(p, 'Telefone') or []
             if isinstance(tels, dict): tels = [tels]
             nums = [t.get('NumeroTelefone') for t in tels if isinstance(t, dict) and t.get('NumeroTelefone')]
-            links = urls_em(html) if html else []
+            links = [u for u in (urls_em(html) if html else []) if rede(u)]
             entrada(f'senado-{cod}', casa='senado', cargo='Senador(a)', nomes=[ide.get('NomeParlamentar'), ide.get('NomeCompletoParlamentar')],
                     emails=[ide.get('EmailParlamentar')], tels=[f'(61) {n}' if n and not str(n).startswith('(') else n for n in nums],
                     gabinete='Senado Federal, Brasília (DF)', pagina=ide.get('UrlPaginaParlamentar') or f'https://www25.senado.leg.br/web/senadores/senador/-/perfil/{cod}',
@@ -140,35 +144,42 @@ def senado():
                     + ([{'l': 'Senado Federal · página do senador', 'u': f'https://www25.senado.leg.br/web/senadores/senador/-/perfil/{cod}'}] if links else []))
     log.append(f'senado: {len(lista)} senadores')
 
-# ---------- TSE: eleitos em 2026 (sites e redes declarados na candidatura) ----------
-TSE = 'https://divulgacandcontas.tse.jus.br/divulga/rest/v1/'
+# ---------- TSE: eleitos em 2026 e senadores eleitos em 2022 (sites e redes declarados na candidatura) ----------
+# Os arquivos de dados abertos do TSE (cdn.tse.jus.br) trazem os candidatos e, à parte, as redes sociais de cada um.
+CDN = 'https://cdn.tse.jus.br/estatistica/sead/odsele/consulta_cand/'
+def zip_csv(url):
+    """Linhas do CSV nacional (ou de todos os estados) dentro de um zip do TSE."""
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=300) as r:
+            z = zipfile.ZipFile(io.BytesIO(r.read()))
+    except Exception as ex:
+        log.append(f'{url}: {ex}'); return []
+    nomes = [n for n in z.namelist() if n.lower().endswith('.csv')]
+    br = [n for n in nomes if 'brasil' in n.lower()]
+    linhas = []
+    for n in (br or nomes):
+        with z.open(n) as f:
+            linhas += list(csv.DictReader(io.TextIOWrapper(f, encoding='latin-1'), delimiter=';'))
+    return linhas
+
 def tse():
-    ords = get(TSE + 'eleicao/ordinarias', 'tse-eleicoes') or []
-    if isinstance(ords, dict): ords = achar(ords, 'eleicoes') or []
-    ids = [str(e.get('id')) for e in ords if isinstance(e, dict) and str(e.get('ano')) == '2026' and e.get('id')]
-    log.append(f'tse: eleições de 2026 {ids}')
-    alvos = []   # (uf, eleição, cargo, candidato)
-    for el in ids:
-        for uf, cargo in [('BR', 1), ('BR', 2)] + [(u, c) for u in UFS for c in (5, 6)]:
-            js = get(f'{TSE}candidatura/listar/2026/{uf}/{el}/{cargo}/candidatos', 'tse-lista')
-            for c in (js or {}).get('candidatos') or []:
-                tot = norm(c.get('descricaoTotalizacao') or '').lower()
-                if 'eleito' in tot and 'nao eleito' not in tot:
-                    alvos.append((uf, el, cargo, c))
-            time.sleep(.15)
-    def um(a):
-        uf, el, cargo, c = a
-        return a, get(f"{TSE}candidatura/buscar/2026/{uf}/{el}/candidato/{c['id']}", 'tse-candidato')
-    CARGO = {1: 'Presidente da República', 2: 'Vice-presidente', 5: 'Senador(a)', 6: 'Deputado(a) federal'}
-    with ThreadPoolExecutor(max_workers=4) as ex:
-        for (uf, el, cargo, c), det in ex.map(um, alvos):
-            det = det or {}
-            sites = det.get('sites') or []
-            links = [s.get('url') if isinstance(s, dict) else s for s in sites] if sites else []
-            entrada(f"tse-{c['id']}", eleito2026=CARGO.get(cargo), nomes=[c.get('nomeUrna'), c.get('nomeCompleto'), det.get('nomeUrna'), det.get('nomeCompleto')],
-                    links=[u for u in links if u],
-                    fontes=[{'l': 'TSE · DivulgaCandContas (candidatura 2026)', 'u': f"https://divulgacandcontas.tse.jus.br/divulga/#/candidato/2026/{el}/{uf}/{c['id']}"}])
-    log.append(f'tse: {len(alvos)} eleitos')
+    CARGO = {'PRESIDENTE': 'Presidente da República', 'VICE-PRESIDENTE': 'Vice-presidente', 'SENADOR': 'Senador(a)', 'DEPUTADO FEDERAL': 'Deputado(a) federal'}
+    for ano, cargos in ((2026, set(CARGO)), (2022, {'SENADOR'})):
+        cands = zip_csv(f'{CDN}consulta_cand_{ano}.zip')
+        eleitos = {}
+        for c in cands:
+            cargo, sit = norm(c.get('DS_CARGO', '')).upper(), norm(c.get('DS_SIT_TOT_TURNO', '')).upper()
+            if cargo in cargos and 'ELEITO' in sit and 'NAO ELEITO' not in sit:
+                eleitos[c.get('SQ_CANDIDATO')] = c
+        if cands and 'tse-cand' not in amostra: amostra['tse-cand'] = {'ano': ano, 'colunas': list(cands[0].keys())}
+        redes = {}
+        for r in zip_csv(f'{CDN}rede_social_candidato_{ano}.zip'):
+            if r.get('SQ_CANDIDATO') in eleitos: redes.setdefault(r['SQ_CANDIDATO'], []).append(r.get('DS_URL', ''))
+        for sq, c in eleitos.items():
+            entrada(f'tse-{ano}-{sq}', nomes=[c.get('NM_URNA_CANDIDATO'), c.get('NM_CANDIDATO'), c.get('NM_SOCIAL_CANDIDATO')],
+                    links=redes.get(sq, []),
+                    fontes=[{'l': f'TSE · dados abertos (candidaturas {ano})', 'u': f'https://dadosabertos.tse.jus.br/dataset/candidatos-{ano}'}] if redes.get(sq) else [])
+        log.append(f'tse {ano}: {len(cands)} candidaturas, {len(eleitos)} eleitos, {len(redes)} com redes')
 
 for etapa in (camara, senado, tse):
     try: etapa()
