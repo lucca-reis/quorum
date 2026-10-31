@@ -942,6 +942,21 @@ h1[tabindex="-1"]:focus{outline:none}
 .vl-b i{display:block;height:100%;border-radius:999px}
 .vl-n{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
 @media (max-width:560px){ .vl li{grid-template-columns:96px minmax(0,1fr) 2.4em;gap:8px;font-size:12.5px} }
+.c-pw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)}
+.pw-c{display:flex;flex-direction:column;gap:6px;min-width:0;padding:0 12px;border-left:1px solid var(--rule)}
+.pw-c:first-child{padding-left:0;border-left:0}
+.pw-c:last-child{padding-right:0}
+.pw-c.off{opacity:.45}
+.pw-n{font-size:11px;color:var(--muted);letter-spacing:.02em}
+.pw-v{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.pw-v .mv{flex-direction:row;align-items:center;gap:6px}
+.pw-v .mv svg{width:38px}
+.pw-v .mv-leg{display:none}
+.pw-v .xm{align-items:flex-start}
+.pw-v .xm-sig .sg{width:70px}
+.pw-v .xm-cap{text-align:left}
+.pw-t{font-size:12px;line-height:1.3;color:color-mix(in srgb, var(--ink) 78%, var(--bg));display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media (max-width:560px){ .pw-c{padding:0 8px} .pw-v .mv svg{width:34px} .pw-t{font-size:11.5px;-webkit-line-clamp:3} .pw-v .xm-sig .sg{width:54px} .c-head .pw-v .xm{flex-direction:column;align-items:flex-start;gap:3px} }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -2294,8 +2309,8 @@ function cardHTML(c, key){
       <span class="c-top"><span class="c-pill">${POWER_NAME[S.here]} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</span></span>
       <span class="c-main"><span class="c-text"><span class="c-title">${esc(P.title)}</span>
       ${ok(P.status) ? `<span class="c-phase">${esc(P.status)}</span>` : ''}
-      ${v && !mv && !ex ? `<span class="c-vres">${esc(v.result)}</span>` : ''}</span>
-      ${mv ? `<span class="c-vline">${mv}</span>` : ''}</span>
+      </span></span>
+      ${powerStrip(c, S)}
       <span class="c-more" aria-hidden="true"></span>
     </button>
     <div class="c-body" id="${id}" hidden>
@@ -2304,6 +2319,48 @@ function cardHTML(c, key){
       ${v ? `<div class="c-vt"><p class="c-vlab">${ex ? 'Votação no Congresso' : 'Votação'}${v.label ? ' · '+esc(v.label) : ''}</p><p class="c-vres">${esc(v.result)}${tallyTx(v) ? `<span class="c-vtal"> · ${esc(tallyTx(v))}</span>` : ''}</p>${who ? `<p class="c-who">${esc(who)}</p>` : ''}</div>` : ''}
       <a class="c-full" href="#p-${c.slug}" data-ref="${c.slug}">Ver página completa <span aria-hidden="true">→</span></a>
     </div></article></li>`;
+}
+// bottom of every card: how the item went in each power. A power the item never reached is shown faded, with a note.
+function legTallies(c){
+  const V = window.QV && window.QV.projetos && window.QV.projetos[c.slug];
+  const out = [];
+  for (const h of ['camara','senado']){
+    const vs = (V||[]).filter(v=> v.casa===h); if (!vs.length) continue;
+    const last = vs[vs.length-1], vals = Object.values(last.votos).map(x=> String(x[2]||'').toLowerCase());
+    const y = vals.filter(x=> x==='sim').length, n = vals.filter(x=> x==='não'||x==='nao').length;
+    out.push({h, y, n, data:(last.data||'').slice(0,10)});
+  }
+  return out;
+}
+function powerStrip(c, S){
+  const P = c.P, path = new Set(S.path||[]), stf = P.house==='stf';
+  const cell = (name, inner, off) => `<span class="pw-c${off?' off':''}"><span class="pw-n">${name}</span>${inner}</span>`;
+  const note = t => `<span class="pw-t">${esc(t)}</span>`;
+  // Legislativo
+  let leg;
+  if (stf) leg = cell('Legislativo', note('Não passou pelo Congresso'), true);
+  else {
+    const T = legTallies(c);
+    if (T.length) leg = cell('Legislativo', T.map(t=> `<span class="pw-v">${miniVote({house:t.h, votes:{tally:[['Votação', t.y, t.n]], label: t.h==='senado'?'Senado':'Câmara', result:''}})}<span class="pw-t">${t.h==='senado'?'Senado':'Câmara'} · ${t.y} sim, ${t.n} não${t.data ? ' · '+cardDate(t.data) : ''}</span></span>`).join(''));
+    else if (P.votes && /camara|senado/.test(voteBody(P)||'') ) leg = cell('Legislativo', `<span class="pw-v">${miniVote(P)}</span>${note(P.votes.result)}`);
+    else {
+      const evs = c.ev.filter(e=> (e.key==='camara'||e.key==='senado') && e.r && !e.week && e.date<=todayISO());
+      const last = evs[evs.length-1];
+      if (path.has('camara') || path.has('senado') || P.house==='camara' || P.house==='senado')
+        leg = cell('Legislativo', note(last ? last.r : 'Em tramitação; ainda sem votação no Plenário'));
+      else leg = cell('Legislativo', note('Ainda não votado no Congresso'), true);
+    }
+  }
+  // Executivo
+  let exe;
+  if (stf) exe = cell('Executivo', note('Não passou pela Presidência'), true);
+  else if (path.has('exec') || P.house==='exec'){ const m = execMark(P); exe = cell('Executivo', m ? `<span class="pw-v">${m}</span>` : note(P.status)); }
+  else exe = cell('Executivo', note('Ainda não chegou à sanção'), true);
+  // Judiciário
+  let jud;
+  if (stf){ const mv = P.votes ? miniVote(P) : ''; jud = cell('Judiciário', `${mv ? `<span class="pw-v">${mv}</span>` : ''}${note(P.votes ? P.votes.result : P.status)}`); }
+  else jud = cell('Judiciário', note('Não passou pelo Supremo'), true);
+  return `<span class="c-pw" aria-label="Por onde passou">${leg}${exe}${jud}</span>`;
 }
 // at the Presidência a card shows the act of the president instead of a floor count:
 // his mark when he signed it (sanction, MP, bill sent), a stamp while the text waits for sanction.
@@ -3191,7 +3248,7 @@ setInterval(()=>{ if (!cons.hidden && consData && Date.now() - Date.parse(consDa
    A card is related to a person when the name appears as author or rapporteur, in the vote, in the steps or in
    the summary; for deputies and senators, data/votos.json (robot) adds how each one voted in roll-call votes. */
 let VOTOS = null;
-setTimeout(()=> trFetch('data/votos.json').then(js=>{ VOTOS = js; const box = document.querySelector('#person .p-cards[data-n]'); if (box) box.outerHTML = relatedHTML(box.dataset.n, box.dataset.k, box.dataset.r||''); }).catch(()=>{}), 0);
+setTimeout(()=> trFetch('data/votos.json').then(js=>{ VOTOS = js; window.QV = js; try { renderToday(); if (openKey) renderPanel(openKey); } catch(e){} const box = document.querySelector('#person .p-cards[data-n]'); if (box) box.outerHTML = relatedHTML(box.dataset.n, box.dataset.k, box.dataset.r||''); }).catch(()=>{}), 0);
 const VOTE_TX = {'Sim':'votou Sim','Não':'votou Não','Nao':'votou Não','Abstenção':'absteve-se','Obstrução':'obstruiu','Artigo 17':'não vota (preside)','SIM':'votou Sim','NAO':'votou Não','NÃO':'votou Não','ABST':'absteve-se','P-NRV':'presente, sem voto','AP':'ausente','LS':'de licença','MIS':'em missão'};
 function nameRe(n){
   const w = fold(n).replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(x=> x.length>1 && !['de','da','do','dos','das','e'].includes(x));
