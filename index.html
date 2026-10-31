@@ -539,7 +539,26 @@ body.morphing #frame,body.morphing #stf-frame,body.morphing #pres-frame{visibili
 .feed-live{display:flex;gap:8px;flex-wrap:wrap}
 .feed-live .lv-tag{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;margin:0;font-size:12px;line-height:1;color:#E0242B;padding:6px 11px 6px 9px;border-radius:999px;background:color-mix(in srgb, #E0242B 10%, var(--bg))}
 .feed-live .lv-tag:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.today > .feed{padding:0 0 48px}
+.today > .feed{padding:0}
+.today:not(.more) .fd-x{display:none}
+@keyframes fd-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.today.more .fd-x{animation:fd-in .5s cubic-bezier(.2,.7,.3,1) both}
+@media (prefers-reduced-motion:reduce){ .today.more .fd-x{animation:none} }
+.fd-morewrap{display:flex;justify-content:center;margin:6px 0 0}
+.fd-more{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 8px;font-size:14px;color:var(--muted);display:inline-flex;align-items:center;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px;transition:color .2s, text-decoration-color .2s}
+.fd-more:hover{color:var(--ink);text-decoration-color:currentColor}
+.fd-more:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
+/* site footer: useful links at the end of every page */
+.site-foot{box-sizing:border-box;width:100%;max-width:1280px;margin:72px auto 0;padding:28px 0 8px;border-top:1px solid var(--rule);font-family:var(--display);color:var(--ink)}
+.landing > .site-foot{max-width:980px;margin-top:24px;grid-column:1/-1}
+.sf-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px 32px}
+.sf-grid h2{margin:0 0 10px;font-size:12.5px;font-weight:500;color:var(--muted)}
+.sf-grid ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;font-size:14px}
+.sf-grid a{color:var(--ink);text-decoration:none}
+.sf-grid a:hover{text-decoration:underline;text-underline-offset:3px}
+.sf-grid a:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
+.sf-note{margin:28px 0 0;font-size:12.5px;line-height:1.5;color:var(--muted);max-width:640px}
+@media (max-width:760px){ .sf-grid{grid-template-columns:repeat(2,minmax(0,1fr))} .site-foot{margin-top:48px} }
 
 /* cards: the same piece on the opening view and in every section. Compact by default, they open in place */
 .feed{list-style:none;margin:0;display:flex;flex-direction:column;gap:22px}
@@ -2499,10 +2518,55 @@ function renderToday(){
     h.removeAttribute('aria-expanded'); h.removeAttribute('aria-controls');
     if (full) h.setAttribute('aria-label', card.querySelector('.c-title').textContent + ': abrir a página');
   });
+  // the five most recent cards show; the others, and the days left empty without them, wait behind "Ver mais"
+  const cards = [...todayEl.querySelectorAll('.feed .card')], extra = cards.length - FEED_FIRST;
+  cards.forEach((c,i)=>{ if (i >= FEED_FIRST) c.closest('li').classList.add('fd-x'); });
+  todayEl.querySelectorAll('.fd').forEach(fd=>{ if (!fd.querySelector('.fd-cards > li:not(.fd-x)')) fd.classList.add('fd-x'); });
+  todayEl.classList.toggle('more', feedMore);
+  if (extra > 0) todayEl.insertAdjacentHTML('beforeend', `<p class="fd-morewrap"><button type="button" class="fd-more" aria-expanded="${feedMore}">${feedMore ? 'Ver menos' : `Ver mais · ${extra} ${extra===1?'projeto':'projetos'}`}</button></p>`);
 }
+const FEED_FIRST = 5;
+let feedMore = false;
+// footer with useful links, placed at the end of the opening view and of every page; pages that redraw themselves get it back
+const FOOT_HTML = `<footer class="site-foot"><div class="sf-grid">
+  <nav aria-label="Fontes oficiais"><h2>Fontes oficiais</h2><ul>
+    <li><a href="https://www.camara.leg.br" target="_blank" rel="noopener">Câmara dos Deputados</a></li>
+    <li><a href="https://www12.senado.leg.br" target="_blank" rel="noopener">Senado Federal</a></li>
+    <li><a href="https://portal.stf.jus.br" target="_blank" rel="noopener">Supremo Tribunal Federal</a></li>
+    <li><a href="https://www.gov.br/planalto" target="_blank" rel="noopener">Presidência da República</a></li>
+    <li><a href="https://www.in.gov.br" target="_blank" rel="noopener">Diário Oficial da União</a></li></ul></nav>
+  <nav aria-label="Dados abertos"><h2>Dados abertos</h2><ul>
+    <li><a href="https://dadosabertos.camara.leg.br" target="_blank" rel="noopener">Dados abertos da Câmara</a></li>
+    <li><a href="https://www12.senado.leg.br/dados-abertos" target="_blank" rel="noopener">Dados abertos do Senado</a></li>
+    <li><a href="https://portaldatransparencia.gov.br" target="_blank" rel="noopener">Portal da Transparência</a></li>
+    <li><a href="https://eagendas.cgu.gov.br" target="_blank" rel="noopener">Agendas de autoridades (e-Agendas)</a></li></ul></nav>
+  <nav aria-label="Participe"><h2>Participe</h2><ul>
+    <li><a href="https://www12.senado.leg.br/ecidadania" target="_blank" rel="noopener">e-Cidadania do Senado</a></li>
+    <li><a href="https://www.camara.leg.br/deputados/quem-sao" target="_blank" rel="noopener">Contato dos deputados</a></li>
+    <li><a href="https://www25.senado.leg.br/web/senadores" target="_blank" rel="noopener">Contato dos senadores</a></li>
+    <li><a href="https://www.tse.jus.br" target="_blank" rel="noopener">Tribunal Superior Eleitoral</a></li></ul></nav>
+  <nav aria-label="No Quorum"><h2>No Quorum</h2><ul>
+    <li><a href="#visao-geral">Visão geral</a></li>
+    <li><a href="#calendario">Calendário</a></li>
+    <li><a href="#consultas">Enquetes</a></li>
+    <li><a href="https://github.com/lucca-reis/quorum" target="_blank" rel="noopener">Código do site</a></li></ul></nav>
+</div><p class="sf-note">Quorum reúne informações públicas dos Três Poderes, com links para a fonte de cada dado. Os robôs do site atualizam votações, pautas e enquetes ao longo do dia. Site independente, sem vínculo com os órgãos citados.</p></footer>`;
+function addFoot(el){ if (el && !(el.lastElementChild && el.lastElementChild.classList.contains('site-foot'))) el.insertAdjacentHTML('beforeend', FOOT_HTML); }
+['landing','stfv','presv','proj','cal','cons','vg','inst'].forEach(id=>{
+  const el = document.getElementById(id); if (!el) return;
+  addFoot(el);
+  new MutationObserver(()=> addFoot(el)).observe(el, {childList:true});
+});
 function placeToday(){ /* the feed sits in the landing grid, beside the drawing */ }
 renderToday(); refreshLive();
 todayEl.addEventListener('click', e=>{
+  const more = e.target.closest('.fd-more');
+  if (more){ e.stopPropagation(); feedMore = !feedMore;
+    todayEl.classList.toggle('more', feedMore); more.setAttribute('aria-expanded', String(feedMore));
+    const n = todayEl.querySelectorAll('.fd-cards > li.fd-x').length;
+    more.textContent = feedMore ? 'Ver menos' : `Ver mais · ${n} ${n===1?'projeto':'projetos'}`;
+    if (!feedMore) more.scrollIntoView({block:'center', behavior: reduce ? 'auto' : 'smooth'});
+    return; }
   const b = e.target.closest('.lv-tag[data-go]');
   if (b){ e.stopPropagation(); const k = b.dataset.go; if (k==='camara'||k==='senado') enterPlan(()=>open(k, true)); else enterView(VIEWS[k==='exec'?'pres':'stf']); return; }
   const card = e.target.closest('.card.go');
