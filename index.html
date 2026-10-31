@@ -454,17 +454,35 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-gap) + 22px)}
 /* the three powers as spheres above the timeline: Legislativo, Executivo, Judiciário */
 .landing > .lx{--u:.7px}
-/* computer: the timeline takes the right half of the page, from the exact middle; the left half is for the three spheres,
-   stacked and sharing the height of the screen (they stay put while the page scrolls), each with its name and phase bar below */
+/* computer: the timeline takes the right half of the page, from the exact middle. The left half shows the three powers as three
+   circles that touch, like a diagram of independent and harmonious powers: Legislativo on top, Executivo below left, Judiciário below right.
+   The circles are see-through, so where two meet the colour deepens. Text sits above the top circle and below the other two. */
 @media (min-width:701px){
   .landing{--lx-top:28px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto;justify-items:stretch;align-items:start;column-gap:0;
     padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-top))}
-  /* each block is the sphere plus about 72px of text; three blocks and two small gaps fill the height below the menu */
-  .landing > .lx{--u:clamp(.22px, calc((100vh - var(--menu-h) - var(--lx-top) - 24px - 3 * 72px - 2 * 10px) / 960), .8px);grid-column:1;grid-row:1;position:sticky;top:0;align-self:start;
-    height:calc(100vh - var(--menu-h) - var(--lx-top) - 24px);display:flex;flex-direction:column;justify-content:space-between;align-items:center;max-width:none;margin:0;padding-right:clamp(24px,4vw,64px);box-sizing:border-box}
+  /* --u scales the drawings (a sphere box is 320u wide); the cluster is about 1.69 spheres tall plus two text blocks, and 1.8 spheres wide */
+  .landing > .lx{--tx:76px;--u:clamp(.2px, min(calc((100vh - var(--menu-h) - var(--lx-top) - 40px - 2 * var(--tx)) / 541), calc((50vw - 110px) / 576)), .9px);
+    --S:calc(320 * var(--u));--s:calc(.77 * var(--S));
+    grid-column:1;grid-row:1;position:sticky;top:0;align-self:start;display:block;max-width:none;margin:0 clamp(24px,4vw,64px) 0 0;
+    height:calc(2 * var(--tx) + var(--S) + .866 * var(--s) + 12px);
+    margin-top:max(0px, calc((100vh - var(--menu-h) - var(--lx-top) - 24px - (2 * var(--tx) + var(--S) + .866 * var(--s) + 12px)) / 2))}
   .landing > .today{grid-column:2;grid-row:1;max-width:none}
   .landing > .site-foot{grid-column:1 / -1;grid-row:2;max-width:none}
-  .landing .lx-row{flex-direction:column;align-items:center;gap:8px}
+  .landing .lx-row{position:absolute;flex-direction:column;align-items:center;gap:6px;width:calc(var(--s) - 16px);transform:translateX(-50%)}
+  .landing .lx-row[data-k="cong"]{left:50%;top:calc(var(--tx) + 6px)}
+  .landing .lx-row[data-k="cong"] .lx-text{position:absolute;left:0;right:0;bottom:calc(100% + 6px)}
+  .landing .lx-text > *{flex-shrink:0}
+  .landing .lx-bar{width:min(170px,88%)}
+  .landing .lx-row[data-k="pres"]{left:calc(50% - var(--s) / 2);top:calc(var(--tx) + 6px + .866 * var(--s))}
+  .landing .lx-row[data-k="stf"]{left:calc(50% + var(--s) / 2);top:calc(var(--tx) + 6px + .866 * var(--s))}
+  .landing .lx-text{max-width:100%}
+  .landing .lx-ph{justify-content:center}
+  /* only the circles take clicks, so the overlapping drawing boxes don't hide each other */
+  .landing .lx-shape svg{pointer-events:none}
+  .landing .lx-shape .lg{pointer-events:auto}
+  .landing .lg > .sph{fill:color-mix(in srgb, var(--ink) 7%, transparent)}
+  .landing .lg:hover > .sph{fill:color-mix(in srgb, var(--ink) 12%, transparent)}
+  .landing .lx-row:has(.lg:hover){z-index:1}
 }
 .lx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(12px,4vw,56px);width:100%;max-width:980px;margin:0 auto;font-family:var(--display)}
 .lx-row{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0}
