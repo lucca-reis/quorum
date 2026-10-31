@@ -533,9 +533,13 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .fd-new{font-weight:600}
 .fd-morewrap{display:flex;justify-content:center}
 @media (min-width:701px){ .today:not(.more){justify-content:center} .today:not(.more) > .feed{flex:none;overflow:visible;padding-bottom:0} }
-.fd-more{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 20px;border-radius:999px;border:1.5px solid var(--ink);font-size:14px;display:inline-flex;align-items:center;transition:background-color .2s, color .2s}
-.fd-more:hover{background:var(--ink);color:var(--bg)}
-.fd-more:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.fd-more{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 8px;font-size:14px;color:var(--muted);display:inline-flex;align-items:center;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px;transition:color .2s, text-decoration-color .2s}
+.fd-more:hover{color:var(--ink);text-decoration-color:currentColor}
+.fd-more:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:6px}
+/* "Ver mais": the most recent day glides up and the older days fade in one after the other */
+@keyframes fd-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.fd-old.fd-enter{animation:fd-in .55s cubic-bezier(.2,.7,.3,1) both}
+@media (prefers-reduced-motion:reduce){ .fd-old.fd-enter{animation:none} }
 .card{--card:color-mix(in srgb, var(--ink) 5%, var(--bg));border-radius:20px;background:var(--card);color:var(--ink);font-family:var(--display);transition:background-color .2s}
 .card:hover{--card:color-mix(in srgb, var(--ink) 8%, var(--bg))}
 .card p{margin:0}
@@ -2487,8 +2491,22 @@ function placeToday(){ /* the feed sits in the landing grid, beside the drawing 
 renderToday(); refreshLive();
 todayEl.addEventListener('click', e=>{
   const more = e.target.closest('.fd-more');
-  if (more){ e.stopPropagation(); feedMore = !feedMore; todayEl.classList.toggle('more', feedMore);
-    todayEl.querySelectorAll('.fd-old').forEach(li=> li.hidden = !feedMore);
+  if (more){ e.stopPropagation(); feedMore = !feedMore;
+    // FLIP: note where the most recent day is, change the layout, then slide it from there to its new place
+    const first = todayEl.querySelector('.feed'), y0 = todayEl.querySelector('.fd-first')?.getBoundingClientRect().top ?? 0;
+    todayEl.classList.toggle('more', feedMore);
+    const olds = [...todayEl.querySelectorAll('.fd-old')];
+    olds.forEach((li, i)=>{ li.hidden = !feedMore; li.classList.remove('fd-enter');
+      if (feedMore && !reduce){ li.style.animationDelay = `${260 + Math.min(i, 8) * 80}ms`; void li.offsetWidth; li.classList.add('fd-enter'); } });
+    if (first && !reduce){
+      const dy = y0 - todayEl.querySelector('.fd-first').getBoundingClientRect().top;
+      if (Math.abs(dy) > 1){
+        first.style.transition = 'none'; first.style.transform = `translateY(${dy}px)`; void first.offsetWidth;
+        first.style.transition = 'transform .6s cubic-bezier(.65,0,.35,1)'; first.style.transform = '';
+        first.addEventListener('transitionend', ()=>{ first.style.transition = ''; }, {once:true});
+      }
+    }
+    if (!feedMore) olds.forEach(li=> li.style.animationDelay = '');
     more.setAttribute('aria-expanded', String(feedMore));
     const n = todayEl.querySelectorAll('.fd-old').length;
     more.textContent = feedMore ? 'Ver menos' : `Ver mais · ${n} ${n===1?'dia anterior':'dias anteriores'}`;
