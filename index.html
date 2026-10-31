@@ -3308,16 +3308,22 @@ function execTr(which){
 let trLeis = null;
 const loadLeis = ()=> trLeis ? Promise.resolve(trLeis) : trFetch('data/leis.json').then(js=> (trLeis = js));
 const SIGLA_PARTY = {'UNIÃO':'União','UNIAO':'União','REPUBLICANOS':'Republicanos','PODE':'Podemos','PODEMOS':'Podemos','NOVO':'Novo','AVANTE':'Avante','SOLIDARIEDADE':'Solidariedade','REDE':'Rede','PCDOB':'PCdoB','MISSÃO':'Missão','MISSAO':'Missão','PSD':'PSD','PL':'PL','PT':'PT','PP':'PP','MDB':'MDB','PSB':'PSB','PDT':'PDT','PSDB':'PSDB','PSOL':'PSOL','PV':'PV','PRD':'PRD'};
+// party acronyms in the Câmara files are cut at 8 letters and some parties were renamed or merged
+const LEIS_ALIAS = {'REPUBLIC':'Republicanos','PRB':'Republicanos','SOLIDARI':'Solidariedade','PODE':'Podemos','PODEMOS':'Podemos','CIDADANI':'Cidadania','CIDADANIA':'Cidadania','PMDB':'MDB','DEM':'União','PSL':'União','UNIÃO':'União','UNIAO':'União','PCDOB':'PCdoB','PATRIOTA':'PRD','PTB':'PRD','PPS':'Cidadania','PR':'PL'};
 function vgLeis(){
   if (!trLeis) return '<p class="vd-none">Carregando…</p>';
   const L = trLeis, G = L.grupos || [];
   if (!G.length) return `<p class="vd-none">${(L.erros||[]).length ? 'Os dados ainda estão sendo reunidos pelo robô; o gráfico aparece aqui na próxima atualização.' : 'Nenhuma norma encontrada no período.'}</p>`;
-  const max = G[0][1];
-  const color = g => { const k = SIGLA_PARTY[String(g).toUpperCase()]; return k ? PARTY[k] : /Executivo/.test(g) ? 'var(--ink)' : 'var(--nc)'; };
-  const label = g => { const k = SIGLA_PARTY[String(g).toUpperCase()]; return k ? (PARTY_NAME[k]||k) : g; };
+  const OUTROS = /^(Comissões e outros órgãos|não informado)$/;
+  const cnt = {};
+  G.forEach(([g,n])=>{ if (OUTROS.test(g)) return; const up = String(g).toUpperCase(), k = LEIS_ALIAS[up] || SIGLA_PARTY[up] || g; cnt[k] = (cnt[k]||0) + n; });
+  const rows = Object.entries(cnt).sort((a,b)=> b[1]-a[1]), max = rows.length ? rows[0][1] : 1;
+  const fora = G.filter(([g])=> OUTROS.test(g)).reduce((a,[,n])=> a+n, 0);
+  const color = g => PARTY[g] || (/Executivo/.test(g) ? 'var(--ink)' : 'var(--nc)');
+  const label = g => PARTY_NAME[g] || g;
   const [y1,m1] = L.periodo[0].split('-'), [y2,m2] = L.periodo[1].split('-');
-  return `<ul class="vl" aria-label="Normas aprovadas por partido do autor">${G.slice(0,14).map(([g,n])=>`<li><span class="vl-l">${esc(label(g))}</span><span class="vl-b"><i style="width:${(n/max*100).toFixed(1)}%;background:${color(g)}"></i></span><span class="vl-n">${n}</span></li>`).join('')}</ul>
-    <p class="vb-note">${FMT_NUM.format(L.total)} proposições viraram lei, emenda constitucional ou decreto legislativo entre ${MO[+m1-1]} ${y1} e ${MO[+m2-1]} ${y2}, contadas pelo partido de quem as apresentou (o primeiro autor), na época da apresentação. Propostas do governo aparecem como Poder Executivo. <a href="https://dadosabertos.camara.leg.br" target="_blank" rel="noopener" style="color:inherit">Dados abertos da Câmara ↗</a></p>`;
+  return `<ul class="vl" aria-label="Normas aprovadas por partido do autor">${rows.slice(0,15).map(([g,n])=>`<li><span class="vl-l">${esc(label(g))}</span><span class="vl-b"><i style="width:${(n/max*100).toFixed(1)}%;background:${color(g)}"></i></span><span class="vl-n">${n}</span></li>`).join('')}</ul>
+    <p class="vb-note">Proposições que viraram lei, emenda constitucional ou decreto legislativo entre ${MO[+m1-1]} ${y1} e ${MO[+m2-1]} ${y2}, contadas pelo partido do primeiro autor na época em que apresentou. Siglas antigas somadas às atuais (PMDB ao MDB, PRB ao Republicanos, DEM e PSL ao União). ${fora ? `Ficam de fora ${FMT_NUM.format(fora)} normas apresentadas por comissões ou outros órgãos, em geral decretos legislativos de concessões de rádio e TV e de acordos internacionais. ` : ''}<a href="https://dadosabertos.camara.leg.br" target="_blank" rel="noopener" style="color:inherit">Dados abertos da Câmara ↗</a></p>`;
 }
 function vgTransp(){
   if (!trResumo) return '<p class="vd-none">Carregando os gastos da cota parlamentar…</p>';
