@@ -208,8 +208,11 @@ def melhor(nomes, contas):
     partes = {p for n in nomes for p in slug(n).split('-') if len(p) >= 4}
     junto = {slug(n).replace('-', '') for n in nomes}
     def nota(c):
+        # quanto do nome da conta é o nome da pessoa ("oficial" conta como nome): "lulaoficial" ganha de "lulaverso"
         h = norm(c['h']).lower().replace('_', '').replace('.', '')
-        return (sum(p in h for p in partes) + 3 * any(j and j in h for j in junto), -len(h))
+        if not h: return (0, 0)
+        casado = sum(len(p) for p in partes if p in h) + (7 if 'oficial' in h else 0)
+        return (min(casado, len(h)) / len(h) + (1 if any(j and j in h for j in junto) else 0), -len(h))
     return max(contas, key=nota) if contas else None
 for f in final.values():
     for r, contas in f.pop('cands', {}).items():
