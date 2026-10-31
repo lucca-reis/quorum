@@ -3317,7 +3317,7 @@ function vgLeis(){
   const label = g => { const k = SIGLA_PARTY[String(g).toUpperCase()]; return k ? (PARTY_NAME[k]||k) : g; };
   const [y1,m1] = L.periodo[0].split('-'), [y2,m2] = L.periodo[1].split('-');
   return `<ul class="vl" aria-label="Normas aprovadas por partido do autor">${G.slice(0,14).map(([g,n])=>`<li><span class="vl-l">${esc(label(g))}</span><span class="vl-b"><i style="width:${(n/max*100).toFixed(1)}%;background:${color(g)}"></i></span><span class="vl-n">${n}</span></li>`).join('')}</ul>
-    <p class="vb-note">${FMT_NUM.format(L.total)} proposições viraram lei, emenda constitucional ou decreto legislativo entre ${MO[+m1-1]} ${y1} e ${MO[+m2-1]} ${y2}, contadas pelo partido atual de quem as apresentou (o primeiro autor). Propostas do governo aparecem como Poder Executivo. <a href="https://dadosabertos.camara.leg.br" target="_blank" rel="noopener" style="color:inherit">Dados abertos da Câmara ↗</a></p>`;
+    <p class="vb-note">${FMT_NUM.format(L.total)} proposições viraram lei, emenda constitucional ou decreto legislativo entre ${MO[+m1-1]} ${y1} e ${MO[+m2-1]} ${y2}, contadas pelo partido de quem as apresentou (o primeiro autor), na época da apresentação. Propostas do governo aparecem como Poder Executivo. <a href="https://dadosabertos.camara.leg.br" target="_blank" rel="noopener" style="color:inherit">Dados abertos da Câmara ↗</a></p>`;
 }
 function vgTransp(){
   if (!trResumo) return '<p class="vd-none">Carregando os gastos da cota parlamentar…</p>';

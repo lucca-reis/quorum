@@ -1,101 +1,77 @@
 """Proposições que viraram norma (lei, emenda constitucional, decreto legislativo…) nos últimos 12 meses,
 com o partido de quem as apresentou. Alimenta o gráfico "Partidos que mais aprovaram projetos" da Visão geral.
 
-Fonte: dados abertos da Câmara (todas as leis passam pela Câmara, inclusive as que começaram no Senado):
-  /referencias/proposicoes/codSituacao  → código da situação "Transformado em Norma Jurídica"
-  /proposicoes?codSituacao=…&dataInicio=…  → proposições nessa situação com tramitação no período
-  /proposicoes/{id}                    → data em que virou norma
-  /proposicoes/{id}/autores            → primeiro autor
-  /deputados/{id}                      → partido atual do deputado autor
-Partido de senadores: lista de senadores em exercício do Senado. Grava data/leis.json. Só usa a biblioteca padrão."""
-import json, re, time, datetime, zoneinfo, pathlib, unicodedata, urllib.request, urllib.parse
+Fonte: arquivos anuais de dados abertos da Câmara (todas as leis passam pela Câmara, inclusive as que começaram no Senado).
+A API de busca por situação da Câmara não responde a tempo (504), então o robô lê os arquivos completos:
+  https://dadosabertos.camara.leg.br/arquivos/proposicoes/csv/proposicoes-AAAA.csv
+      → situação atual de cada proposição apresentada no ano ("Transformado em Norma Jurídica") e a data
+  https://dadosabertos.camara.leg.br/arquivos/proposicoesAutores/csv/proposicoesAutores-AAAA.csv
+      → autores, com o partido de cada um na época
+Conta pelo primeiro autor. Grava data/leis.json. Só usa a biblioteca padrão."""
+import csv, io, json, re, datetime, zoneinfo, pathlib, unicodedata, urllib.request, traceback
 
 BR = zoneinfo.ZoneInfo('America/Sao_Paulo')
 HOJE = datetime.datetime.now(BR).date()
 INICIO = HOJE.replace(year=HOJE.year - 1)
 OUT = pathlib.Path(__file__).resolve().parent.parent / 'data'
-CAM = 'https://dadosabertos.camara.leg.br/api/v2/'
-UA = {'Accept': 'application/json', 'User-Agent': 'quorum (github.com/lucca-reis/quorum)'}
+ARQ = 'https://dadosabertos.camara.leg.br/arquivos/'
+UA = {'User-Agent': 'quorum (github.com/lucca-reis/quorum)'}
+TIPOS = {'PL', 'PLP', 'PEC', 'MPV', 'PDL', 'PLV', 'PDC'}
 log = []
 
-def get(url):
-    for n in range(3):
-        try:
-            time.sleep(0.25)
-            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=90) as r:
-                return json.loads(r.read().decode('utf-8') or 'null')
-        except Exception as ex:
-            if n == 2: log.append(f'{url}: {ex}'); return None
-            time.sleep(3)
+def baixar(url):
+    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=300) as r:
+        return r.read().decode('utf-8-sig', 'replace')
 
 def norm(t):
     t = unicodedata.normalize('NFD', str(t or ''))
     return re.sub(r'\s+', ' ', ''.join(c for c in t if not unicodedata.combining(c))).upper().strip()
 
-itens, props = [], {}
+def col(row, *nomes):
+    for n in nomes:
+        if n in row and row[n] not in (None, ''): return row[n]
+    return ''
+
+itens = []
 def coletar():
-    global itens, props
-    # 1) código da situação "Transformado(a) em Norma Jurídica"
-    refs = (get(CAM + 'referencias/proposicoes/codSituacao') or {}).get('dados', [])
-    cods = [r['cod'] for r in refs if 'NORMA JURIDICA' in norm(r.get('nome') or r.get('descricao'))]
-    if not cods: log.append('situação "Transformado em Norma Jurídica" não encontrada')
-
-    # 2) proposições nessa situação com tramitação no período
-    props = {}
-    # a API demora (e devolve 504) com períodos longos: busca em janelas de 15 dias, um tipo de proposição por vez
-    janelas, ini = [], INICIO
-    while ini <= HOJE:
-        fim = min(HOJE, ini + datetime.timedelta(days=14)); janelas.append((ini, fim)); ini = fim + datetime.timedelta(days=1)
-    for cod in cods:
-        for ini, fim in janelas:
-          for tipo in ('PL', 'PLP', 'PEC', 'MPV', 'PDL'):
-            for pag in range(1, 30):
-                js = get(CAM + 'proposicoes?' + urllib.parse.urlencode({'codSituacao': cod, 'siglaTipo': tipo, 'dataInicio': ini.isoformat(), 'dataFim': fim.isoformat(),
-                                                                        'itens': 100, 'pagina': pag}))
-                dados = (js or {}).get('dados', [])
-                for p in dados: props[p['id']] = p
-                if len(dados) < 100: break
-
-    # partidos dos senadores em exercício (para autores do Senado)
-    sen = {}
-    js = get('https://legis.senado.leg.br/dadosabertos/senador/lista/atual.json')
-    try:
-        for p in js['ListaParlamentarEmExercicio']['Parlamentares']['Parlamentar']:
-            i = p['IdentificacaoParlamentar']
-            sen[norm(i.get('NomeParlamentar'))] = i.get('SiglaPartidoParlamentar')
-    except Exception as ex:
-        log.append(f'senadores: {ex}')
-
-    partido_dep = {}
-    itens = []
-    for pid, p in props.items():
-        det = (get(CAM + f'proposicoes/{pid}') or {}).get('dados', {})
-        st = det.get('statusProposicao') or {}
-        quando = (st.get('dataHora') or '')[:10]
-        if not quando or not (INICIO.isoformat() <= quando <= HOJE.isoformat()): continue
-        if 'NORMA JURIDICA' not in norm(st.get('descricaoSituacao')): continue
-        autores = (get(CAM + f'proposicoes/{pid}/autores') or {}).get('dados', [])
-        autores.sort(key=lambda a: (a.get('ordemAssinatura') or 99, -(a.get('proponente') or 0)))
-        a = autores[0] if autores else {}
-        tipo, nome, partido = a.get('tipo') or '', a.get('nome') or 'não informado', None
-        if 'Deputad' in tipo and a.get('uri'):
-            did = a['uri'].rstrip('/').split('/')[-1]
-            if did not in partido_dep:
-                partido_dep[did] = ((get(CAM + f'deputados/{did}') or {}).get('dados', {}).get('ultimoStatus') or {}).get('siglaPartido')
-            partido = partido_dep[did]
-        elif 'Senad' in tipo:
-            partido = sen.get(norm(re.sub(r'^Senador[a]?\s+', '', nome)))
-        grupo = partido or ('Poder Executivo' if 'Executivo' in tipo else 'Senado (sem partido identificado)' if 'Senad' in tipo
-                            else 'Comissões e outros órgãos' if tipo else 'não informado')
-        itens.append({'s': p.get('siglaTipo'), 'n': p.get('numero'), 'a': p.get('ano'), 'e': (p.get('ementa') or '')[:200], 'd': quando,
-                      'autor': nome, 'tipo': tipo, 'grupo': grupo, 'partido': partido,
-                      'u': f"https://www.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao={pid}"})
-
+    # leis aprovadas agora podem ter sido apresentadas muitos anos antes: lê os arquivos desde 2003
+    for ano in range(HOJE.year, 2002, -1):
+        try:
+            txt = baixar(f'{ARQ}proposicoes/csv/proposicoes-{ano}.csv')
+        except Exception as ex:
+            log.append(f'proposicoes {ano}: {ex}'); continue
+        achadas = {}
+        for r in csv.DictReader(io.StringIO(txt), delimiter=';'):
+            if col(r, 'siglaTipo') not in TIPOS: continue
+            sit = norm(col(r, 'ultimoStatus_descricaoSituacao', 'statusProposicao_descricaoSituacao'))
+            if 'NORMA JURIDICA' not in sit: continue
+            quando = col(r, 'ultimoStatus_dataHora', 'statusProposicao_dataHora')[:10]
+            if not (INICIO.isoformat() <= quando <= HOJE.isoformat()): continue
+            achadas[col(r, 'id')] = {'s': r['siglaTipo'], 'n': col(r, 'numero'), 'a': col(r, 'ano'), 'e': col(r, 'ementa')[:200], 'd': quando,
+                                     'u': f"https://www.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao={col(r, 'id')}"}
+        if not achadas: continue
+        try:
+            aut = baixar(f'{ARQ}proposicoesAutores/csv/proposicoesAutores-{ano}.csv')
+        except Exception as ex:
+            log.append(f'autores {ano}: {ex}'); aut = ''
+        primeiros = {}
+        for r in csv.DictReader(io.StringIO(aut), delimiter=';'):
+            pid = col(r, 'idProposicao')
+            if pid not in achadas: continue
+            ordem = int(col(r, 'ordemAssinatura') or 99)
+            if pid not in primeiros or ordem < primeiros[pid][0]:
+                primeiros[pid] = (ordem, r)
+        for pid, p in achadas.items():
+            r = primeiros.get(pid, (0, {}))[1]
+            tipo, nome, partido = col(r, 'tipoAutor'), col(r, 'nomeAutor') or 'não informado', col(r, 'siglaPartidoAutor') or None
+            grupo = partido or ('Poder Executivo' if 'EXECUTIVO' in norm(tipo + ' ' + nome) or 'PRESIDENCIA DA REPUBLICA' in norm(nome)
+                                else 'Senado (sem partido no arquivo)' if 'SENAD' in norm(tipo + ' ' + nome)
+                                else 'Comissões e outros órgãos' if tipo else 'não informado')
+            itens.append({**p, 'autor': nome, 'tipo': tipo, 'partido': partido, 'grupo': grupo})
 
 try:
     coletar()
-except Exception as ex:
-    import traceback
+except Exception:
     log.append('falha: ' + traceback.format_exc()[-600:])
 
 cont = {}
@@ -103,6 +79,6 @@ for i in itens: cont[i['grupo']] = cont.get(i['grupo'], 0) + 1
 OUT.mkdir(exist_ok=True)
 res = {'atualizado': datetime.datetime.now(BR).isoformat(timespec='minutes'), 'periodo': [INICIO.isoformat(), HOJE.isoformat()],
        'total': len(itens), 'grupos': sorted(cont.items(), key=lambda x: -x[1]), 'itens': sorted(itens, key=lambda i: i['d'], reverse=True),
-       'fonte': 'https://dadosabertos.camara.leg.br', 'erros': log[:30]}
+       'fonte': 'https://dadosabertos.camara.leg.br/swagger/api.html#staticfile', 'erros': log[:30]}
 (OUT / 'leis.json').write_text(json.dumps(res, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
-print(json.dumps({'candidatas': len(props), 'normas': len(itens), 'grupos': res['grupos'][:12], 'erros': log[:5]}, ensure_ascii=False))
+print(json.dumps({'normas': len(itens), 'grupos': res['grupos'][:15], 'erros': log[:5]}, ensure_ascii=False))
