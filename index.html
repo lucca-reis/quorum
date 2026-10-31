@@ -309,23 +309,55 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 @media (max-width:1180px){ .menu nav .long{display:none} .menu nav > a,.nav-leg{padding:7px 6px} }
 @media (min-width:761px) and (max-width:1100px){ .menu{grid-template-columns:auto minmax(0,1fr)} .menu nav{margin-left:auto;max-width:460px} }
 @media (max-width:1000px){ .menu nav > a,.nav-leg{padding:7px 4px;font-size:13px} .menu nav{margin-right:138px} .menu .vg-link{padding:7px 8px;font-size:13px} }
+/* phones: a short header on top (name, Visão geral, calendar) and the four powers in a tab bar at the bottom, within reach of the thumb;
+   Executivo, Legislativo and Judiciário open their lists in a sheet that rises from the bar */
+.nav-scrim{display:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.nav-sub a[hidden]{display:none!important}
+.nav-find{display:block;margin:6px 8px 2px;padding:0}
+.nav-find input{box-sizing:border-box;width:100%;font:inherit;font-size:14px;color:var(--ink);background:color-mix(in srgb, var(--ink) 5%, var(--bg));border:1px solid var(--rule);border-radius:12px;padding:9px 12px;outline:none}
+.nav-find input:focus-visible{border-color:var(--ink)}
+.nav-none{margin:6px 20px;font-size:13px;color:var(--muted)}
 @media (max-width:760px){
-  :root{--menu-h:96px}
-  .menu{grid-template-columns:1fr auto;grid-template-rows:auto auto;row-gap:8px;column-gap:12px;align-content:center}
-  .menu nav{margin-right:0}
+  :root{--menu-h:56px;--tab-h:60px}
+  .menu{grid-template-columns:minmax(0,1fr) auto;column-gap:12px}
   .today-date{font-size:13px}
-  .menu .brand{font-size:17px}
-  .menu nav{grid-column:1 / -1;grid-row:2;justify-self:stretch}
-  .menu nav > a,.nav-leg{padding:7px 2px;flex:1 1 auto;text-align:center;font-size:12.5px}
-  .nav-car{margin-left:4px}
+  .menu .brand{font-size:18px}
+  .menu .vg-link{font-size:14px;padding:10px 12px}
+  .menu .cal-link{width:44px;height:44px}
+  .menu-tools{grid-column:2;grid-row:1;gap:2px}
+  .menu nav{position:fixed;left:0;right:0;bottom:0;margin:0;max-width:none;box-sizing:border-box;height:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
+    padding:6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+    border-radius:0;gap:4px;background:var(--bg);border-top:1px solid var(--rule);z-index:3;transition:background-color .35s}
+  .nav-grp{flex:1 1 0;position:static}
+  .menu nav > a,.nav-leg{flex:1 1 0;min-height:48px;padding:0 4px;font-size:14px;border-radius:14px}
   .menu nav .long{display:none}
-  .menu-tools{grid-column:2;grid-row:1}
-  .menu .vg-link{font-size:13.5px}
+  .nav-car{margin-left:5px;transform:translateY(1px) rotate(-135deg)}
+  .nav-grp.open .nav-car{transform:translateY(-2px) rotate(45deg)}
+  .nav-sub{position:fixed;top:auto;left:0;right:0;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));min-width:0;max-height:calc(100dvh - var(--menu-h) - var(--tab-h) - env(safe-area-inset-bottom, 0px) - 24px);
+    padding:10px max(8px, env(safe-area-inset-right, 0px)) 8px max(8px, env(safe-area-inset-left, 0px));transform:translateY(14px);overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box}
+  .nav-sub::before{display:none}
+  .nav-sub{background:var(--bg);border-radius:22px 22px 0 0;box-shadow:0 -1px 0 var(--rule), 0 -16px 40px -18px rgba(0,0,0,.3)}
+  .nav-grp.open .nav-sub{transform:translateY(0)}
+  .nav-sub a{margin:0;padding:0 14px;min-height:48px;display:flex;align-items:center;font-size:15px;border-radius:14px}
+  .nav-sub a:first-child{margin-top:0}.nav-sub a:last-child{margin-bottom:0}
+  .nav-sub-wide,.nav-sub-courts{min-width:0}
+  .nav-scroll{max-height:none;overflow:visible}
+  .nav-h{margin:10px 14px 4px}
+  .nav-find{margin:4px 0 6px}
+  .nav-find input{font-size:16px;padding:12px 14px}
+  .nav-scrim{display:block;position:fixed;inset:0;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));z-index:1;background:rgba(0,0,0,.28);opacity:0;visibility:hidden;transition:opacity .18s, visibility 0s .18s}
+  .menu:has(.nav-grp.open) .nav-scrim{opacity:1;visibility:visible;transition:opacity .18s}
+  /* full-screen layers stop above the bar, so nothing hides behind it */
+  .ov,.proj,.landing,.stfv{bottom:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px))}
+  body{padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 16px)}
 }
 @media (max-width:380px){
-  .menu nav > a,.nav-leg{padding:7px 1px;font-size:11.5px}
+  .today-date{display:none}
+  .menu nav > a,.nav-leg{font-size:13px;padding:0 2px}
   .nav-car{margin-left:3px}
 }
+@media (prefers-reduced-motion:reduce){ .brand-o{animation:none} .nav-sub,.nav-scrim{transition:none} }
 
 /* calendar page */
 .cal{z-index:19}
@@ -979,7 +1011,7 @@ h1[tabindex="-1"]:focus{outline:none}
   <nav aria-label="Poderes">
     <div class="nav-grp nav-grp-exec" data-grp="exec">
       <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub-exec">Executivo<span class="nav-car" aria-hidden="true"></span></button>
-      <div class="nav-sub nav-sub-wide" id="nav-sub-exec"><a href="#" data-nav="pres">Presidência</a><p class="nav-h">Ministérios</p><div class="nav-scroll" id="nav-min"></div></div>
+      <div class="nav-sub nav-sub-wide" id="nav-sub-exec"><a href="#" data-nav="pres">Presidência</a><p class="nav-h" id="nav-min-h">Ministérios</p><label class="nav-find"><span class="sr-only">Buscar ministério</span><input type="search" id="nav-min-q" placeholder="Buscar ministério" autocomplete="off" aria-controls="nav-min"></label><div class="nav-scroll" id="nav-min" aria-labelledby="nav-min-h"></div><p class="nav-none" id="nav-min-none" hidden>Nenhum ministério com esse nome.</p></div>
     </div>
     <div class="nav-grp" data-grp="leg">
       <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub">
@@ -992,6 +1024,7 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
     </div>
     <a href="#consultas" data-nav="consultas">Enquetes</a>
   </nav>
+  <div class="nav-scrim" aria-hidden="true"></div>
   <div class="menu-tools"><a class="vg-link" href="#visao-geral" data-nav="visao">Visão geral</a><a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a></div>
 </header>
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
@@ -2780,13 +2813,22 @@ function grpOpen(g, on){ g.classList.toggle('open', on); grpBtn(g).setAttribute(
 function legOpen(on){ if (!on) NAV_GRPS.forEach(g=> grpOpen(g, false)); }
 document.getElementById('nav-min').innerHTML = EXEC_MIN.map(M=>`<a href="#ministerio-${slugName(M.pasta)}" data-route="m:${slugName(M.pasta)}">${esc(M.pasta)}</a>`).join('');
 document.querySelectorAll('.nav-sub [data-route]').forEach(a=> a.addEventListener('click', ()=>{ legOpen(false); a.blur(); }));
+// search the ministries by name, ignoring accents
+const minQ = document.getElementById('nav-min-q');
+const minFold = t=> String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+minQ.addEventListener('input', ()=>{
+  const q = minFold(minQ.value.trim()); let n = 0;
+  document.querySelectorAll('#nav-min a').forEach(a=>{ const ok = !q || minFold(a.textContent).includes(q); a.hidden = !ok; if (ok) n++; });
+  document.getElementById('nav-min-none').hidden = n>0;
+});
+minQ.addEventListener('keydown', e=>{ if (e.key==='Enter'){ const a = document.querySelector('#nav-min a:not([hidden])'); if (a){ e.preventDefault(); a.click(); location.hash = a.getAttribute('href'); } } });
 document.querySelectorAll('.menu [data-nav]').forEach(a=>a.addEventListener('click', e=>{
   e.preventDefault(); e.stopPropagation(); legOpen(false); a.blur(); navTo(a.dataset.nav);
 }));
 NAV_GRPS.forEach(g=>{
   grpBtn(g).addEventListener('click', e=>{ e.stopPropagation(); const on = !g.classList.contains('open'); legOpen(false); grpOpen(g, on); });
-  g.addEventListener('mouseleave', ()=> grpOpen(g, false));
-  g.addEventListener('focusout', e=>{ if (!g.contains(e.relatedTarget)) grpOpen(g, false); });
+  g.addEventListener('mouseleave', ()=>{ if (matchMedia('(hover:hover) and (min-width:761px)').matches) grpOpen(g, false); });
+  g.addEventListener('focusout', e=>{ if (e.relatedTarget && !g.contains(e.relatedTarget)) grpOpen(g, false); });
   g.addEventListener('keydown', e=>{ if (e.key==='Escape' && g.classList.contains('open')){ e.stopPropagation(); grpOpen(g, false); grpBtn(g).focus(); } });
 });
 // the consultations list is fetched as soon as someone points at its menu item, so the page opens ready
