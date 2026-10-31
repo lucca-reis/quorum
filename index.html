@@ -3599,15 +3599,17 @@ function ctSection(name, key, M){
     const b = box(); if (!b) return;
     const rows = [];
     (C.emails||[]).forEach(e=> rows.push(['E-mail', `<a href="mailto:${esc(e)}">${esc(e)}</a>`]));
-    (C.tels||[]).forEach(t=> rows.push(['Telefone', `<a href="tel:+55${esc(String(t).replace(/\D/g,''))}">${esc(t)}</a>`]));
+    (C.tels||[]).forEach(t=> rows.push(['Telefone', `<a href="tel:+55${esc(String(t).replace(/\D/g,''))}">${esc(String(t).replace(/(\d{4})(\d{4})$/, '$1-$2'))}</a>`]));
     if (C.gabinete) rows.push(['Gabinete', esc(C.gabinete)]);
     if (C.pagina) rows.push(['Página oficial', `<a href="${esc(C.pagina)}" target="_blank" rel="noopener">${esc(C.pagina.replace(/^https?:\/\/(www\d*\.)?/,'').split('/')[0])} ↗</a>`]);
     (C.extra||[]).forEach(r=> rows.push(r));
     const nets = CT_NET.filter(([k])=> C.redes && C.redes[k]).map(([k,l])=> `<a class="ct-net" href="${esc(C.redes[k].u)}" target="_blank" rel="noopener"><b>${l}</b>${k==='x'||k==='instagram'||k==='tiktok'||k==='threads' ? '@'+esc(C.redes[k].h) : esc(C.redes[k].h)}</a>`);
     const main = C.redes && (C.redes.x || C.redes.instagram);
+    const soTse = nets.length && (C.fontes||[]).some(f=> /TSE/.test(f.l)) && !(C.fontes||[]).some(f=> /Câmara|Senado/.test(f.l));
     b.innerHTML = `<h3>Contato</h3>
       ${rows.length ? `<dl class="ct-dl">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>` : `<p class="tr-empty">${esc(D || 'Os canais oficiais ainda não foram publicados.')}</p>`}
       ${nets.length ? `<div class="ct-nets" aria-label="Redes sociais">${nets.join('')}</div>` : ''}
+      ${soTse ? '<p class="ct-src">Redes declaradas pela candidatura ao TSE; podem incluir perfis da campanha.</p>' : ''}
       ${nets.length && !main ? '<p class="ct-src">Sem conta no X ou no Instagram nas fontes oficiais.</p>' : ''}
       ${!nets.length && C.fontes && C.fontes.length ? '<p class="ct-src">Nenhuma rede social informada nas fontes oficiais.</p>' : ''}
       ${C.fontes && C.fontes.length ? `<p class="ct-src">Fonte${C.fontes.length>1?'s':''}: ${C.fontes.map(f=>`<a href="${esc(f.u)}" target="_blank" rel="noopener">${esc(f.l)}</a>`).join(' · ')}</p>` : ''}`;
@@ -3620,6 +3622,10 @@ function ctSection(name, key, M){
   });
   loadCt().then(J=>{
     const id = J && J.nomes && J.nomes[slugName(name)], C = id && J.pessoas[id];
+    if (C && key==='exec'){   // government profiles keep the official channels beside what the robot found
+      const gov = M && M.pasta ? ministry() : Promise.resolve({extra:[['Presidência', '<a href="https://www.gov.br/planalto" target="_blank" rel="noopener">gov.br/planalto ↗</a>'], ['Fale com o governo', '<a href="https://falabr.cgu.gov.br" target="_blank" rel="noopener">Fala.BR ↗</a>']], fontes:[]});
+      return gov.then(G=> draw({...C, extra:[...(C.extra||[]), ...G.extra], fontes:[...(C.fontes||[]), ...(G.fontes||[])]}));
+    }
     if (C) return draw(C);
     if (key==='exec' && M && M.pasta) return ministry().then(x=> draw(x));
     if (key==='exec') return draw({extra:[['Presidência', '<a href="https://www.gov.br/planalto" target="_blank" rel="noopener">gov.br/planalto ↗</a>'], ['Fale com o governo', '<a href="https://falabr.cgu.gov.br" target="_blank" rel="noopener">Fala.BR ↗</a>']]});
