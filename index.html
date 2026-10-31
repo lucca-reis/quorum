@@ -957,6 +957,16 @@ h1[tabindex="-1"]:focus{outline:none}
 .pw-v .xm-cap{text-align:left}
 .pw-t{font-size:12px;line-height:1.3;color:color-mix(in srgb, var(--ink) 78%, var(--bg));display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @media (max-width:560px){ .pw-c{padding:0 8px} .pw-v .mv svg{width:34px} .pw-t{font-size:11.5px;-webkit-line-clamp:3} .pw-v .xm-sig .sg{width:54px} .c-head .pw-v .xm{flex-direction:column;align-items:flex-start;gap:3px} }
+.pj-pw{display:flex;flex-direction:column;gap:14px;padding-top:22px;border-top:1px solid var(--rule)}
+.pj-pw h3{margin:0}
+.pj-pw .c-pw{margin:0;padding:0;border:0;gap:0}
+.pj-pw .pw-c{padding:4px 22px;gap:10px}
+.pj-pw .pw-c:first-child{padding-left:0}
+.pj-pw .pw-n{font-size:13px}
+.pj-pw .pw-v .mv svg{width:110px}
+.pj-pw .pw-t{font-size:14px;-webkit-line-clamp:4}
+.pj-pw .pw-v .xm-sig .sg{width:110px}
+@media (max-width:700px){ .pj-pw .c-pw{grid-template-columns:minmax(0,1fr)} .pj-pw .pw-c{padding:14px 0;border-left:0;border-top:1px solid var(--rule)} .pj-pw .pw-c:first-child{border-top:0;padding-top:0} }
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -2309,8 +2319,8 @@ function cardHTML(c, key){
       <span class="c-top"><span class="c-pill">${POWER_NAME[S.here]} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</span></span>
       <span class="c-main"><span class="c-text"><span class="c-title">${esc(P.title)}</span>
       ${ok(P.status) ? `<span class="c-phase">${esc(P.status)}</span>` : ''}
-      </span></span>
-      ${powerStrip(c, S)}
+      ${v && !mv && !ex ? `<span class="c-vres">${esc(v.result)}</span>` : ''}</span>
+      ${mv ? `<span class="c-vline">${mv}</span>` : ''}</span>
       <span class="c-more" aria-hidden="true"></span>
     </button>
     <div class="c-body" id="${id}" hidden>
@@ -2360,7 +2370,7 @@ function powerStrip(c, S){
   let jud;
   if (stf){ const mv = P.votes ? miniVote(P) : ''; jud = cell('Judiciário', `${mv ? `<span class="pw-v">${mv}</span>` : ''}${note(P.votes ? P.votes.result : P.status)}`); }
   else jud = cell('Judiciário', note('Não passou pelo Supremo'), true);
-  return `<span class="c-pw" aria-label="Por onde passou">${leg}${exe}${jud}</span>`;
+  return `<div class="c-pw" aria-label="Por onde passou">${leg}${exe}${jud}</div>`;
 }
 // at the Presidência a card shows the act of the president instead of a floor count:
 // his mark when he signed it (sanction, MP, bill sent), a stamp while the text waits for sanction.
@@ -2860,6 +2870,7 @@ function renderProject(slug){
         <section><h3>Links oficiais</h3><ul class="pj-links">${P.links.map(l=>`<li><a href="${l.u}" target="_blank" rel="noopener">${esc(l.l)}</a></li>`).join('')}</ul></section>
       </aside>
     </div>
+    <section class="pj-pw" aria-labelledby="pj-pw-h"><h3 id="pj-pw-h">Nos três poderes</h3>${C ? powerStrip(C, S) : ''}</section>
     </article>
   </div>`;
   return true;
@@ -3248,7 +3259,7 @@ setInterval(()=>{ if (!cons.hidden && consData && Date.now() - Date.parse(consDa
    A card is related to a person when the name appears as author or rapporteur, in the vote, in the steps or in
    the summary; for deputies and senators, data/votos.json (robot) adds how each one voted in roll-call votes. */
 let VOTOS = null;
-setTimeout(()=> trFetch('data/votos.json').then(js=>{ VOTOS = js; window.QV = js; try { renderToday(); if (openKey) renderPanel(openKey); } catch(e){} const box = document.querySelector('#person .p-cards[data-n]'); if (box) box.outerHTML = relatedHTML(box.dataset.n, box.dataset.k, box.dataset.r||''); }).catch(()=>{}), 0);
+setTimeout(()=> trFetch('data/votos.json').then(js=>{ VOTOS = js; window.QV = js; try { const m = location.hash.match(/^#p-([a-z0-9-]+)$/); if (m && !proj.hidden){ const top = proj.scrollTop; renderProject(m[1]); proj.scrollTop = top; } } catch(e){} const box = document.querySelector('#person .p-cards[data-n]'); if (box) box.outerHTML = relatedHTML(box.dataset.n, box.dataset.k, box.dataset.r||''); }).catch(()=>{}), 0);
 const VOTE_TX = {'Sim':'votou Sim','Não':'votou Não','Nao':'votou Não','Abstenção':'absteve-se','Obstrução':'obstruiu','Artigo 17':'não vota (preside)','SIM':'votou Sim','NAO':'votou Não','NÃO':'votou Não','ABST':'absteve-se','P-NRV':'presente, sem voto','AP':'ausente','LS':'de licença','MIS':'em missão'};
 function nameRe(n){
   const w = fold(n).replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(x=> x.length>1 && !['de','da','do','dos','das','e'].includes(x));
