@@ -18,7 +18,7 @@ concurrency:
 jobs:
   transparencia:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -33,7 +33,7 @@ jobs:
       - name: Normas aprovadas no último ano, por partido do autor
         run: python scripts/leis.py
         continue-on-error: true
-        timeout-minutes: 20
+        timeout-minutes: 30
       - name: Portal da Transparência (Presidência e ministérios)
         run: python scripts/portal.py
         continue-on-error: true

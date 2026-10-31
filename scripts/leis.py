@@ -22,7 +22,7 @@ def get(url):
     for n in range(3):
         try:
             time.sleep(0.25)
-            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=40) as r:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=90) as r:
                 return json.loads(r.read().decode('utf-8') or 'null')
         except Exception as ex:
             if n == 2: log.append(f'{url}: {ex}'); return None
@@ -42,14 +42,15 @@ def coletar():
 
     # 2) proposições nessa situação com tramitação no período
     props = {}
-    # a API recusa períodos longos: busca em janelas de até 80 dias
+    # a API demora (e devolve 504) com períodos longos: busca em janelas de 15 dias, um tipo de proposição por vez
     janelas, ini = [], INICIO
     while ini <= HOJE:
-        fim = min(HOJE, ini + datetime.timedelta(days=80)); janelas.append((ini, fim)); ini = fim + datetime.timedelta(days=1)
+        fim = min(HOJE, ini + datetime.timedelta(days=14)); janelas.append((ini, fim)); ini = fim + datetime.timedelta(days=1)
     for cod in cods:
         for ini, fim in janelas:
+          for tipo in ('PL', 'PLP', 'PEC', 'MPV', 'PDL'):
             for pag in range(1, 30):
-                js = get(CAM + 'proposicoes?' + urllib.parse.urlencode({'codSituacao': cod, 'dataInicio': ini.isoformat(), 'dataFim': fim.isoformat(),
+                js = get(CAM + 'proposicoes?' + urllib.parse.urlencode({'codSituacao': cod, 'siglaTipo': tipo, 'dataInicio': ini.isoformat(), 'dataFim': fim.isoformat(),
                                                                         'itens': 100, 'pagina': pag}))
                 dados = (js or {}).get('dados', [])
                 for p in dados: props[p['id']] = p
