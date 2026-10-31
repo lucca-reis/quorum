@@ -461,19 +461,19 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   .landing{--lx-top:28px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto;justify-items:stretch;align-items:start;column-gap:0;
     padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-top))}
   /* --u scales the drawings (a sphere box is 320u wide): two rows of spheres with their text fit the height, two spheres side by side fit the width */
-  .landing .lx{--tx:76px;--gy:18px;--gx:28px;--u:clamp(.2px, min(calc((100vh - var(--menu-h) - var(--lx-top) - 40px - 2 * var(--tx) - var(--gy)) / 640), calc((50vw - 100px - var(--gx)) / 640)) * .72, .62px);
-    --S:calc(320 * var(--u));--s:calc(var(--S) + var(--gx));
+  .landing .lx{--tx:76px;--gy:18px;--gx:28px;--u:clamp(.2px, min(calc((100vh - var(--menu-h) - var(--lx-top) - 40px - 2 * var(--tx) - var(--gy)) / 640), calc((50vw - 210px) / 690)) * .72, .62px);
+    --S:calc(320 * var(--u));--s:calc((var(--S) + var(--tx) + var(--gy)) / .866);
     --lx-mt:max(0px, calc((100vh - var(--menu-h) - var(--lx-top) - 24px - (2 * var(--S) + 2 * var(--tx) + var(--gy))) / 2));
     position:sticky;top:var(--lx-mt);display:block;max-width:none;margin:var(--lx-mt) clamp(24px,4vw,64px) 0 0;
     height:calc(2 * var(--S) + 2 * var(--tx) + var(--gy))}
-  /* the circles stay put until the "Ver mais" line (end of the wrapper's row) reaches them, then rise with the timeline */
-  .landing > .lx-wrap{display:block;grid-column:1;grid-row:1;align-self:stretch}
+  /* the circles stay put until the bottom of the timeline's last card reaches them, then rise with the page (--lx-end trims the "Ver mais" line off the wrapper) */
+  .landing > .lx-wrap{display:block;grid-column:1;grid-row:1;align-self:stretch;margin-bottom:var(--lx-end, 0px)}
   .landing > .today{grid-column:2;grid-row:1;max-width:none}
   .landing > .site-foot{grid-column:1 / -1;grid-row:2;max-width:none}
-  .landing .lx-row{position:absolute;flex-direction:column;align-items:center;gap:8px;width:calc(var(--S) + var(--gx) - 12px);transform:translateX(-50%)}
+  .landing .lx-row{position:absolute;flex-direction:column;align-items:center;gap:8px;width:calc(var(--S) + 60px);transform:translateX(-50%)}
   .landing .lx-row[data-k="cong"]{left:50%;top:0}
-  .landing .lx-row[data-k="pres"]{left:calc(50% - var(--s) / 2);top:calc(var(--S) + var(--tx) + var(--gy))}
-  .landing .lx-row[data-k="stf"]{left:calc(50% + var(--s) / 2);top:calc(var(--S) + var(--tx) + var(--gy))}
+  .landing .lx-row[data-k="pres"]{left:calc(50% - var(--s) / 2);top:calc(.866 * var(--s))}
+  .landing .lx-row[data-k="stf"]{left:calc(50% + var(--s) / 2);top:calc(.866 * var(--s))}
   .landing .lx-text > *{flex-shrink:0}
   .landing .lx-bar{width:min(170px,88%)}
   .landing .lx-text{max-width:100%}
@@ -2603,6 +2603,13 @@ function renderToday(){
   todayEl.classList.toggle('more', feedMore);
   if (extra > 0) todayEl.insertAdjacentHTML('beforeend', `<p class="fd-morewrap"><button type="button" class="fd-more" aria-expanded="${feedMore}">${feedMore ? 'Ver menos' : `Ver mais · ${extra} ${extra===1?'projeto':'projetos'}`}</button></p>`);
 }
+// the circles on the left rise with the page from the bottom of the last card shown
+function lxEnd(){
+  const cards = [...todayEl.querySelectorAll('.feed .card')].filter(c=> c.offsetParent);
+  const last = cards[cards.length-1]; if (!last) return;
+  const gap = todayEl.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom;
+  landing.style.setProperty('--lx-end', Math.max(0, Math.round(gap)) + 'px');
+}
 const FEED_FIRST = 5;
 let feedMore = false;
 // footer with useful links, placed at the end of the opening view and of every page; pages that redraw themselves get it back
@@ -2637,12 +2644,14 @@ function addFoot(el){ if (el && !(el.lastElementChild && el.lastElementChild.cla
 });
 function placeToday(){ /* the feed sits in the landing grid, beside the drawing */ }
 renderToday(); refreshLive();
+requestAnimationFrame(lxEnd); addEventListener('resize', ()=> requestAnimationFrame(lxEnd)); setTimeout(lxEnd, 1500);
 todayEl.addEventListener('click', e=>{
   const more = e.target.closest('.fd-more');
   if (more){ e.stopPropagation(); feedMore = !feedMore;
     todayEl.classList.toggle('more', feedMore); more.setAttribute('aria-expanded', String(feedMore));
     const n = todayEl.querySelectorAll('.fd-cards > li.fd-x').length;
     more.textContent = feedMore ? 'Ver menos' : `Ver mais · ${n} ${n===1?'projeto':'projetos'}`;
+    lxEnd(); setTimeout(lxEnd, 700);
     if (!feedMore) more.scrollIntoView({block:'center', behavior: reduce ? 'auto' : 'smooth'});
     return; }
   const b = e.target.closest('.lv-tag[data-go]');
