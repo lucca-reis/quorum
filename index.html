@@ -436,8 +436,9 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
   padding:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 8px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 24px) max(16px, env(safe-area-inset-left, 0px));
   transition:background-color .45s}
 .landing[hidden]{display:none!important}
-.landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;place-items:start center;align-content:start;row-gap:clamp(32px,5vw,56px);overflow:auto;
-  padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + clamp(20px,4vh,40px))}
+.landing{--lx-gap:clamp(32px,5vw,56px);grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;place-items:start center;align-content:start;row-gap:var(--lx-gap);overflow:auto;
+  /* menu → spheres is the same distance as subtitles → first card (gap + the day label above the card, minus the sphere's inset in its drawing) */
+  padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-gap) + 23px)}
 /* the three powers as spheres above the timeline: Legislativo, Executivo, Judiciário */
 .landing > .lx{--u:.5px}
 .lx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(12px,4vw,56px);width:100%;max-width:980px;margin:0 auto;font-family:var(--display)}
@@ -597,7 +598,7 @@ body.morphing #frame,body.morphing #stf-frame,body.morphing #pres-frame{visibili
 .tl.feed{padding-right:8px}
 @media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 16px 16px;border-radius:18px} }
 @media (max-width:700px){
-  .landing{row-gap:28px;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 20px)}
+  .landing{--lx-gap:28px;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-gap) + 24px)}
   .landing > .lx{--u:.3px}
   .lx-row{gap:10px}
   .lx-n{font-size:20px}
