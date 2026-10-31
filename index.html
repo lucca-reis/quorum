@@ -463,7 +463,8 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .lg:hover,.lg:focus-visible{transform:scale(1.03)}
 .lg:focus-visible > .sph{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:5 4}
 /* the sphere that grows into a section (and shrinks back into its place on the way home) */
-.sph-fx{position:fixed;z-index:26;border-radius:50%;background:color-mix(in srgb, var(--ink) 6%, var(--bg));pointer-events:none;will-change:transform,opacity}
+body.morphing #frame,body.morphing #stf-frame,body.morphing #pres-frame{visibility:hidden}
+.sph-fx{position:fixed;z-index:26;background:color-mix(in srgb, var(--ink) 6%, var(--bg));pointer-events:none;will-change:transform,opacity}
 .lg.soon{cursor:default}
 /* faint preview of each section inside its shape on the opening view */
 .lg .pv{pointer-events:none}
@@ -777,6 +778,10 @@ a.ag-card:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .c-body .c-vres{font-size:13.5px;font-weight:400}
 .c-who{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .c-full{padding:0;background:none;font-size:13px;color:var(--muted);margin-top:2px}
+/* opening view: cards always open; the whole card leads to the project page */
+.card.go{cursor:pointer}
+.card.go .c-more{display:none}
+.card.go .c-head{cursor:pointer}
 .c-full:hover{color:var(--ink)}
 @media (max-width:560px){ .c-head{min-height:108px;padding:16px 14px} .c-body{padding:0 14px 16px} }
 /* power symbols (family A: dots), used only in the calendar */
@@ -2474,13 +2479,25 @@ function renderToday(){
   document.getElementById('today-date').textContent = `${wd}, ${d} ${MO[m-1]}`;
   todayEl.innerHTML = `<div class="feed-h"><div class="feed-live" id="feed-live"></div></div>
     <ol class="feed" aria-label="Propostas e julgamentos, do mais recente ao mais antigo">${feedHTML(null)}</ol>`;
+  // on the opening view every card shows in full and leads to its page
+  todayEl.querySelectorAll('.card').forEach(card=>{
+    const h = card.querySelector('.c-head'), full = card.querySelector('.c-full');
+    card.classList.add('open', 'go'); card.querySelector('.c-body').hidden = false;
+    h.removeAttribute('aria-expanded'); h.removeAttribute('aria-controls');
+    if (full) h.setAttribute('aria-label', card.querySelector('.c-title').textContent + ': abrir a página');
+  });
 }
 function placeToday(){ /* the feed sits in the landing grid, beside the drawing */ }
 renderToday(); refreshLive();
 todayEl.addEventListener('click', e=>{
   const b = e.target.closest('.lv-tag[data-go]');
   if (b){ e.stopPropagation(); const k = b.dataset.go; if (k==='camara'||k==='senado') enterPlan(()=>open(k, true)); else enterView(VIEWS[k==='exec'?'pres':'stf']); return; }
-  cardClick(e);
+  const card = e.target.closest('.card.go');
+  if (card && !e.target.closest('a:not(.c-full)')){
+    e.preventDefault(); e.stopPropagation();
+    const full = card.querySelector('.c-full'); if (!full) return;
+    projFrom = true; location.hash = full.getAttribute('href');
+  }
 });
 
 /* ---------- opening view ---------- */
@@ -2492,24 +2509,25 @@ function planTransformToMini(){
   const P = planSvg.getBoundingClientRect(), F = frameEl.getBoundingClientRect(), k = mini.width / F.width;
   return `translate(${mini.left - P.left - (F.left-P.left)*k}px, ${mini.top - P.top - (F.top-P.top)*k}px) scale(${k})`;
 }
-// a sphere on the opening view grows over the screen and dissolves into its section; on the way back it shrinks into its place
-function sphereFx(lg, back){
-  const c = lg && lg.querySelector('.sph'); if (reduce || !c) return;
-  const r = c.getBoundingClientRect(); if (!r.width) return;
-  const R = r.width/2, cx = r.left+R, cy = r.top+R, k = Math.hypot(Math.max(cx, innerWidth-cx), Math.max(cy, innerHeight-cy)) / R + .05;
-  const fx = document.createElement('div'); fx.className = 'sph-fx';
-  fx.style.cssText = `left:${cx-R}px;top:${cy-R}px;width:${2*R}px;height:${2*R}px`;
-  document.body.appendChild(fx);
-  const ease = 'cubic-bezier(.65,0,.35,1)';
-  const a = back
-    ? fx.animate([{transform:`scale(${k})`, opacity:0}, {transform:`scale(${k})`, opacity:.55, offset:.25}, {transform:'scale(1)', opacity:1, offset:.88}, {transform:'scale(1)', opacity:0}], {duration:1000, easing:ease, fill:'forwards'})
-    : fx.animate([{transform:'scale(1)', opacity:1}, {transform:`scale(${k*.5})`, opacity:.7, offset:.35}, {transform:`scale(${k})`, opacity:.25, offset:.65}, {transform:`scale(${k})`, opacity:0}], {duration:1000, easing:ease, fill:'forwards'});
-  a.onfinish = ()=> fx.remove();
+// a sphere on the opening view travels to its section's frame and turns into that rectangle on the way (and back again on the way home)
+function morphFx(lg, frame, back){
+  const c = lg && lg.querySelector('.sph'); if (reduce || !c || !frame) return;
+  const A = c.getBoundingClientRect(), B = frame.getBoundingClientRect(); if (!A.width || !B.width) return;
+  const rB = (+frame.getAttribute('rx') || 0) * B.width / +frame.getAttribute('width');
+  const at = (R, rad, o)=> ({left:R.left+'px', top:R.top+'px', width:R.width+'px', height:R.height+'px', borderRadius:rad+'px', opacity:o});
+  const circ = at(A, A.width/2, 1), rect = at(B, rB, 1), ease = 'cubic-bezier(.65,0,.35,1)';
+  const fx = document.createElement('div'); fx.className = 'sph-fx'; document.body.appendChild(fx);
+  const kf = back ? [{...rect, easing:ease}, {...circ, offset:.82}, {...circ, opacity:0}]
+                  : [{...circ, easing:ease}, {...rect, offset:.82}, {...rect, opacity:0}];
+  // the section's own frame hides while the sphere stands in for it
+  document.body.classList.add('morphing'); clearTimeout(morphFx.t);
+  morphFx.t = setTimeout(()=> document.body.classList.remove('morphing'), 900);
+  fx.animate(kf, {duration:1100, fill:'forwards'}).onfinish = ()=> fx.remove();
 }
 function enterPlan(after){
   if (landing.hidden || zoomBusy) { after && after(); return; }
-  zoomBusy = true; sphereFx(mini);
-  planSvg.style.transition = 'none'; planSvg.style.transformOrigin = '0 0';
+  zoomBusy = true;
+  planSvg.style.transition = 'none'; planSvg.style.transform = 'none'; morphFx(mini, frameEl); planSvg.style.transformOrigin = '0 0';
   planSvg.style.transform = planTransformToMini();
   stage.classList.add('zooming');
   planSvg.getBoundingClientRect();
@@ -2525,10 +2543,10 @@ function exitPlan(){
   zoomBusy = true;
   landing.classList.add('instant','leaving'); landing.hidden = false;
   landing.getBoundingClientRect();
-  landing.classList.remove('instant'); sphereFx(mini, true);
+  landing.classList.remove('instant');
   planSvg.style.transformOrigin = '0 0';
   const target = planTransformToMini();
-  planSvg.style.transform = 'none'; planSvg.getBoundingClientRect();
+  planSvg.style.transform = 'none'; planSvg.getBoundingClientRect(); morphFx(mini, frameEl, true);
   planSvg.style.transition = reduce ? 'none' : 'transform .85s cubic-bezier(.65,0,.35,1)';
   stage.classList.add('zooming');
   requestAnimationFrame(()=>{ planSvg.style.transform = target; });
@@ -2631,12 +2649,12 @@ function enterView(V){
   V.render();
   V.el.hidden = false; V.el.classList.remove('show'); V.el.classList.add('zooming');
   V.el.scrollTop = 0;
-  V.svg.style.transform = 'none'; V.size();
+  V.svg.style.transform = 'none'; V.size(); morphFx(V.lg, V.frame);
   V.svg.style.transition = 'none'; V.svg.style.transformOrigin = '0 0';
   V.svg.style.transform = svgToRect(V.svg, V.frame, document.getElementById(V.mini));
   V.svg.getBoundingClientRect();
   if (landing.hidden){ landing.hidden = false; }
-  V.lg.classList.add('zoomsrc'); sphereFx(V.lg);
+  V.lg.classList.add('zoomsrc');
   landing.classList.add('instant'); landing.style.backgroundColor = 'transparent'; landing.getBoundingClientRect();
   landing.classList.remove('instant'); landing.classList.add('leaving');
   requestAnimationFrame(()=>{ V.svg.style.willChange = 'transform'; V.svg.style.transition = reduce ? 'none' : 'transform .9s cubic-bezier(.65,0,.35,1)'; V.svg.style.transform = 'none'; });
@@ -2654,10 +2672,9 @@ function exitView(V){
   V.el.scrollTop = 0;
   landing.classList.add('instant','leaving'); V.lg.classList.add('zoomsrc'); landing.hidden = false;
   landing.getBoundingClientRect(); landing.classList.remove('instant');
-  V.lg.classList.remove('zoomsrc'); sphereFx(V.lg, true); V.lg.classList.add('zoomsrc');
   V.svg.style.transformOrigin = '0 0';
   const target = svgToRect(V.svg, V.frame, document.getElementById(V.mini));
-  V.svg.style.transform = 'none'; V.svg.getBoundingClientRect();
+  V.svg.style.transform = 'none'; V.svg.getBoundingClientRect(); morphFx(V.lg, V.frame, true);
   V.svg.style.transition = reduce ? 'none' : 'transform .85s cubic-bezier(.65,0,.35,1)';
   V.el.classList.add('zooming');
   requestAnimationFrame(()=>{ V.svg.style.transform = target; });
