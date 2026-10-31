@@ -84,7 +84,8 @@ def entrada(pid, **campos):
         if v in (None, '', []): continue
         if k == 'nomes':
             for n in v:
-                if n and n not in e['nomes']: e['nomes'].append(n)
+                # o TSE marca campo vazio como #NULO# ou #NE#; nomes assim juntariam pessoas diferentes
+                if n and not str(n).startswith('#') and len(slug(n)) > 3 and n not in e['nomes']: e['nomes'].append(n)
         elif k in ('emails', 'tels'):
             for x in v:
                 x = str(x).strip()
