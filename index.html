@@ -455,6 +455,15 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .lx-s.on{color:#E0242B}
 .lx-s .lv-dot{width:7px;height:7px}
 .lx-text:hover .lx-l{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+/* the square follows the timeline: the power of the card in focus lights up, the other two step back */
+.lx-k{display:none}
+.lx-shape,.lx-text{transition:opacity .45s ease}
+.lx.track .lx-row:not(.on) > *{opacity:.32}
+.lx.track .lx-row:not(.on) > *:hover,.lx.track .lx-row:not(.on) > *:focus-within{opacity:.8}
+.lx-row.on .lg > rect{fill:color-mix(in srgb, var(--ink) 9%, var(--bg))}
+.lx-row.on .lg .pv .dots:not(.vacant){fill:var(--c,var(--ink));opacity:1}
+.lx-row.on .lg .pv .u{stroke:var(--ink)}
+@media (prefers-reduced-motion:reduce){ .lx-shape,.lx-text{transition:none} }
 .lg{cursor:pointer;outline:none;transform-box:fill-box;transform-origin:center;transition:transform .35s cubic-bezier(.3,.7,.3,1), opacity .4s}
 .lg > rect{fill:color-mix(in srgb, var(--ink) 6%, var(--bg));stroke:none;transition:fill .2s}
 .lg > circle{fill:var(--bg);stroke:none}
@@ -606,9 +615,15 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 @media (max-width:560px){ .c-meta{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .card{padding:14px 16px 16px;border-radius:18px} }
 @media (max-width:700px){
   .landing{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;align-content:start;justify-items:center;gap:32px;overflow:auto;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + 24px)}
-  .landing > .lx{--u:.42px}
-  .lx{grid-template-columns:calc(330 * var(--u)) minmax(0,1fr);width:100%;row-gap:22px}
-  .lx-shape{padding:0}
+  /* phones: the square becomes a small strip that stays at the top while the timeline scrolls */
+  .landing > .lx{--u:.2px;position:sticky;top:-1px;z-index:2;place-self:stretch}
+  .lx{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto;grid-auto-flow:column;width:auto;row-gap:6px;column-gap:8px;
+    margin:0 -16px;padding:10px 16px 12px;background:var(--bg);border-bottom:1px solid var(--rule);box-shadow:0 -60px 0 var(--bg);transition:background-color .35s, box-shadow .35s}
+  .lx-shape{padding:0;height:46px}
+  .lx-text{align-self:start;align-items:center;text-align:center;flex-direction:row;justify-content:center;gap:5px;max-width:none}
+  .lx-n{font-size:18px}
+  .lx-k{display:inline;font-size:12.5px}
+  .lx-l,.lx-b,.lx-s{display:none}
   .today{max-width:640px;height:auto;padding-bottom:56px}
   .today > .feed{overflow:visible;padding-right:0;flex:none}
 }
@@ -1043,15 +1058,15 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
   <div class="lx" aria-label="Os três poderes">
     <div class="lx-row" data-k="stf">
       <div class="lx-shape"><svg viewBox="1251 315 320 235.2" style="--vw:320" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Supremo Tribunal Federal"><rect id="stf-mini" x="1257" y="321" width="308" height="223.2" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
-      <button type="button" class="lx-text" data-open="stf"><span class="lx-n" id="lx-n-stf"></span><span class="lx-l" id="lx-l-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
+      <button type="button" class="lx-text" data-open="stf"><span class="lx-n" id="lx-n-stf"></span><span class="lx-k">Supremo</span><span class="lx-l" id="lx-l-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
     </div>
     <div class="lx-row" data-k="pres">
       <div class="lx-shape"><svg viewBox="598 247 320 154.4" style="--vw:320" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir a Presidência da República"><rect id="pres-mini" x="604" y="253" width="308" height="142.4" rx="20" vector-effect="non-scaling-stroke"/></g></svg></div>
-      <button type="button" class="lx-text" data-open="pres"><span class="lx-n" id="lx-n-pres"></span><span class="lx-l" id="lx-l-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
+      <button type="button" class="lx-text" data-open="pres"><span class="lx-n" id="lx-n-pres"></span><span class="lx-k">Presidência</span><span class="lx-l" id="lx-l-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
     </div>
     <div class="lx-row" data-k="cong">
       <div class="lx-shape"><svg viewBox="837 868 320 150" style="--vw:320" role="img" aria-label="Congresso Nacional"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Congresso Nacional"><rect x="843" y="873.9" width="308" height="138.2" id="mini-frame" rx="20" vector-effect="non-scaling-stroke"/><circle cx="921.6" cy="942.8" r="32.2" vector-effect="non-scaling-stroke"/><circle cx="1063.9" cy="942.8" r="42.6" vector-effect="non-scaling-stroke"/></g></svg></div>
-      <button type="button" class="lx-text" data-open="cong"><span class="lx-n" id="lx-n-cong"></span><span class="lx-l" id="lx-l-cong"></span><span class="lx-b" id="lx-b-cong"></span><span class="lx-s" id="lx-s-cong"></span></button>
+      <button type="button" class="lx-text" data-open="cong"><span class="lx-n" id="lx-n-cong"></span><span class="lx-k">Congresso</span><span class="lx-l" id="lx-l-cong"></span><span class="lx-b" id="lx-b-cong"></span><span class="lx-s" id="lx-s-cong"></span></button>
     </div>
   </div>
   <div class="today" id="today" aria-live="polite"></div>
@@ -1836,6 +1851,37 @@ function renderIndex(){
       : last ? `última atividade: ${cardDate(last.date)}` : '';
   }
 }
+// which power the timeline is showing: the card nearest the middle of the visible feed
+const LX_ROWS = [...document.querySelectorAll('.lx-row')];
+let lxOn = '', lxRaf = 0;
+function lxMark(k){
+  if (k===lxOn) return; lxOn = k;
+  document.querySelector('.lx')?.classList.toggle('track', !!k);
+  LX_ROWS.forEach(r=> r.classList.toggle('on', r.dataset.k===k));
+}
+function lxTrack(){
+  lxRaf = 0;
+  const box = document.getElementById('today'); if (!box || landing.hidden) return;
+  const strip = document.querySelector('.lx').getBoundingClientRect();
+  const phone = getComputedStyle(document.querySelector('.lx')).position==='sticky';
+  const top = phone ? strip.bottom : Math.max(box.getBoundingClientRect().top, 0);
+  const bot = phone ? landing.getBoundingClientRect().bottom : Math.min(box.getBoundingClientRect().bottom, innerHeight);
+  const mid = (top + bot) / 2;
+  let best = null, dist = Infinity;
+  box.querySelectorAll('.fd:not([hidden]) .card[data-pw]').forEach(c=>{
+    const r = c.getBoundingClientRect(); if (r.bottom < top || r.top > bot) return;
+    const d = r.top <= mid && r.bottom >= mid ? 0 : Math.min(Math.abs(r.top-mid), Math.abs(r.bottom-mid));
+    if (d < dist){ dist = d; best = c; }
+  });
+  lxMark(best ? best.dataset.pw : '');
+}
+const lxSoon = ()=>{ if (!lxRaf) lxRaf = requestAnimationFrame(lxTrack); };
+document.addEventListener('scroll', lxSoon, {capture:true, passive:true});
+addEventListener('resize', lxSoon);
+document.getElementById('today')?.addEventListener('pointerover', e=>{ const c = e.target.closest('.card[data-pw]'); if (c && matchMedia('(hover:hover)').matches) lxMark(c.dataset.pw); });
+document.getElementById('today')?.addEventListener('pointerleave', lxSoon);
+document.getElementById('today')?.addEventListener('click', ()=> setTimeout(lxSoon, 700));
+setTimeout(lxSoon, 600);
 document.querySelector('.lx')?.addEventListener('click', e=>{
   const b = e.target.closest('[data-open]'); if (!b) return;
   e.stopPropagation();
@@ -2359,7 +2405,7 @@ function cardHTML(c, key){
   ].filter(Boolean);
   const v = P.votes, ex = S.here==='exec', mv = ex ? execMark(P) : miniVote(P), who = ex ? '' : whoVoted(v);
   const id = 'cx-'+c.slug+(key?'-'+key:'');
-  return `<li><article class="card${live?' is-live':''}">
+  return `<li><article class="card${live?' is-live':''}" data-pw="${S.here==='exec'?'pres':S.here==='stf'?'stf':S.here?'cong':''}">
     <button type="button" class="c-head" aria-expanded="false" aria-controls="${id}">
       <span class="c-top"><span class="c-pill">${POWER_NAME[S.here]} · ${stageOf(P)}${live ? ' · ao vivo' : ''}</span></span>
       <span class="c-main"><span class="c-text"><span class="c-title">${esc(P.title)}</span>
