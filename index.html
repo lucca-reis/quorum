@@ -449,6 +449,20 @@ a.ev:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .landing.leaving .lx-text{opacity:0}
 .landing.instant .lx-text{transition:none}
 .lx-text:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+.lx-name{display:inline-flex;align-items:center;gap:7px;font-size:16px;font-weight:500;letter-spacing:-.01em;line-height:1.2}
+.lx-name::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--pc)}
+.lx-text{--pc:var(--ink)}
+.lx-text:has(.pw-leg){--pc:#F2C200}.lx-text:has(.pw-exec){--pc:#009C3B}.lx-text:has(.pw-jud){--pc:#1F4FB5}
+/* the phase bar: one segment per phase, from proposed (lightest) to in force (full colour); suspended is grey */
+.lx-bar{display:flex;gap:2px;width:min(170px,100%);height:5px;margin:7px 0 4px;border-radius:3px;overflow:hidden}
+.lx-bar i,.lx-ph i{display:block;background:var(--pc)}
+.lx-bar i{height:100%;min-width:4px}
+i.ph-0{opacity:.32}i.ph-1{opacity:.65}i.ph-2{background:color-mix(in srgb, var(--ink) 30%, var(--bg))!important}i.ph-3{opacity:1}
+.lx-ph{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 10px;font-size:12.5px;line-height:1.35;color:var(--muted)}
+.lx-ph span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.lx-ph i{width:7px;height:7px;border-radius:50%}
+.lx-s:empty{display:none}
+.lx-text:hover .lx-name{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .lx-n{font-size:clamp(24px,2vw,30px);font-weight:500;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
 .lx-l{font-size:14px;line-height:1.35}
 .lx-b{font-size:13px;line-height:1.35}
@@ -601,9 +615,10 @@ body.morphing #frame,body.morphing #stf-frame,body.morphing #pres-frame{visibili
   .landing{--lx-gap:28px;padding-top:calc(env(safe-area-inset-top, 0px) + var(--menu-h) + var(--lx-gap) + 24px)}
   .landing > .lx{--u:.3px}
   .lx-row{gap:10px}
-  .lx-n{font-size:20px}
-  .lx-l{font-size:12.5px}
-  .lx-b,.lx-s{display:none}
+  .lx-name{font-size:14px;gap:5px}
+  .lx-name::before{width:7px;height:7px}
+  .lx-ph{flex-direction:column;align-items:center;font-size:11.5px;gap:1px}
+  .lx-s{font-size:11.5px}
 }
 
 /* calendar v2 */
@@ -1044,15 +1059,15 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
   <div class="lx" aria-label="Os três poderes">
     <div class="lx-row" data-k="cong">
       <div class="lx-shape"><svg viewBox="837 868 320 320" style="--vw:320" role="img" aria-label="Congresso Nacional"><g class="lg mini" id="mini" tabindex="0" role="button" aria-label="Abrir o Legislativo: Senado e Câmara"><circle class="sph" cx="997" cy="1028" r="154"/><rect x="857" y="965.2" width="280" height="125.65" id="mini-frame" rx="8" vector-effect="non-scaling-stroke"/><circle cx="928.4" cy="1027.6" r="29.3" vector-effect="non-scaling-stroke"/><circle cx="1057.8" cy="1027.6" r="38.7" vector-effect="non-scaling-stroke"/></g></svg></div>
-      <button type="button" class="lx-text" data-open="cong"><span class="lx-n" id="lx-n-cong"></span><span class="lx-l" id="lx-l-cong"></span><span class="lx-b" id="lx-b-cong"></span><span class="lx-s" id="lx-s-cong"></span></button>
+      <button type="button" class="lx-text" data-open="cong"><span class="lx-name pw-leg">Legislativo</span><span class="lx-bar" id="lx-bar-cong" aria-hidden="true"></span><span class="lx-ph" id="lx-ph-cong"></span><span class="lx-s" id="lx-s-cong"></span></button>
     </div>
     <div class="lx-row" data-k="pres">
       <div class="lx-shape"><svg viewBox="598 247 320 320" style="--vw:320" role="img" aria-label="Presidência da República"><g class="lg" id="lg-pres" tabindex="0" role="button" aria-label="Abrir o Executivo: Presidência da República"><circle class="sph" cx="758" cy="407" r="154"/><rect id="pres-mini" x="613" y="340" width="290" height="134" rx="8" vector-effect="non-scaling-stroke"/></g></svg></div>
-      <button type="button" class="lx-text" data-open="pres"><span class="lx-n" id="lx-n-pres"></span><span class="lx-l" id="lx-l-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
+      <button type="button" class="lx-text" data-open="pres"><span class="lx-name pw-exec">Executivo</span><span class="lx-bar" id="lx-bar-pres" aria-hidden="true"></span><span class="lx-ph" id="lx-ph-pres"></span><span class="lx-s" id="lx-s-pres"></span></button>
     </div>
     <div class="lx-row" data-k="stf">
       <div class="lx-shape"><svg viewBox="1251 315 320 320" style="--vw:320" role="img" aria-label="Supremo Tribunal Federal"><g class="lg" id="lg-stf" tabindex="0" role="button" aria-label="Abrir o Judiciário: Supremo Tribunal Federal"><circle class="sph" cx="1411" cy="475" r="154"/><rect id="stf-mini" x="1261" y="366.3" width="300" height="217.4" rx="8" vector-effect="non-scaling-stroke"/></g></svg></div>
-      <button type="button" class="lx-text" data-open="stf"><span class="lx-n" id="lx-n-stf"></span><span class="lx-l" id="lx-l-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
+      <button type="button" class="lx-text" data-open="stf"><span class="lx-name pw-jud">Judiciário</span><span class="lx-bar" id="lx-bar-stf" aria-hidden="true"></span><span class="lx-ph" id="lx-ph-stf"></span><span class="lx-s" id="lx-s-stf"></span></button>
     </div>
   </div>
   </div>
@@ -1809,33 +1824,20 @@ const LX = {stf:{keys:['stf'], none:'nenhum processo em curso', one:'processo em
             cong:{keys:['camara','senado'], none:'nenhum projeto em curso', one:'projeto em curso no Congresso', many:'projetos em curso no Congresso'}};
 const DONE_RE = /julgad[ao] em|sancionad|promulgad|vetad|arquivad|rejeitad|decidid|conclu[ií]d|transitad|virou lei|perdeu a validade/i;
 function renderIndex(){
-  if (typeof CARDS==='undefined' || !document.getElementById('lx-n-stf')) return;
+  if (typeof CARDS==='undefined' || !document.getElementById('lx-bar-stf')) return;
   const t = todayISO();
+  // under each sphere: the power's name in its colour, a thin bar with how many items are in each phase, and the phases in words
+  const PH = [['proposto','proposto','propostos'], ['em andamento','em andamento','em andamento'], ['suspenso','suspenso','suspensos'], ['em vigor','em vigor','em vigor']];
   for (const k in LX){
     const X = LX[k];
-    const here = CARDS.map(c=>({c, S:cardState(c,null)})).filter(x=> X.keys.includes(x.S.here) && !DONE_RE.test(x.c.P.status||''));
-    const n = here.length;
-    document.getElementById('lx-n-'+k).textContent = n;
-    let lab = n===0 ? X.none : n===1 ? X.one : X.many;
-    document.getElementById('lx-l-'+k).textContent = lab;
-    const sp = document.getElementById('lx-b-'+k);
-    if (sp){ const c = here.filter(x=>x.S.here==='camara').length; sp.textContent = n ? `${c} na Câmara · ${n-c} no Senado` : ''; }
+    const all = CARDS.map(c=>({c, S:cardState(c,null)})).filter(x=> X.keys.includes(x.S.here));
+    const cnt = PH.map(([ph])=> all.filter(x=> stageOf(x.c.P)===ph).length);
+    document.getElementById('lx-bar-'+k).innerHTML = cnt.map((n,i)=> n ? `<i class="ph-${i}" style="flex:${n}"></i>` : '').join('');
+    document.getElementById('lx-ph-'+k).innerHTML = cnt.map((n,i)=> n ? `<span><i class="ph-${i}"></i>${n} ${PH[i][n===1?1:2]}</span>` : '').join('') || '<span>nada em curso</span>';
     const st = document.getElementById('lx-s-'+k);
     const liveK = X.keys.find(x=> liveState(x)?.s==='live');
-    if (liveK){
-      st.className = 'lx-s on';
-      st.innerHTML = `<span class="lv-dot" aria-hidden="true"></span>ao vivo agora${k==='cong' ? ' · '+POWER_NAME[liveK] : ''}`;
-      continue;
-    }
-    st.className = 'lx-s';
-    const days = X.keys.flatMap(x=> AGENDA[x].days.map(d=>({...d, key:x})));
-    const soon = X.keys.map(x=> liveState(x)).find(v=> v && v.s==='soon');
-    const next = days.filter(d=> d.date>t).sort((a,b)=> a.date.localeCompare(b.date))[0];
-    const last = days.filter(d=> d.date<=t && !d.label).sort((a,b)=> b.date.localeCompare(a.date))[0];
-    const word = k==='pres' ? 'próximo compromisso' : 'próxima sessão';
-    st.textContent = soon ? `hoje às ${Math.floor(soon.st/60)}h${soon.st%60?String(soon.st%60).padStart(2,'0'):''}`
-      : next ? `${word}: ${next.label ? 'semana de '+cardDate(next.date) : cardDate(next.date, next.time)}`
-      : last ? `última atividade: ${cardDate(last.date)}` : '';
+    st.className = liveK ? 'lx-s on' : 'lx-s';
+    st.innerHTML = liveK ? `<span class="lv-dot" aria-hidden="true"></span>ao vivo agora${k==='cong' ? ' · '+POWER_NAME[liveK] : ''}` : '';
   }
 }
 document.querySelector('.lx')?.addEventListener('click', e=>{
