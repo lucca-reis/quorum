@@ -270,13 +270,13 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
   display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;column-gap:clamp(24px,4vw,64px);background:var(--bg);font-family:var(--display);font-weight:400;font-size:14px;transition:background-color .35s}
 .menu a{color:var(--ink);text-decoration:none;white-space:nowrap}
 .brand-wrap{justify-self:start;display:flex;align-items:baseline;gap:10px;min-width:0}
-.menu .brand{font-size:18px;font-weight:400;letter-spacing:-.01em}
+.menu .brand{font-size:22px;font-weight:400;letter-spacing:-.015em}
 /* the o of Quorum is a solid dot, the size of a lowercase letter */
 .brand-o{display:inline-block;width:.54em;height:.54em;margin:0 .045em;border-radius:50%;background:#009C3B;animation:brand-o 9s infinite;vertical-align:baseline}
 /* green, yellow and blue, three seconds each */
 @keyframes brand-o{0%,30%{background:#009C3B}33.3%,63.3%{background:#F2C200}66.6%,96.6%{background:#1F4FB5}100%{background:#009C3B}}
 .today-date{font-size:14px;color:var(--muted);white-space:nowrap}
-.menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:150px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;max-width:100%}
+.menu nav{grid-column:2;grid-row:1;justify-self:stretch;margin-right:100px;display:flex;gap:2px;padding:3px;border-radius:999px;background:transparent;max-width:100%}
 .nav-grp{flex:1 1 0;position:relative;display:flex}
 .nav-leg{all:unset;box-sizing:border-box;flex:1;cursor:pointer;text-align:center;padding:7px 10px;border-radius:999px;color:color-mix(in srgb, var(--ink) 72%, var(--bg));display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;transition:background-color .2s, color .2s}
 .nav-leg:hover,.nav-grp:hover .nav-leg,.nav-grp.open .nav-leg{color:var(--ink);background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
@@ -301,6 +301,11 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .menu .vg-link:hover{color:var(--ink);background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
 .menu .vg-link[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));color:var(--ink)}
 .menu .cal-link{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;transition:background-color .2s}
+/* Visão geral is an icon too: a die, beside the calendar */
+.menu .menu-tools .vg-link{display:grid;place-items:center;width:38px;height:38px;padding:0;border-radius:50%;color:var(--ink)}
+.menu .menu-tools .vg-link:hover{background:color-mix(in srgb, var(--ink) 6%, var(--bg))}
+.menu .menu-tools .vg-link[aria-current="page"]{background:var(--ink);color:var(--bg)}
+@media (max-width:760px){ .menu .menu-tools .vg-link{width:44px;height:44px} }
 .menu .cal-link:hover{background:color-mix(in srgb, var(--ink) 6%, var(--bg))}
 .menu .cal-link[aria-current="page"]{background:var(--ink);color:var(--bg)}
 .menu a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
@@ -308,7 +313,7 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
 .menu .brand:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
 @media (max-width:1180px){ .menu nav .long{display:none} .menu nav > a,.nav-leg{padding:7px 6px} }
 @media (min-width:761px) and (max-width:1100px){ .menu{grid-template-columns:auto minmax(0,1fr)} .menu nav{margin-left:auto;max-width:460px} }
-@media (max-width:1000px){ .menu nav > a,.nav-leg{padding:7px 4px;font-size:13px} .menu nav{margin-right:138px} .menu .vg-link{padding:7px 8px;font-size:13px} }
+@media (max-width:1000px){ .menu nav > a,.nav-leg{padding:7px 4px;font-size:13px} .menu nav{margin-right:96px} .menu .vg-link{padding:7px 8px;font-size:13px} }
 /* phones: a short header on top (name, Visão geral, calendar) and the four powers in a tab bar at the bottom, within reach of the thumb;
    Executivo, Legislativo and Judiciário open their lists in a sheet that rises from the bar */
 .nav-scrim{display:none}
@@ -322,7 +327,7 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
   :root{--menu-h:56px;--tab-h:60px}
   .menu{grid-template-columns:minmax(0,1fr) auto;column-gap:12px}
   .today-date{font-size:13px}
-  .menu .brand{font-size:18px}
+  .menu .brand{font-size:20px}
   .menu .vg-link{font-size:14px;padding:10px 12px}
   .menu .cal-link{width:44px;height:44px}
   .menu-tools{grid-column:2;grid-row:1;gap:2px}
@@ -341,7 +346,14 @@ html,body,.ov::before,.back-arrow,.info-pop{transition:background-color .35s, co
   .nav-grp.open .nav-sub{transform:translateY(0)}
   .nav-sub a{margin:0;padding:0 14px;min-height:48px;display:flex;align-items:center;font-size:15px;border-radius:14px}
   .nav-sub a:first-child{margin-top:0}.nav-sub a:last-child{margin-bottom:0}
-  .nav-sub-wide,.nav-sub-courts{min-width:0}
+  .menu .nav-sub-exec,.nav-sub-courts{min-width:0}
+  .menu .nav-mg{margin:0}
+  .menu .nav-mg-btn{min-height:48px;padding:0 14px;font-size:15px}
+  .menu .nav-mg-car{transform:rotate(45deg)}
+  .menu .nav-mg.open .nav-mg-car{transform:rotate(-135deg)}
+  .menu .nav-mg-sub{position:static;min-width:0;padding:0;display:none;opacity:1;visibility:visible;transform:none}
+  .menu .nav-mg-sub::before{display:none}
+  .menu .nav-mg.open .nav-mg-sub{display:flex}
   .nav-scroll{max-height:none;overflow:visible}
   .nav-h{margin:10px 14px 4px}
   .nav-find{margin:4px 0 6px}
@@ -921,6 +933,18 @@ h1[tabindex="-1"]:focus{outline:none}
 @media (max-width:560px){ .vb{padding:16px;border-radius:18px} .vp{grid-template-columns:minmax(0,1fr)} .vp-i{flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:10px} .vp-p{width:100%} .vp-n{font-size:44px} .vp-s{width:100%;margin-top:2px} .vv{grid-template-columns:repeat(2,minmax(0,1fr))} .vc{grid-template-columns:minmax(0,1fr)} .vm-lab{font-size:11.5px} }
 /* transparency: the parliamentary allowance (cota) of each member, from the official files of each house */
 .p-tr{width:100%;display:flex;flex-direction:column;gap:14px;padding:18px 20px 20px;border-radius:20px;background:color-mix(in srgb, var(--ink) 5%, var(--bg));box-sizing:border-box}
+.p-ct{width:100%;display:flex;flex-direction:column;gap:12px;padding:18px 20px 20px;border-radius:20px;background:color-mix(in srgb, var(--ink) 5%, var(--bg));box-sizing:border-box}
+.p-ct h3{margin:0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ct-dl{margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px 24px;font-size:14px;line-height:1.4}
+.ct-dl dt{font-size:12px;color:var(--muted);margin-bottom:2px}
+.ct-dl dd{margin:0;overflow-wrap:anywhere}
+.ct-dl a,.ct-src a{color:var(--ink);text-underline-offset:3px}
+.ct-nets{display:flex;flex-wrap:wrap;gap:8px}
+.ct-net{display:inline-flex;align-items:baseline;gap:7px;padding:8px 13px;border-radius:999px;background:var(--bg);color:var(--ink);text-decoration:none;font-size:14px}
+.ct-net b{font-weight:500;font-size:12px;color:var(--muted)}
+.ct-net:hover{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.ct-net:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.ct-src{margin:0;font-size:12px;color:var(--muted);line-height:1.5}
 .p-tr h3{margin:0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .tr-top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 28px}
 .tr-tot{display:flex;flex-direction:column;gap:2px}
@@ -969,7 +993,20 @@ h1[tabindex="-1"]:focus{outline:none}
   .xm-stamp{transform:rotate(-3deg)}
 }
 /* menu lists: ministries scroll inside the Executivo list; courts show their initials and full name */
-.nav-sub-wide{min-width:290px}
+.nav-sub-exec{min-width:200px}
+/* Ministérios: a second list that opens beside the first */
+.nav-mg{position:relative;margin:0 4px 4px}
+.nav-mg-btn{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 16px;border-radius:14px;color:color-mix(in srgb, var(--ink) 80%, var(--bg))}
+.nav-mg-btn:hover,.nav-mg.open .nav-mg-btn{background:color-mix(in srgb, var(--ink) 5%, var(--bg));color:var(--ink)}
+.nav-mg-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.nav-mg-car{width:4px;height:4px;border-right:1.25px solid currentColor;border-bottom:1.25px solid currentColor;transform:rotate(-45deg);transition:transform .2s}
+.nav-mg-sub{position:absolute;left:100%;top:-6px;min-width:290px;padding-left:8px;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateX(-4px);transition:opacity .18s, transform .18s, visibility 0s .18s}
+.nav-mg-sub::before{content:"";position:absolute;inset:0 0 0 8px;border-radius:18px;background:var(--bg);box-shadow:0 0 0 1px var(--rule), 0 10px 30px -12px rgba(0,0,0,.25);z-index:-1}
+.nav-mg-sub > *{position:relative}
+.nav-mg.open .nav-mg-sub{opacity:1;visibility:visible;transform:none;transition:opacity .18s, transform .18s}
+@media (hover:hover) and (min-width:761px){ .nav-mg:hover .nav-mg-sub{opacity:1;visibility:visible;transform:none;transition:opacity .18s, transform .18s} .nav-mg:hover .nav-mg-btn{background:color-mix(in srgb, var(--ink) 5%, var(--bg));color:var(--ink)} }
+@media (min-width:761px) and (max-width:1100px){ .nav-mg-sub{left:auto;right:100%;padding:0 8px 0 0} .nav-mg-sub::before{inset:0 8px 0 0} }
+.nav-mg-sub .nav-h{margin-top:12px}
 .nav-grp-exec .nav-sub{left:0;transform:translate(0,-4px)}
 .nav-grp-exec.open .nav-sub{transform:translate(0,0)}
 @media (hover:hover){ .nav-grp-exec:hover .nav-sub{transform:translate(0,0)} }
@@ -1002,7 +1039,7 @@ h1[tabindex="-1"]:focus{outline:none}
 .inst-more a{display:inline-block;padding:7px 13px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--rule);color:var(--ink);text-decoration:none;font-size:13.5px}
 .inst-more a:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg))}
 .inst-more a[aria-current="page"]{background:color-mix(in srgb, var(--ink) 8%, var(--bg));box-shadow:none}
-@media (max-width:560px){ .inst-dl{grid-template-columns:minmax(0,1fr)} .inst-card{padding:16px;border-radius:18px} .nav-sub-wide,.nav-sub-courts{min-width:260px} }
+@media (max-width:560px){ .inst-dl{grid-template-columns:minmax(0,1fr)} .inst-card{padding:16px;border-radius:18px} .nav-sub-courts{min-width:260px} }
 .p-cards .rel-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .p-cards .rel-list > li{display:flex;flex-direction:column;gap:6px}
 .rel-tags{margin:0;display:flex;flex-wrap:wrap;gap:6px}
@@ -1058,7 +1095,7 @@ h1[tabindex="-1"]:focus{outline:none}
   <nav aria-label="Poderes">
     <div class="nav-grp nav-grp-exec" data-grp="exec">
       <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub-exec">Executivo<span class="nav-car" aria-hidden="true"></span></button>
-      <div class="nav-sub nav-sub-wide" id="nav-sub-exec"><a href="#" data-nav="pres">Presidência</a><p class="nav-h" id="nav-min-h">Ministérios</p><label class="nav-find"><span class="sr-only">Buscar ministério</span><input type="search" id="nav-min-q" placeholder="Buscar ministério" autocomplete="off" aria-controls="nav-min"></label><div class="nav-scroll" id="nav-min" aria-labelledby="nav-min-h"></div><p class="nav-none" id="nav-min-none" hidden>Nenhum ministério com esse nome.</p></div>
+      <div class="nav-sub nav-sub-exec" id="nav-sub-exec"><a href="#" data-nav="pres">Presidência</a><div class="nav-mg"><button type="button" class="nav-mg-btn" aria-expanded="false" aria-controls="nav-mg-sub">Ministérios<span class="nav-mg-car" aria-hidden="true"></span></button><div class="nav-mg-sub" id="nav-mg-sub"><p class="nav-h" id="nav-min-h">Ministérios atuais</p><label class="nav-find"><span class="sr-only">Buscar ministério</span><input type="search" id="nav-min-q" placeholder="Buscar ministério" autocomplete="off" aria-controls="nav-min"></label><div class="nav-scroll" id="nav-min" aria-labelledby="nav-min-h"></div><p class="nav-none" id="nav-min-none" hidden>Nenhum ministério com esse nome.</p></div></div></div>
     </div>
     <div class="nav-grp" data-grp="leg">
       <button type="button" class="nav-leg" aria-expanded="false" aria-controls="nav-sub">
@@ -1072,7 +1109,7 @@ Legislativo<span class="nav-car" aria-hidden="true"></span></button>
     <a href="#consultas" data-nav="consultas">Enquetes</a>
   </nav>
   <div class="nav-scrim" aria-hidden="true"></div>
-  <div class="menu-tools"><a class="vg-link" href="#visao-geral" data-nav="visao">Visão geral</a><a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a></div>
+  <div class="menu-tools"><a class="vg-link" href="#visao-geral" data-nav="visao" aria-label="Visão geral" title="Visão geral"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3.5"/><circle cx="8.3" cy="8.3" r="1.25" fill="currentColor" stroke="none"/><circle cx="15.7" cy="8.3" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="8.3" cy="15.7" r="1.25" fill="currentColor" stroke="none"/><circle cx="15.7" cy="15.7" r="1.25" fill="currentColor" stroke="none"/></svg></a><a class="cal-link" href="#calendario" data-nav="calendario" aria-label="Calendário" title="Calendário"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r=".6" fill="currentColor"/><circle cx="12" cy="14.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="14.5" r=".6" fill="currentColor"/></svg></a></div>
 </header>
 <section class="landing" id="landing" aria-label="Praça dos Três Poderes">
   <div class="lx" aria-label="Os três poderes">
@@ -2190,6 +2227,7 @@ function openPerson(src, key, P){
           ? 'O histórico do mandato atual está no portal do Senado. Ainda não foi carregado nesta página.'
           : 'Começam a ser registradas após a posse, em fevereiro de 2027.'}</p></section>
       </div>
+      <section class="p-ct" id="p-ct" aria-live="polite"><h3>Contato</h3><p class="tr-empty">Carregando…</p></section>
       ${relatedHTML(P.n, key)}
       <section class="p-tr" id="p-tr" aria-live="polite"><h3>Transparência · cota parlamentar</h3><p class="tr-empty">Carregando os gastos…</p></section>
       ${note ? `<p class="p-note">${esc(note)}</p>` : ''}
@@ -2200,7 +2238,7 @@ function openPerson(src, key, P){
   person.innerHTML = `<div class="avatar" role="button" tabindex="0" aria-label="Voltar"><span class="ph">${P?esc(initialsOf(P.n)):''}</span></div>
     <div class="p-info fade">${html}</div>`;
   personState = {src};
-  if (P) trSection(P, key);
+  if (P){ trSection(P, key); ctSection(P.n, key); }
   const av = person.querySelector('.avatar');
   growIn(person, av, src);
   setTimeout(()=>av.focus({preventScroll:true}), 650);
@@ -2881,6 +2919,7 @@ function openExec(el, i){
         <section><h3>Antecessor(a)</h3>${M.prev ? `<span class="big" style="font-size:24px;line-height:1.15">${esc(M.prev)}</span>` : '<p class="empty">Não levantado.</p>'}</section>
       </div>`;
   }
+  html += '<section class="p-ct" id="p-ct" aria-live="polite"><h3>Contato</h3><p class="tr-empty">Carregando…</p></section>';
   html += relatedHTML(M.n, 'exec', M.role);
   if (M.role==='Presidente da República' || M.role==='Vice-presidente') html += `<section class="p-tr" id="p-tr" aria-live="polite"><h3>Transparência · cartão de pagamento</h3><p class="tr-empty">Carregando…</p></section>`;
   html += `<div class="p-src">${infoBox(EXEC_SOURCES,'Fontes')}</div>`;
@@ -2888,6 +2927,7 @@ function openExec(el, i){
   layer.style.setProperty('--on', /^#/.test(color) ? onColor(color) : 'var(--ink)');
   layer.innerHTML = `<div class="avatar" role="button" tabindex="0" aria-label="Voltar"><span class="ph">${esc(initialsOf(M.n))}</span></div><div class="p-info fade">${html}</div>`;
   personState = {src: el};
+  ctSection(M.n, 'exec', M);
   if (M.role==='Presidente da República' || M.role==='Vice-presidente') execTr(M.role==='Presidente da República' ? 'presidencia' : 'vice');
   const av = layer.querySelector('.avatar');
   growIn(layer, av, el);
@@ -2922,7 +2962,11 @@ function navTo(key){
 // Executivo, Legislativo and Judiciário open their lists: on hover with a mouse, on tap or Enter otherwise
 const NAV_GRPS = [...document.querySelectorAll('.nav-grp')];
 const grpBtn = g => g.querySelector('.nav-leg');
-function grpOpen(g, on){ g.classList.toggle('open', on); grpBtn(g).setAttribute('aria-expanded', String(on)); }
+function grpOpen(g, on){ g.classList.toggle('open', on); grpBtn(g).setAttribute('aria-expanded', String(on)); if (!on) mgOpen(false); }
+// Ministérios inside Executivo: hover opens it with a mouse, a tap or Enter otherwise
+function mgOpen(on){ const m = document.querySelector('.nav-mg'); if (!m) return; m.classList.toggle('open', on); m.querySelector('.nav-mg-btn').setAttribute('aria-expanded', String(on)); }
+document.querySelector('.nav-mg-btn')?.addEventListener('click', e=>{ e.stopPropagation(); const on = !document.querySelector('.nav-mg').classList.contains('open'); mgOpen(on); if (on && matchMedia('(min-width:761px)').matches) document.getElementById('nav-min-q').focus({preventScroll:true}); });
+document.querySelector('.nav-mg')?.addEventListener('mouseleave', ()=>{ if (matchMedia('(hover:hover) and (min-width:761px)').matches && document.activeElement?.id!=='nav-min-q') mgOpen(false); });
 function legOpen(on){ if (!on) NAV_GRPS.forEach(g=> grpOpen(g, false)); }
 document.getElementById('nav-min').innerHTML = EXEC_MIN.map(M=>`<a href="#ministerio-${slugName(M.pasta)}" data-route="m:${slugName(M.pasta)}">${esc(M.pasta)}</a>`).join('');
 document.querySelectorAll('.nav-sub [data-route]').forEach(a=> a.addEventListener('click', ()=>{ legOpen(false); a.blur(); }));
@@ -3526,6 +3570,49 @@ function execTr(which){
     box.innerHTML = `<h3>Transparência · cartão de pagamento da ${which==='vice'?'Vice-Presidência':'Presidência'}</h3>${cardBlock(C, 15)}
       <div class="tr-foot"><span>Gastos do órgão (${esc(C.orgao.nome)}), não da pessoa. Valores como publicados pela CGU.</span><a href="${C.fonte}" target="_blank" rel="noopener">Fonte ↗</a></div>`;
   }).catch(()=>{ const b = document.getElementById('p-tr'); if (b) b.innerHTML = '<h3>Transparência · cartão de pagamento</h3><p class="tr-empty">Não deu para carregar agora. <a href="https://portaldatransparencia.gov.br/cartoes" target="_blank" rel="noopener" style="color:inherit">Ver no Portal ↗</a></p>'; });
+}
+// contact card: official e-mail, phone, office and page, and the social networks (X and Instagram first), from data/contatos.json (robot:
+// Câmara, Senado and TSE). Ministers without their own entry get their ministry's official channels.
+let ctData = null;
+const loadCt = ()=> ctData ? Promise.resolve(ctData) : trFetch('data/contatos.json').then(js=> (ctData = js));
+const CT_NET = [['x','X (Twitter)'],['instagram','Instagram'],['facebook','Facebook'],['youtube','YouTube'],['tiktok','TikTok'],['threads','Threads'],['bluesky','Bluesky']];
+function ctSection(name, key, M){
+  const box = ()=> document.getElementById('p-ct');
+  const search = key==='senado' ? 'https://www25.senado.leg.br/web/senadores/em-exercicio' : 'https://www.camara.leg.br/deputados/quem-sao/resultado?search='+encodeURIComponent(name);
+  const draw = (C, D)=>{
+    const b = box(); if (!b) return;
+    const rows = [];
+    (C.emails||[]).forEach(e=> rows.push(['E-mail', `<a href="mailto:${esc(e)}">${esc(e)}</a>`]));
+    (C.tels||[]).forEach(t=> rows.push(['Telefone', `<a href="tel:+55${esc(String(t).replace(/\D/g,''))}">${esc(t)}</a>`]));
+    if (C.gabinete) rows.push(['Gabinete', esc(C.gabinete)]);
+    if (C.pagina) rows.push(['Página oficial', `<a href="${esc(C.pagina)}" target="_blank" rel="noopener">${esc(C.pagina.replace(/^https?:\/\/(www\d*\.)?/,'').split('/')[0])} ↗</a>`]);
+    (C.extra||[]).forEach(r=> rows.push(r));
+    const nets = CT_NET.filter(([k])=> C.redes && C.redes[k]).map(([k,l])=> `<a class="ct-net" href="${esc(C.redes[k].u)}" target="_blank" rel="noopener"><b>${l}</b>${k==='x'||k==='instagram'||k==='tiktok'||k==='threads' ? '@'+esc(C.redes[k].h) : esc(C.redes[k].h)}</a>`);
+    const main = C.redes && (C.redes.x || C.redes.instagram);
+    b.innerHTML = `<h3>Contato</h3>
+      ${rows.length ? `<dl class="ct-dl">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>` : `<p class="tr-empty">${esc(D || 'Os canais oficiais ainda não foram publicados.')}</p>`}
+      ${nets.length ? `<div class="ct-nets" aria-label="Redes sociais">${nets.join('')}</div>` : ''}
+      ${nets.length && !main ? '<p class="ct-src">Sem conta no X ou no Instagram nas fontes oficiais.</p>' : ''}
+      ${!nets.length && C.fontes && C.fontes.length ? '<p class="ct-src">Nenhuma rede social informada nas fontes oficiais.</p>' : ''}
+      ${C.fontes && C.fontes.length ? `<p class="ct-src">Fonte${C.fontes.length>1?'s':''}: ${C.fontes.map(f=>`<a href="${esc(f.u)}" target="_blank" rel="noopener">${esc(f.l)}</a>`).join(' · ')}</p>` : ''}`;
+  };
+  const ministry = ()=> trFetch('data/instituicoes.json').catch(()=>null).then(I=>{
+    const site = I && I.ministerios && I.ministerios[slugName(M.pasta)] && I.ministerios[slugName(M.pasta)].fonte;
+    return {extra:[...(site ? [['Ministério', `<a href="${esc(site)}" target="_blank" rel="noopener">${esc(site.replace(/^https?:\/\/(www\.)?/,''))} ↗</a>`]] : []),
+      ['Fale com o governo', '<a href="https://falabr.cgu.gov.br" target="_blank" rel="noopener">Fala.BR, a plataforma de ouvidoria do governo federal ↗</a>']],
+      fontes:[{l:'Fala.BR (CGU)', u:'https://falabr.cgu.gov.br'}]};
+  });
+  loadCt().then(J=>{
+    const id = J && J.nomes && J.nomes[slugName(name)], C = id && J.pessoas[id];
+    if (C) return draw(C);
+    if (key==='exec' && M && M.pasta) return ministry().then(x=> draw(x));
+    if (key==='exec') return draw({extra:[['Presidência', '<a href="https://www.gov.br/planalto" target="_blank" rel="noopener">gov.br/planalto ↗</a>'], ['Fale com o governo', '<a href="https://falabr.cgu.gov.br" target="_blank" rel="noopener">Fala.BR ↗</a>']]});
+    draw({}, `Os canais oficiais de ${name} aparecem aqui depois que a ${key==='senado'?'Casa':'Câmara'} ou o TSE os publicam.`);
+    const b = box(); if (b) b.insertAdjacentHTML('beforeend', `<p class="ct-src"><a href="${search}" target="_blank" rel="noopener">Procurar no site ${key==='senado'?'do Senado':'da Câmara'} ↗</a></p>`);
+  }).catch(()=>{
+    if (key==='exec' && M && M.pasta) return ministry().then(x=> draw(x));
+    const b = box(); if (b) b.innerHTML = `<h3>Contato</h3><p class="tr-empty">Não deu para carregar os contatos agora. <a href="${search}" target="_blank" rel="noopener">Ver no site oficial ↗</a></p>`;
+  });
 }
 // laws and other norms approved in the last 12 months, by the party of whoever proposed them (data/leis.json, robot)
 let trLeis = null;
